@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { createClient } from '@/lib/supabase/server'
 import CookTile from '@/components/CookTile'
 import type { CookWithDetails } from '@/lib/types'
