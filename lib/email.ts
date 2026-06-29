@@ -1,8 +1,11 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = 'CookMatch <onboarding@resend.dev>'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 // In demo mode, Resend only allows sending to your own account email.
 // Set RESEND_TEST_EMAIL to override all recipients. Remove in production.
@@ -31,7 +34,7 @@ export async function sendCookNotification({
   notes: string
   discountCode: string
 }) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
     subject: `New booking inquiry from ${clientName}`,
@@ -75,7 +78,7 @@ export async function sendClientConfirmation({
   date: string
   discountCode: string
 }) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(clientEmail),
     subject: `Your booking request to ${cookName} was sent`,
@@ -132,7 +135,7 @@ export async function sendCookWatchNotification({
     </tr>`
   }
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
     subject: `Important: Feedback on your recent session`,
@@ -180,7 +183,7 @@ export async function sendFeedbackRequest({
   bookingId: string
 }) {
   const feedbackUrl = `${SITE_URL}/feedback?booking=${bookingId}`
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(clientEmail),
     subject: `How was your session with ${cookName}?`,
@@ -210,7 +213,7 @@ export async function sendCheckinEmail({
   cookEmail: string
   availabilityUrl: string
 }) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
     subject: `Please confirm your availability this week`,
@@ -237,7 +240,7 @@ export async function sendDormantNotification({
   cookName: string
   cookEmail: string
 }) {
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
     subject: `Your CookMatch profile has been paused`,
