@@ -1,10 +1,57 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyCook } from '@/lib/agents/cookVerificationAgent'
+import Anthropic from '@anthropic-ai/sdk'
+
+async function validateCustomCuisines(input: string): Promise<string[]> {
+  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  const response = await anthropic.messages.create({
+    model: 'claude-opus-4-8',
+    max_tokens: 256,
+    messages: [{
+      role: 'user',
+      content: `You are validating cuisine types for a home cook platform in the San Francisco Bay Area. A cook applicant entered these as their cuisine specialties: "${input}"
+
+Return ONLY a JSON array of valid cuisine type names from this input. Rules:
+- Include only real, recognized cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions)
+- Correct obvious misspellings (e.g. "tamilian" → "Tamil", "soth indian" → "South Indian")
+- Exclude anything that is not a cuisine name (gibberish, offensive words, unrelated text, emojis, numbers)
+- Return an empty array [] if nothing valid is found
+- No explanation, just the JSON array`,
+    }],
+  })
+  const text = response.content.find(b => b.type === 'text')?.text || '[]'
+  try {
+    const parsed = JSON.parse(text)
+    return Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === 'string') : []
+  } catch {
+    return []
+  }
+}
 
 export async function POST(request: Request) {
   const body = await request.json()
   const supabase = await createClient()
+
+  // Validate and merge custom cuisines
+  let cuisineTypes: string[] = body.cuisine_types || []
+  if (body.other_cuisines?.trim()) {
+    const validated = await validateCustomCuisines(body.other_cuisines.trim())
+    console.log('[Cuisine validation] Input:', body.other_cuisines, '→ Valid:', validated)
+    if (validated.length === 0 && cuisineTypes.length === 0) {
+      return NextResponse.json(
+        { error: 'The cuisines you entered could not be recognised. Please enter valid cuisine names, e.g. Chettinad, Kongunadu, Malabar.' },
+        { status: 400 }
+      )
+    }
+    if (validated.length === 0 && body.other_cuisines.trim()) {
+      return NextResponse.json(
+        { error: `"${body.other_cuisines}" doesn't appear to be a recognised cuisine. Please check your spelling or leave the field blank.` },
+        { status: 400 }
+      )
+    }
+    cuisineTypes = [...cuisineTypes, ...validated]
+  }
 
   // Insert cook application (status = 'pending' until verified by Agent 1 in Phase 2)
   const { data: cook, error } = await supabase
@@ -17,16 +64,18 @@ export async function POST(request: Request) {
       bio: body.bio,
       tagline: body.tagline,
       video_url: body.video_url,
-      cuisine_types: body.cuisine_types,
+      photo_url: body.photo_url ?? null,
+      cuisine_types: cuisineTypes,
       dietary_specialties: body.dietary_specialties,
       occasion_types: body.occasion_types,
       languages: body.languages,
       price_min: body.price_min,
-      price_max: body.price_max,
+      price_max: body.price_min,
       price_unit: body.price_unit,
+      min_hours: body.min_hours ?? null,
       service_areas: body.service_areas,
-      group_size_min: body.group_size_min,
-      group_size_max: body.group_size_max,
+      group_size_min: 1,
+      group_size_max: 50,
       signature_dishes: body.signature_dishes,
       years_experience: body.years_experience,
       available_recurring: body.available_recurring,

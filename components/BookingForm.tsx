@@ -12,20 +12,28 @@ interface ContactInfo {
   discountCode: string
 }
 
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+}
+
 export default function BookingForm({
   cookId,
   cookName,
   cuisineTypes,
   dietarySpecialties,
   availableRecurring,
+  availableDates,
 }: {
   cookId: string
   cookName: string
   cuisineTypes: string[]
   dietarySpecialties: string[]
   availableRecurring: boolean
+  availableDates: string[]
 }) {
   const [sessionType, setSessionType] = useState<'one_time' | 'recurring'>('one_time')
+  const [selectedDate, setSelectedDate] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [contact, setContact] = useState<ContactInfo | null>(null)
   const [error, setError] = useState('')
@@ -43,12 +51,18 @@ export default function BookingForm({
       client_phone: formData.get('client_phone'),
       session_type: sessionType,
       recurring_frequency: sessionType === 'recurring' ? formData.get('recurring_frequency') : null,
-      preferred_date: formData.get('preferred_date'),
+      preferred_date: selectedDate,
       group_size: formData.get('group_size'),
       cuisine_needs: formData.get('cuisine_needs'),
       dietary_needs: formData.get('dietary_needs'),
       occasion_type: formData.get('occasion_type'),
       notes: formData.get('notes'),
+    }
+
+    if (!selectedDate) {
+      setError('Please select an available date.')
+      setLoading(false)
+      return
     }
 
     const res = await fetch('/api/bookings', {
@@ -133,7 +147,31 @@ export default function BookingForm({
       <input name="client_email" type="email" required placeholder="Your email" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
       <input name="client_phone" type="tel" required placeholder="Your phone number" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
 
-      <input name="preferred_date" type="date" required min={new Date().toISOString().split('T')[0]} className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700" />
+      {availableDates.length === 0 ? (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-3 text-sm text-amber-800">
+          This cook hasn't set their availability yet — check back soon.
+        </div>
+      ) : (
+        <div>
+          <p className="text-xs text-gray-500 mb-2">Select an available date:</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {availableDates.map(date => (
+              <button
+                key={date}
+                type="button"
+                onClick={() => setSelectedDate(date)}
+                className={`rounded-lg px-2 py-2 text-xs font-medium border transition-colors ${
+                  selectedDate === date
+                    ? 'bg-orange-600 text-white border-orange-600'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
+                }`}
+              >
+                {formatDate(date)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <select name="group_size" required className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
         <option value="">Number of people</option>
@@ -161,7 +199,7 @@ export default function BookingForm({
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || availableDates.length === 0}
         className="bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
       >
         {loading ? 'Submitting...' : 'Submit & Get Contact Info'}

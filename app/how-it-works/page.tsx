@@ -1,0 +1,74 @@
+export default function HowItWorksPage() {
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-12">
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
+      <p className="text-gray-600 mb-10">
+        Sivan Spices Home Cooks connects you with verified Indian home cooks who come to your home and cook fresh, healthy meals for you. Currently launched in select cities in Northern California - Fremont, Newark, Union City, and Milpitas. We will keep you posted as we roll out to new cities.
+      </p>
+
+      <div className="flex flex-col gap-10">
+
+        {/* For Clients */}
+        <section className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-5">For Clients</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you verified, background-checked Indian home cooks in your area</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Let you see their cuisine specialties, ratings, and availability before booking</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Connect you directly with the cook — you get their phone, email, and WhatsApp</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you a feedback link after your session to rate your experience</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">What we don't do</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not handle payment — you pay the cook directly</li>
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not mediate disputes between clients and cooks</li>
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not guarantee availability — confirm directly with the cook after booking</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* For Cooks */}
+        <section className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-5">For Cooks</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>List your profile, specialties, and availability so clients can find you</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Verify your identity and background before activating your profile</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you weekly availability reminders so your profile stays active</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Monitor your ratings and provide coaching if feedback drops</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">What we don't do</h3>
+              <ul className="space-y-2 text-sm text-gray-700">
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not take a commission from your earnings</li>
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not assign bookings — clients contact you directly</li>
+                <li className="flex gap-2"><span className="text-gray-400 mt-0.5">✕</span>We do not handle scheduling conflicts — manage those directly with clients</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Feedback */}
+        <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-orange-900 mb-2">This is a new service and we want to hear from you</h2>
+          <p className="text-sm text-orange-800">
+            We are actively improving based on your experience. If you have feedback, suggestions, or questions, please write to us at{' '}
+            <a href="mailto:contact@sivanspices.com" className="font-medium underline hover:text-orange-600">
+              contact@sivanspices.com
+            </a>
+            .
+          </p>
+        </section>
+
+      </div>
+    </div>
+  )
+}

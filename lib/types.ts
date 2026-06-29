@@ -1,5 +1,5 @@
 export type CookStatus = 'pending' | 'active' | 'watch' | 'training' | 'dormant'
-export type PriceUnit = 'hourly' | 'per_session' | 'per_person' | 'monthly'
+export type PriceUnit = 'hourly' | 'per_session'
 export type SessionType = 'one_time' | 'recurring'
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly'
 
@@ -20,6 +20,7 @@ export interface Cook {
   price_min: number
   price_max: number
   price_unit: PriceUnit
+  min_hours: number | null
   service_areas: string[]
   group_size_min: number
   group_size_max: number
@@ -57,6 +58,7 @@ export interface CookScore {
   response_rate: number
   verification_score: number
   training_complete: boolean
+  trust_score: number
   updated_at: string
 }
 

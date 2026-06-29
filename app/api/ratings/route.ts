@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { analyzeFeedback } from '@/lib/agents/feedbackAnalysisAgent'
+import { scoreProfile } from '@/lib/agents/profileScoringAgent'
 
 function getSupabase() {
   return createClient(
@@ -130,6 +131,9 @@ export async function POST(request: Request) {
       session_count: count,
     }).catch(err => console.error('[Agent 3] Error:', err))
   }
+
+  // ── Agent 5: Profile Scoring ─────────────────────────────────────────────
+  scoreProfile(cook_id).catch(err => console.error('[Agent 5] Error:', err))
 
   return NextResponse.json({ success: true })
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
 const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal']
@@ -10,8 +10,6 @@ const AREAS = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 const PRICE_UNITS = [
   { value: 'per_session', label: 'Per Session' },
   { value: 'hourly', label: 'Hourly' },
-  { value: 'per_person', label: 'Per Person' },
-  { value: 'monthly', label: 'Monthly' },
 ]
 
 function CheckboxGroup({ name, options, label }: { name: string; options: string[]; label: string }) {
@@ -34,6 +32,21 @@ export default function ApplyPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [priceUnit, setPriceUnit] = useState('per_session')
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Photo must be under 5MB.')
+      return
+    }
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -45,6 +58,14 @@ export default function ApplyPage() {
     const getChecked = (name: string) =>
       formData.getAll(name).map(String)
 
+    const cuisineTypes = getChecked('cuisine_types')
+    const otherCuisines = (formData.get('other_cuisines') as string || '').trim()
+    if (cuisineTypes.length === 0 && !otherCuisines) {
+      setError('Please select at least one cuisine you cook.')
+      setLoading(false)
+      return
+    }
+
     const body = {
       name: formData.get('name'),
       email: formData.get('email'),
@@ -53,13 +74,16 @@ export default function ApplyPage() {
       bio: formData.get('bio'),
       tagline: formData.get('tagline'),
       video_url: formData.get('video_url') || null,
-      cuisine_types: getChecked('cuisine_types'),
+      cuisine_types: cuisineTypes,
+      other_cuisines: otherCuisines || null,
+      photo_url: null as string | null,
       dietary_specialties: getChecked('dietary_specialties'),
       occasion_types: getChecked('occasion_types'),
       languages: getChecked('languages'),
       price_min: Number(formData.get('price_min')),
       price_max: Number(formData.get('price_max')),
       price_unit: formData.get('price_unit'),
+      min_hours: priceUnit === 'hourly' ? Number(formData.get('min_hours')) || null : null,
       service_areas: getChecked('service_areas'),
       group_size_min: Number(formData.get('group_size_min')),
       group_size_max: Number(formData.get('group_size_max')),
@@ -69,6 +93,21 @@ export default function ApplyPage() {
       recurring_options: getChecked('recurring_options'),
     }
 
+    let photo_url: string | null = null
+    if (photoFile) {
+      const uploadData = new FormData()
+      uploadData.append('photo', photoFile)
+      const uploadRes = await fetch('/api/upload-photo', { method: 'POST', body: uploadData })
+      if (!uploadRes.ok) {
+        setError('Photo upload failed. Please try again.')
+        setLoading(false)
+        return
+      }
+      const uploadJson = await uploadRes.json()
+      photo_url = uploadJson.url
+    }
+    body.photo_url = photo_url
+
     const res = await fetch('/api/apply', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,7 +115,8 @@ export default function ApplyPage() {
     })
 
     if (!res.ok) {
-      setError('Something went wrong. Please try again.')
+      const data = await res.json()
+      setError(data.error || 'Something went wrong. Please try again.')
       setLoading(false)
       return
     }
@@ -102,11 +142,86 @@ export default function ApplyPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Join CookMatch as a Cook</h1>
       <p className="text-gray-600 mb-8">Fill in your details below. We will verify your information and activate your profile within 2–3 business days.</p>
 
+      {/* Requirements */}
+      <div className="flex flex-col gap-4 mb-2">
+        <section className="bg-white border border-gray-200 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">What you will need to get verified</h2>
+          <ul className="space-y-2 text-sm text-gray-700">
+            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Government-issued photo ID (driver's license, passport, or state ID)</li>
+            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Consent to a background check</li>
+            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Valid Food Handler certification (details below)</li>
+            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Two references who can vouch for your cooking</li>
+          </ul>
+        </section>
+
+        <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-orange-900 mb-1">How to get your Food Handler's card</h2>
+          <p className="text-sm text-orange-800 mb-4">California law requires anyone handling food to hold a valid Food Handler certification. It is valid for 3 years and costs $15–$40.</p>
+
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-800 mb-1">Fastest option — Online</p>
+              <p className="text-sm text-gray-700">
+                <strong>ServSafe</strong> at{' '}
+                <a href="https://www.servsafe.com" target="_blank" rel="noopener noreferrer" className="text-orange-600 underline hover:text-orange-700">servsafe.com</a>
+                {' '}— complete the course online and take a proctored exam. Widely accepted and takes about 2–3 hours.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-800 mb-1">In-person options in the Bay Area</p>
+              <ul className="space-y-1.5 text-sm text-gray-700">
+                <li className="flex gap-2">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span><strong>Alameda County</strong> (Fremont, Newark, Union City) — contact Alameda County Environmental Health at <a href="tel:5105676700" className="text-orange-600 underline">(510) 567-6700</a> for local testing centers</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-orange-500 mt-0.5">•</span>
+                  <span><strong>Santa Clara County</strong> (Milpitas) — contact Santa Clara County Public Health for approved training providers</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
         {/* Personal Info */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Personal Information</h2>
+          {/* Photo upload */}
+          <div className="flex items-center gap-4">
+            <div
+              onClick={() => photoInputRef.current?.click()}
+              className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-orange-400 overflow-hidden flex-shrink-0"
+            >
+              {photoPreview ? (
+                <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-xs text-gray-400 text-center leading-tight px-1">Add photo</span>
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-700">Profile photo</p>
+              <p className="text-xs text-gray-400 mb-2">Shown on your cook tile. Max 5MB.</p>
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50"
+              >
+                {photoPreview ? 'Change photo' : 'Upload photo'}
+              </button>
+            </div>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+          </div>
+
           <input name="name" required placeholder="Full name" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           <input name="email" type="email" required placeholder="Email address" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           <input name="phone" type="tel" required placeholder="Phone number" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
@@ -127,6 +242,16 @@ export default function ApplyPage() {
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
           <h2 className="text-lg font-semibold">Cooking Details</h2>
           <CheckboxGroup name="cuisine_types" options={CUISINES} label="Cuisines you cook (select all that apply)" />
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1">Other cuisines not listed above</p>
+            <input
+              name="other_cuisines"
+              type="text"
+              placeholder="e.g. Chettinad, Kongunadu, Malabar"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">Separate multiple cuisines with commas. We will verify these before publishing your profile.</p>
+          </div>
           <CheckboxGroup name="dietary_specialties" options={DIETARY} label="Dietary specialties" />
           <CheckboxGroup name="occasion_types" options={OCCASIONS} label="Occasions you cook for" />
           <CheckboxGroup name="languages" options={LANGUAGES} label="Languages you speak" />
@@ -137,23 +262,30 @@ export default function ApplyPage() {
           <h2 className="text-lg font-semibold">Pricing &amp; Availability</h2>
 
           <div className="flex gap-3 items-center">
-            <div className="flex-1">
-              <input name="price_min" type="number" required min={1} placeholder="Min price ($)" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <span className="text-gray-400">–</span>
-            <div className="flex-1">
-              <input name="price_max" type="number" required min={1} placeholder="Max price ($)" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <select name="price_unit" className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <input name="price_min" type="number" required min={1} placeholder="Your rate ($)" className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+            <select
+              name="price_unit"
+              value={priceUnit}
+              onChange={e => setPriceUnit(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            >
               {PRICE_UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
             </select>
           </div>
 
-          <div className="flex gap-3 items-center">
-            <input name="group_size_min" type="number" required min={1} placeholder="Min group size" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            <span className="text-gray-400">–</span>
-            <input name="group_size_max" type="number" required min={1} placeholder="Max group size" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          </div>
+          {priceUnit === 'hourly' && (
+            <div className="flex flex-col gap-1">
+              <input
+                name="min_hours"
+                type="number"
+                required
+                min={1}
+                placeholder="Minimum hours per visit"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <p className="text-xs text-gray-400">The minimum number of hours you require per visit to make the trip worthwhile</p>
+            </div>
+          )}
 
           <CheckboxGroup name="service_areas" options={AREAS} label="Areas you serve" />
 

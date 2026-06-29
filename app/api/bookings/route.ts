@@ -63,6 +63,7 @@ export async function POST(request: Request) {
       cookPhone: cook.phone,
       cookEmail: cook.email,
       cookWhatsapp: cook.whatsapp,
+      date: body.preferred_date,
       discountCode: DISCOUNT_CODE,
     }),
   ])

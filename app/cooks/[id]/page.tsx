@@ -27,6 +27,16 @@ export default async function CookProfilePage({
 
   if (!cook) notFound()
 
+  const today = new Date().toISOString().split('T')[0]
+  const { data: availabilityRows } = await supabase
+    .from('cook_availability')
+    .select('available_date')
+    .eq('cook_id', id)
+    .gte('available_date', today)
+    .order('available_date', { ascending: true })
+
+  const availableDates = (availabilityRows || []).map(r => r.available_date as string)
+
   const c = cook as CookWithDetails
   const score = c.cook_scores
   const verification = c.cook_verifications
@@ -36,8 +46,6 @@ export default async function CookProfilePage({
   const priceLabel = {
     hourly: '/hr',
     per_session: '/session',
-    per_person: '/person',
-    monthly: '/month',
   }[c.price_unit] ?? '/session'
 
   return (
@@ -115,10 +123,6 @@ export default async function CookProfilePage({
               <p className="font-medium">{c.signature_dishes}</p>
             </div>
             <div>
-              <p className="text-gray-500 mb-1">Group Size</p>
-              <p className="font-medium">{c.group_size_min}–{c.group_size_max} people</p>
-            </div>
-            <div>
               <p className="text-gray-500 mb-1">Service Areas</p>
               <p className="font-medium">{c.service_areas.join(', ')}</p>
             </div>
@@ -177,14 +181,17 @@ export default async function CookProfilePage({
           <div className="sticky top-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
             <div className="mb-4">
               <p className="text-2xl font-bold text-gray-900">
-                ${c.price_min}–${c.price_max}
+                ${c.price_min}
                 <span className="text-sm font-normal text-gray-400">{priceLabel}</span>
               </p>
+              {c.price_unit === 'hourly' && c.min_hours && (
+                <p className="text-xs text-amber-700 mt-1">Minimum {c.min_hours} hour{c.min_hours > 1 ? 's' : ''} per visit</p>
+              )}
               {c.available_recurring && (
                 <p className="text-xs text-green-600 mt-1">Available for recurring bookings</p>
               )}
             </div>
-            <BookingForm cookId={c.id} cookName={c.name} cuisineTypes={c.cuisine_types} dietarySpecialties={c.dietary_specialties} availableRecurring={c.available_recurring} />
+            <BookingForm cookId={c.id} cookName={c.name} cuisineTypes={c.cuisine_types} dietarySpecialties={c.dietary_specialties} availableRecurring={c.available_recurring} availableDates={availableDates} />
           </div>
         </div>
       </div>

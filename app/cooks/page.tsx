@@ -30,7 +30,14 @@ export default async function CooksPage({
     query = query.contains('occasion_types', [filters.occasion])
   }
 
-  const { data: cooks } = await query
+  const { data: rawCooks } = await query
+
+  // Sort by trust score descending — highest trust shown first
+  const cooks = [...(rawCooks || [])].sort((a, b) => {
+    const scoreA = (a as CookWithDetails).cook_scores?.trust_score ?? 0
+    const scoreB = (b as CookWithDetails).cook_scores?.trust_score ?? 0
+    return scoreB - scoreA
+  })
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
@@ -95,6 +102,7 @@ export default async function CooksPage({
           {(cooks as CookWithDetails[]).map((cook) => (
             <CookTile key={cook.id} cook={cook} />
           ))}
+
         </div>
       )}
     </div>

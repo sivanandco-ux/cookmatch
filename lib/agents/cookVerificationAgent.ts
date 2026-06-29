@@ -1,5 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { scoreProfile } from '@/lib/agents/profileScoringAgent'
+import { sendCheckinEmail } from '@/lib/email'
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
@@ -139,7 +143,15 @@ Cook:
           .eq('id', cook_id)
 
         if (cookErr) console.error('[Agent 1] cooks status update error:', cookErr.message)
-        else console.log(`[Agent 1] APPROVED — ${name} is now active`)
+        else {
+          console.log(`[Agent 1] APPROVED — ${name} is now active`)
+          scoreProfile(cook_id).catch(err => console.error('[Agent 5] Error from Agent 1:', err))
+          sendCheckinEmail({
+            cookName: name,
+            cookEmail: email,
+            availabilityUrl: `${SITE_URL}/availability/${cook_id}`,
+          }).catch(err => console.error('[Agent 1] Check-in email failed:', err))
+        }
       } else {
         console.log(`[Agent 1] PENDING — ${name} kept pending. Reason: ${decision.reason}`)
       }

@@ -63,6 +63,7 @@ export async function sendClientConfirmation({
   cookPhone,
   cookEmail,
   cookWhatsapp,
+  date,
   discountCode,
 }: {
   clientName: string
@@ -71,6 +72,7 @@ export async function sendClientConfirmation({
   cookPhone: string
   cookEmail: string
   cookWhatsapp: string | null
+  date: string
   discountCode: string
 }) {
   const { error } = await resend.emails.send({
@@ -80,6 +82,10 @@ export async function sendClientConfirmation({
     html: `
       <p>Hi ${clientName},</p>
       <p>Your booking request has been sent to <strong>${cookName}</strong>. They will contact you to confirm the details.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin-bottom:16px;">
+        <tr><td><strong>Cook</strong></td><td>${cookName}</td></tr>
+        <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+      </table>
       <h3 style="margin-top:24px;">Contact ${cookName} directly:</h3>
       <ul>
         <li>Phone: ${cookPhone}</li>
@@ -193,4 +199,55 @@ export async function sendFeedbackRequest({
     `,
   })
   if (error) console.error('[Email] Feedback request failed:', error.message)
+}
+
+export async function sendCheckinEmail({
+  cookName,
+  cookEmail,
+  availabilityUrl,
+}: {
+  cookName: string
+  cookEmail: string
+  availabilityUrl: string
+}) {
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `Please confirm your availability this week`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>It's Monday — time to update your availability for the next 3 weeks so clients can find and book you.</p>
+      <p style="margin-top:24px;">
+        <a href="${availabilityUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Update My Availability
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;margin-top:16px;">Takes less than a minute. Keeping your availability up to date ensures you get more bookings.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Check-in email failed:', error.message)
+}
+
+export async function sendDormantNotification({
+  cookName,
+  cookEmail,
+}: {
+  cookName: string
+  cookEmail: string
+}) {
+  const { error } = await resend.emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `Your CookMatch profile has been paused`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>We haven't heard from you in over 60 days, so your CookMatch profile has been temporarily paused and is no longer visible to clients.</p>
+      <p>To reactivate your profile, simply reply to this email or contact us at <a href="mailto:contact@sivanspices.com" style="color:#ea580c;">contact@sivanspices.com</a>.</p>
+      <p>We'd love to have you back.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Dormant notification failed:', error.message)
 }

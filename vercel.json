@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/feedback",
       "schedule": "0 22 * * *"
+    },
+    {
+      "path": "/api/cron/checkin",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/inactivity",
+      "schedule": "0 6 * * *"
     }
   ]
 }
