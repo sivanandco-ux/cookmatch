@@ -4,6 +4,21 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Home Cooks — SivanSpices',
   description: 'Hire a verified Indian home cook to cook fresh, healthy meals in your home.',
+  openGraph: {
+    title: 'Home Cooks — SivanSpices',
+    description: 'Hire a verified Indian home cook to cook fresh, healthy meals in your home.',
+    url: 'https://cookmatch-git-main-sivanspices.vercel.app/cooks',
+    siteName: 'SivanSpices Home Cooks',
+    images: [
+      {
+        url: 'https://cookmatch-git-main-sivanspices.vercel.app/sivanspices-logo.png',
+        width: 1080,
+        height: 1080,
+        alt: 'SivanSpices Home Cooks',
+      },
+    ],
+    type: 'website',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
