@@ -109,7 +109,7 @@ export default function ApplyPage() {
       service_areas: getChecked('service_areas'),
       group_size_min: 2,
       group_size_max: 14,
-      signature_dishes: null,
+      signature_dishes: '',
       years_experience: 0,
       available_recurring: false,
       recurring_options: [],
