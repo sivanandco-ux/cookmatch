@@ -7,19 +7,11 @@ import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/
 const OCCASIONS = ['Regular Meal', 'Weekend Family Cooking', 'Dinner Party', 'Birthday', 'Festival / Occasion', 'Other']
 const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal', 'Gluten-Free']
 const CITIES = ['Fremont', 'Newark', 'Union City', 'Milpitas']
-const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 
 const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: number }[] = [
   { value: 'family_cooking', label: 'Family Cooking', range: '2–5 people', max: 5 },
   { value: 'small_event',    label: 'Small Event',    range: '6–10 people', max: 10 },
   { value: 'medium_event',   label: 'Medium Event',   range: '11–14 people', max: 14 },
-]
-
-const DURATIONS = [
-  { value: 2,  label: '2–4 hours' },
-  { value: 4,  label: '4–6 hours' },
-  { value: 6,  label: '6–10 hours' },
-  { value: 10, label: 'Full day' },
 ]
 
 const GROCERY_OPTIONS: { value: GrocerySituation; label: string }[] = [
@@ -85,23 +77,23 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
       client_phone: get('client_phone'),
       job_category: jobCategory as JobCategory,
       occasion: get('occasion'),
-      specific_dishes: get('specific_dishes'),
+      specific_dishes: '',
       num_dishes: Number(get('num_dishes')),
       preferred_date: selectedDate,
-      preferred_time: get('preferred_time'),
-      expected_duration_hours: Number(get('expected_duration_hours')),
+      preferred_time: '',
+      expected_duration_hours: 2,
       num_people: numPeople,
       dietary_restrictions: dietaryRestrictions,
       grocery_situation: get('grocery_situation') as GrocerySituation,
       cleanup_needed: (form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false,
-      kitchen_access_time: get('kitchen_access_time'),
+      kitchen_access_time: '',
       city: get('city'),
       parking_available: (form.elements.namedItem('parking_available') as HTMLInputElement)?.checked ?? false,
-      language_preferred: get('language_preferred'),
-      recurring: get('recurring') === 'true',
+      language_preferred: '',
+      recurring: false,
       text_description: textDescription,
       voice_memo_url: voiceMemoUrl,
-      additional_notes: get('additional_notes'),
+      additional_notes: '',
     }
 
     setLoading(true)
@@ -158,11 +150,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
             <input name="num_dishes" type="number" required min={1} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           </div>
         </div>
-
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Specific dishes (optional — or say &quot;cook&apos;s choice&quot;)</label>
-          <input name="specific_dishes" placeholder="e.g. Chicken biryani, raita, gulab jamun" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-        </div>
       </div>
 
       {/* Section 2: When */}
@@ -207,25 +194,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
             />
           </div>
         )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Preferred start time <span className="text-red-500">*</span></label>
-            <input name="preferred_time" type="time" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Cook arrives for prep at</label>
-            <input name="kitchen_access_time" type="time" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Expected duration <span className="text-red-500">*</span></label>
-          <select name="expected_duration_hours" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">Select duration</option>
-            {DURATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
-          </select>
-        </div>
       </div>
 
       {/* Section 3: Who */}
@@ -297,28 +265,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
         </div>
       </div>
 
-      {/* Section 5: Preferences */}
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-gray-900">Preferences</p>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Language preferred</label>
-            <select name="language_preferred" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-              <option value="">Any language</option>
-              {LANGUAGES.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Session type <span className="text-red-500">*</span></label>
-            <select name="recurring" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-              <option value="false">One-time</option>
-              <option value="true">Recurring</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Section 6: Voice memo + text description */}
+      {/* Section 5: Tell the cook */}
       <div className="flex flex-col gap-3">
         <div>
           <p className="text-sm font-semibold text-gray-900">Tell the cook what you need</p>
@@ -343,19 +290,9 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
           />
         </div>
-
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">Anything else (optional)</label>
-          <textarea
-            name="additional_notes"
-            placeholder="Other details, special requests, or context"
-            rows={2}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
-          />
-        </div>
       </div>
 
-      {/* Section 7: Contact info */}
+      {/* Section 6: Contact info */}
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-gray-900">Your contact info</p>
         <p className="text-xs text-gray-500">
