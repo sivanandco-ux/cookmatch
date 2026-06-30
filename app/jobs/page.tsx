@@ -78,7 +78,7 @@ export default async function JobBoardPage({
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at'
+    : 'id, job_category, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url'
 
   const { data: jobs } = await supabase
     .from('job_posts')
@@ -159,6 +159,9 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       {/* Key highlights */}
       <div className="flex flex-wrap gap-2">
         <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">📍 {job.city}</span>
+        {job.voice_memo_url && (
+          <span className="text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
+        )}
         {needsGrocery && (
           <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2.5 py-1 rounded-full">🛒 Grocery pickup needed</span>
         )}
