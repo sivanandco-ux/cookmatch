@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Home Cooks — SivanSpices',
     description: 'Hire a verified Indian home cook to cook fresh, healthy meals in your home.',
-    url: 'https://cookmatch-git-main-sivanspices.vercel.app/cooks',
+    url: 'https://cookmatch-flame.vercel.app/cooks',
     siteName: 'SivanSpices Home Cooks',
     images: [
       {
-        url: 'https://cookmatch-git-main-sivanspices.vercel.app/sivanspices-logo.png',
-        width: 1080,
-        height: 1080,
+        url: 'https://cookmatch-flame.vercel.app/og-image.png',
+        width: 1200,
+        height: 630,
         alt: 'SivanSpices Home Cooks',
       },
     ],
