@@ -2,6 +2,11 @@ export type CookStatus = 'pending' | 'active' | 'watch' | 'training' | 'dormant'
 export type PriceUnit = 'hourly' | 'per_session'
 export type SessionType = 'one_time' | 'recurring'
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly'
+export type JobCategory = 'family_cooking' | 'small_event' | 'medium_event'
+export type GrocerySituation = 'client_has_everything' | 'need_grocery_pickup' | 'cook_brings_ingredients'
+export type JobPostStatus = 'open' | 'taken' | 'done' | 'expired'
+export type BookingStatus = 'legacy' | 'pending' | 'cook_interested' | 'confirmed' | 'cancelled' | 'completed'
+export type JobInterestStatus = 'pending' | 'accepted' | 'rejected'
 
 export interface Cook {
   id: string
@@ -29,6 +34,11 @@ export interface Cook {
   available_recurring: boolean
   recurring_options: RecurringFrequency[]
   status: CookStatus
+  // V0 additions
+  job_categories: JobCategory[]
+  does_cleanup: boolean
+  grocery_pickup: boolean
+  grocery_pickup_charge: number | null
   created_at: string
 }
 
@@ -78,7 +88,98 @@ export interface Booking {
   notes: string
   discount_code_sent: boolean
   cook_notified: boolean
+  // V0 session brief additions
+  job_category: JobCategory | null
+  occasion: string | null
+  specific_dishes: string | null
+  num_dishes: number | null
+  preferred_time: string | null
+  expected_duration_hours: number | null
+  num_people: number | null
+  dietary_restrictions: string[] | null
+  grocery_situation: GrocerySituation | null
+  cleanup_needed: boolean
+  kitchen_access_time: string | null
+  city: string | null
+  parking_available: boolean
+  language_preferred: string | null
+  text_description: string | null
+  voice_memo_url: string | null
+  status: BookingStatus
+  cook_interested_at: string | null
+  confirmed_at: string | null
+  cancelled_at: string | null
+  cancelled_by: 'client' | 'cook' | null
   created_at: string
+}
+
+export interface JobPost {
+  id: string
+  client_name: string
+  client_email: string
+  client_phone: string
+  job_category: JobCategory
+  occasion: string
+  specific_dishes: string | null
+  num_dishes: number
+  requested_date: string
+  requested_time: string
+  expected_duration_hours: number
+  num_people: number
+  dietary_restrictions: string[]
+  grocery_situation: GrocerySituation
+  cleanup_needed: boolean
+  kitchen_access_time: string
+  city: string
+  parking_available: boolean
+  language_preferred: string | null
+  recurring: boolean
+  voice_memo_url: string
+  additional_notes: string | null
+  status: JobPostStatus
+  assigned_cook_id: string | null
+  confirmed_at: string | null
+  completed_at: string | null
+  expired_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface JobPostPublic {
+  id: string
+  job_category: JobCategory
+  occasion: string
+  num_dishes: number
+  requested_date: string
+  requested_time: string
+  expected_duration_hours: number
+  num_people: number
+  dietary_restrictions: string[]
+  grocery_situation: GrocerySituation
+  cleanup_needed: boolean
+  city: string
+  recurring: boolean
+  status: JobPostStatus
+  created_at: string
+}
+
+export interface JobInterest {
+  id: string
+  job_post_id: string
+  cook_id: string
+  expressed_at: string
+  status: JobInterestStatus
+}
+
+export interface ClientCancellation {
+  id: string
+  client_email: string
+  booking_id: string | null
+  job_post_id: string | null
+  session_date: string
+  hours_before_session: number
+  within_48hrs: boolean
+  cancelled_at: string
 }
 
 export interface CookRating {
@@ -112,4 +213,29 @@ export interface CookWithDetails extends Cook {
   cook_verifications: CookVerification | null
   cook_scores: CookScore | null
   cook_ratings: CookRating[]
+}
+
+export interface SessionBriefFormData {
+  client_name: string
+  client_email: string
+  client_phone: string
+  job_category: JobCategory
+  occasion: string
+  specific_dishes: string
+  num_dishes: number
+  preferred_date: string
+  preferred_time: string
+  expected_duration_hours: number
+  num_people: number
+  dietary_restrictions: string[]
+  grocery_situation: GrocerySituation
+  cleanup_needed: boolean
+  kitchen_access_time: string
+  city: string
+  parking_available: boolean
+  language_preferred: string
+  recurring: boolean
+  text_description: string
+  voice_memo_url: string
+  additional_notes: string
 }

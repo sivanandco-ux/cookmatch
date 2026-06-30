@@ -37,6 +37,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
           <nav className="flex gap-6 items-center text-sm font-medium">
             <a href="/cooks" className="text-gray-600 hover:text-orange-600">Find a Cook</a>
+            <a href="/jobs" className="text-gray-600 hover:text-orange-600">Job Board</a>
+            <a href="/jobs/post" className="text-gray-600 hover:text-orange-600">Post a Job</a>
             <a href="/apply" className="text-orange-600 border border-orange-300 px-4 py-2 rounded-lg hover:bg-orange-50">
               Join as Cook
             </a>

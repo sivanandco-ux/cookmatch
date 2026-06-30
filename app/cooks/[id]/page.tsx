@@ -29,12 +29,15 @@ export default async function CookProfilePage({
 
   if (!cook) notFound()
 
-  const today = new Date().toISOString().split('T')[0]
+  // Only show dates strictly after the 48-hour cutoff — clients cannot book within 48hrs
+  const cutoff = new Date(Date.now() + 48 * 60 * 60 * 1000)
+  const minBookableDate = cutoff.toISOString().split('T')[0]
+
   const { data: availabilityRows } = await supabase
     .from('cook_availability')
     .select('available_date')
     .eq('cook_id', id)
-    .gte('available_date', today)
+    .gt('available_date', minBookableDate)
     .order('available_date', { ascending: true })
 
   const availableDates = (availabilityRows || []).map(r => r.available_date as string)
@@ -193,7 +196,7 @@ export default async function CookProfilePage({
                 <p className="text-xs text-green-600 mt-1">Available for recurring bookings</p>
               )}
             </div>
-            <BookingForm cookId={c.id} cookName={c.name} cuisineTypes={c.cuisine_types} dietarySpecialties={c.dietary_specialties} availableRecurring={c.available_recurring} availableDates={availableDates} />
+            <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} />
           </div>
         </div>
       </div>

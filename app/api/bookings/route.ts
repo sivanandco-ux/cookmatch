@@ -1,41 +1,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { sendCookNotification, sendClientConfirmation } from '@/lib/email'
-
-const DISCOUNT_CODE = 'COOKMATCH20'
+import { sendBriefReceivedToCook } from '@/lib/email'
 
 export async function POST(request: Request) {
   const body = await request.json()
   const supabase = await createClient()
 
-  // Save booking
-  const { error } = await supabase
-    .from('bookings')
-    .insert({
-      cook_id: body.cook_id,
-      client_name: body.client_name,
-      client_email: body.client_email,
-      client_phone: body.client_phone,
-      session_type: body.session_type,
-      recurring_frequency: body.recurring_frequency,
-      preferred_date: body.preferred_date,
-      group_size: body.group_size,
-      cuisine_needs: body.cuisine_needs || '',
-      dietary_needs: body.dietary_needs || '',
-      occasion_type: body.occasion_type,
-      notes: body.notes || '',
-      discount_code_sent: true,
-      cook_notified: true,
-    })
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
-
-  // Fetch cook contact info
   const { data: cook } = await supabase
     .from('cooks')
-    .select('phone, email, whatsapp, name')
+    .select('id, name, email')
     .eq('id', body.cook_id)
     .single()
 
@@ -43,38 +16,56 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Cook not found' }, { status: 404 })
   }
 
-  // Send emails — fire both in parallel, don't block the response on failures
-  await Promise.all([
-    sendCookNotification({
-      cookName: cook.name,
-      cookEmail: cook.email,
-      clientName: body.client_name,
-      clientPhone: body.client_phone,
-      date: body.preferred_date,
-      occasion: body.occasion_type,
-      groupSize: body.group_size,
-      notes: body.notes || '',
-      discountCode: DISCOUNT_CODE,
-    }),
-    sendClientConfirmation({
-      clientName: body.client_name,
-      clientEmail: body.client_email,
-      cookName: cook.name,
-      cookPhone: cook.phone,
-      cookEmail: cook.email,
-      cookWhatsapp: cook.whatsapp,
-      date: body.preferred_date,
-      discountCode: DISCOUNT_CODE,
-    }),
-  ])
+  const { data: booking, error } = await supabase
+    .from('bookings')
+    .insert({
+      cook_id: body.cook_id,
+      client_name: body.client_name,
+      client_email: body.client_email,
+      client_phone: body.client_phone,
+      session_type: body.recurring ? 'recurring' : 'one_time',
+      preferred_date: body.preferred_date,
+      preferred_time: body.preferred_time || null,
+      group_size: String(body.num_people),
+      occasion_type: body.occasion,
+      cuisine_needs: '',
+      dietary_needs: (body.dietary_restrictions || []).join(', '),
+      notes: body.additional_notes || '',
+      // Session brief fields
+      job_category: body.job_category,
+      specific_dishes: body.specific_dishes || null,
+      num_dishes: body.num_dishes,
+      expected_duration_hours: body.expected_duration_hours,
+      num_people: body.num_people,
+      grocery_situation: body.grocery_situation,
+      cleanup_needed: body.cleanup_needed ?? false,
+      kitchen_access_time: body.kitchen_access_time || null,
+      city: body.city,
+      parking_available: body.parking_available ?? false,
+      language_preferred: body.language_preferred || null,
+      text_description: body.text_description || null,
+      voice_memo_url: body.voice_memo_url || null,
+      discount_code_sent: false,
+      cook_notified: true,
+      status: 'pending',
+    })
+    .select()
+    .single()
 
-  // Return contact info + discount code to client
-  return NextResponse.json({
-    contact: {
-      phone: cook.phone,
-      email: cook.email,
-      whatsapp: cook.whatsapp,
-      discountCode: DISCOUNT_CODE,
-    },
-  })
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  await sendBriefReceivedToCook({
+    cookName: cook.name,
+    cookEmail: cook.email,
+    cookId: cook.id,
+    clientName: body.client_name,
+    jobCategory: body.job_category,
+    occasion: body.occasion,
+    date: body.preferred_date,
+    numPeople: body.num_people,
+  }).catch(err => console.error('[Email] Brief notification failed:', err))
+
+  return NextResponse.json({ pending: true, booking_id: booking.id })
 }

@@ -74,12 +74,16 @@ export async function POST(request: Request) {
       price_unit: body.price_unit,
       min_hours: body.min_hours ?? null,
       service_areas: body.service_areas,
-      group_size_min: 1,
-      group_size_max: 50,
+      group_size_min: 2,
+      group_size_max: Math.min(body.group_size_max || 14, 14),
       signature_dishes: body.signature_dishes,
       years_experience: body.years_experience,
       available_recurring: body.available_recurring,
       recurring_options: body.recurring_options,
+      job_categories: body.job_categories || [],
+      does_cleanup: body.does_cleanup || false,
+      grocery_pickup: body.grocery_pickup || false,
+      grocery_pickup_charge: body.grocery_pickup_charge ?? null,
       status: 'pending',
     })
     .select()

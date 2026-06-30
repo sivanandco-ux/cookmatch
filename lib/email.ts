@@ -233,6 +233,264 @@ export async function sendCheckinEmail({
   if (error) console.error('[Email] Check-in email failed:', error.message)
 }
 
+export async function sendBriefReceivedToCook({
+  cookName,
+  cookEmail,
+  cookId,
+  clientName,
+  jobCategory,
+  occasion,
+  date,
+  numPeople,
+}: {
+  cookName: string
+  cookEmail: string
+  cookId: string
+  clientName: string
+  jobCategory: string
+  occasion: string
+  date: string
+  numPeople: number
+}) {
+  const dashboardUrl = `${SITE_URL}/dashboard/${cookId}`
+  const categoryLabel: Record<string, string> = {
+    family_cooking: 'Family Cooking',
+    small_event: 'Small Event',
+    medium_event: 'Medium Event',
+  }
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `New session brief from ${clientName}`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>A client has submitted a session brief and wants you to cook for them. Review it on your dashboard and decide if you want to accept.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Client</strong></td><td>${clientName}</td></tr>
+        <tr><td><strong>Job type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
+        <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
+        <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+        <tr><td><strong>People</strong></td><td>${numPeople}</td></tr>
+      </table>
+      <p>The brief includes a voice memo and/or written description. Listen and read before deciding.</p>
+      <p style="margin-top:24px;">
+        <a href="${dashboardUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Review &amp; Respond
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">Only accept if you are fully available on this date.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Brief received (cook) failed:', error.message)
+}
+
+export async function sendCookAcceptedToClient({
+  clientName,
+  clientEmail,
+  cookName,
+  bookingId,
+  date,
+}: {
+  clientName: string
+  clientEmail: string
+  cookName: string
+  bookingId: string
+  date: string
+}) {
+  const confirmUrl = `${SITE_URL}/bookings/${bookingId}/confirm`
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(clientEmail),
+    subject: `${cookName} accepted your session brief`,
+    html: `
+      <p>Hi ${clientName},</p>
+      <p><strong>${cookName}</strong> has reviewed your session brief and wants to cook for you on <strong>${date}</strong>.</p>
+      <p>To complete the booking, please confirm below. By confirming, you are committing to be home and ready for the cook on this date.</p>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:16px;margin:20px 0;">
+        <p style="margin:0;color:#9a3412;font-weight:600;">Before you confirm:</p>
+        <p style="margin:8px 0 0;color:#9a3412;font-size:14px;">This cook is reserving time specifically for you. Last-minute cancellations directly affect their income. Please only confirm if you are fully committed to this session.</p>
+      </div>
+      <p style="margin-top:24px;">
+        <a href="${confirmUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Confirm My Booking
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">You can also cancel from the same page if your plans have changed.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Cook accepted (client) failed:', error.message)
+}
+
+export async function sendSessionConfirmedToBoth({
+  clientName,
+  clientEmail,
+  cookName,
+  cookEmail,
+  cookPhone,
+  cookWhatsapp,
+  clientPhone,
+  date,
+  discountCode,
+}: {
+  clientName: string
+  clientEmail: string
+  cookName: string
+  cookEmail: string
+  cookPhone: string
+  cookWhatsapp: string | null
+  clientPhone: string
+  date: string
+  discountCode: string
+}) {
+  const resend = getResend()
+  await Promise.all([
+    resend.emails.send({
+      from: FROM,
+      to: to(clientEmail),
+      subject: `Confirmed — ${cookName} is cooking for you on ${date}`,
+      html: `
+        <p>Hi ${clientName},</p>
+        <p>Your session is confirmed. Here is how to reach ${cookName}:</p>
+        <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+          <tr><td><strong>Phone</strong></td><td>${cookPhone}</td></tr>
+          <tr><td><strong>Email</strong></td><td>${cookEmail}</td></tr>
+          ${cookWhatsapp ? `<tr><td><strong>WhatsApp</strong></td><td>${cookWhatsapp}</td></tr>` : ''}
+          <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+        </table>
+        <p>Please coordinate directly with ${cookName} for any final details.</p>
+        <h3 style="margin-top:24px;">Your SivanSpices gift 🎁</h3>
+        <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off at SivanSpices.com</p>
+        <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop SivanSpices →</a></p>
+        <p>— CookMatch Team</p>
+      `,
+    }),
+    resend.emails.send({
+      from: FROM,
+      to: to(cookEmail),
+      subject: `Confirmed — ${clientName} is expecting you on ${date}`,
+      html: `
+        <p>Hi ${cookName},</p>
+        <p>The booking is confirmed. Here is how to reach ${clientName}:</p>
+        <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+          <tr><td><strong>Phone</strong></td><td>${clientPhone}</td></tr>
+          <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+        </table>
+        <p>Coordinate directly with the client for directions, parking, and any final details.</p>
+        <p>— CookMatch Team</p>
+      `,
+    }),
+  ]).catch(err => console.error('[Email] Session confirmed failed:', err))
+}
+
+export async function sendCookInterestedToClient({
+  clientName,
+  clientEmail,
+  cookName,
+  jobPostId,
+  interestId,
+  jobCategory,
+  occasion,
+  date,
+}: {
+  clientName: string
+  clientEmail: string
+  cookName: string
+  jobPostId: string
+  interestId: string
+  jobCategory: string
+  occasion: string
+  date: string
+}) {
+  const confirmUrl = `${SITE_URL}/jobs/${jobPostId}/confirm?interest_id=${interestId}`
+  const categoryLabel: Record<string, string> = {
+    family_cooking: 'Family Cooking',
+    small_event: 'Small Event',
+    medium_event: 'Medium Event',
+  }
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(clientEmail),
+    subject: `${cookName} wants to cook for you`,
+    html: `
+      <p>Hi ${clientName},</p>
+      <p><strong>${cookName}</strong> has reviewed your job post and wants to cook for you.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Cook</strong></td><td>${cookName}</td></tr>
+        <tr><td><strong>Job type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
+        <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
+        <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+      </table>
+      <p>Review their profile and confirm to complete the booking. Contact details are shared only after you confirm.</p>
+      <p style="margin-top:24px;">
+        <a href="${confirmUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Review &amp; Confirm
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">If this cook is not a good fit, you can decline and wait for other cooks to express interest.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Cook interested (client) failed:', error.message)
+}
+
+export async function sendSessionReminder({
+  clientName,
+  clientEmail,
+  cookName,
+  cookEmail,
+  date,
+  time,
+  type,
+}: {
+  clientName: string
+  clientEmail: string
+  cookName: string
+  cookEmail: string
+  date: string
+  time: string | null
+  type: '24hr' | '2hr'
+}) {
+  const when = type === '24hr' ? 'tomorrow' : 'in about 2 hours'
+  const resend = getResend()
+  await Promise.all([
+    resend.emails.send({
+      from: FROM,
+      to: to(clientEmail),
+      subject: `Reminder — ${cookName} is cooking for you ${when}`,
+      html: `
+        <p>Hi ${clientName},</p>
+        <p>This is a reminder that <strong>${cookName}</strong> will be at your home ${when}.</p>
+        <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+          <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+          ${time ? `<tr><td><strong>Time</strong></td><td>${time}</td></tr>` : ''}
+        </table>
+        <p>Make sure the kitchen is accessible and any agreed ingredients are ready.</p>
+        <p>— CookMatch Team</p>
+      `,
+    }),
+    resend.emails.send({
+      from: FROM,
+      to: to(cookEmail),
+      subject: `Reminder — ${clientName} is expecting you ${when}`,
+      html: `
+        <p>Hi ${cookName},</p>
+        <p>This is a reminder that you have a confirmed session with <strong>${clientName}</strong> ${when}.</p>
+        <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+          <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+          ${time ? `<tr><td><strong>Time</strong></td><td>${time}</td></tr>` : ''}
+        </table>
+        <p>Please contact the client if anything has changed.</p>
+        <p>— CookMatch Team</p>
+      `,
+    }),
+  ]).catch(err => console.error('[Email] Session reminder failed:', err))
+}
+
 export async function sendDormantNotification({
   cookName,
   cookEmail,

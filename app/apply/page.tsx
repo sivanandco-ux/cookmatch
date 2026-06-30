@@ -11,6 +11,11 @@ const PRICE_UNITS = [
   { value: 'per_session', label: 'Per Session' },
   { value: 'hourly', label: 'Hourly' },
 ]
+const JOB_CATEGORIES = [
+  { value: 'family_cooking', label: 'Family Cooking (2–5 people)' },
+  { value: 'small_event', label: 'Small Event (6–10 people)' },
+  { value: 'medium_event', label: 'Medium Event (11–14 people)' },
+]
 
 function CheckboxGroup({ name, options, label }: { name: string; options: string[]; label: string }) {
   return (
@@ -33,6 +38,7 @@ export default function ApplyPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [priceUnit, setPriceUnit] = useState('per_session')
+  const [groceryPickup, setGroceryPickup] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -85,12 +91,16 @@ export default function ApplyPage() {
       price_unit: formData.get('price_unit'),
       min_hours: priceUnit === 'hourly' ? Number(formData.get('min_hours')) || null : null,
       service_areas: getChecked('service_areas'),
-      group_size_min: Number(formData.get('group_size_min')),
-      group_size_max: Number(formData.get('group_size_max')),
+      group_size_min: 2,
+      group_size_max: Math.min(Number(formData.get('group_size_max')) || 14, 14),
       signature_dishes: formData.get('signature_dishes'),
       years_experience: Number(formData.get('years_experience')),
       available_recurring: formData.get('available_recurring') === 'on',
       recurring_options: getChecked('recurring_options'),
+      job_categories: getChecked('job_categories'),
+      does_cleanup: formData.get('does_cleanup') === 'on',
+      grocery_pickup: formData.get('grocery_pickup') === 'on',
+      grocery_pickup_charge: groceryPickup ? Number(formData.get('grocery_pickup_charge')) || null : null,
     }
 
     let photo_url: string | null = null
@@ -295,6 +305,66 @@ export default function ApplyPage() {
           </label>
 
           <CheckboxGroup name="recurring_options" options={['Weekly', 'Bi-weekly', 'Monthly']} label="Recurring frequency options (if applicable)" />
+        </section>
+
+        {/* Job Preferences */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
+          <h2 className="text-lg font-semibold">Job Preferences</h2>
+
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-2">Job types you accept</p>
+            <div className="flex flex-col gap-2">
+              {JOB_CATEGORIES.map(cat => (
+                <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="job_categories" value={cat.value} className="rounded border-gray-300 text-orange-600" />
+                  <span className="text-sm text-gray-700">{cat.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-1">Maximum number of people you can cook for</p>
+            <input
+              name="group_size_max"
+              type="number"
+              min={2}
+              max={14}
+              placeholder="e.g. 10"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
+            />
+            <p className="text-xs text-gray-400 mt-1">Platform maximum is 14 people for v0.</p>
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="does_cleanup" className="rounded border-gray-300 text-orange-600" />
+            <span className="text-sm text-gray-700">I clean up after cooking</span>
+          </label>
+
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer mb-2">
+              <input
+                type="checkbox"
+                name="grocery_pickup"
+                className="rounded border-gray-300 text-orange-600"
+                onChange={e => setGroceryPickup(e.target.checked)}
+              />
+              <span className="text-sm text-gray-700">I can pick up groceries (extra charge applies)</span>
+            </label>
+            {groceryPickup && (
+              <div className="flex items-center gap-2 ml-6">
+                <span className="text-sm text-gray-500">$</span>
+                <input
+                  name="grocery_pickup_charge"
+                  type="number"
+                  min={0}
+                  placeholder="Extra charge"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
+                />
+                <span className="text-sm text-gray-400">per trip</span>
+              </div>
+            )}
+          </div>
         </section>
 
         {/* Verification acknowledgement */}

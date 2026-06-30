@@ -13,6 +13,11 @@ function getNext21Days() {
   return days
 }
 
+function getMinBookableDate(): string {
+  const cutoff = new Date(Date.now() + 48 * 60 * 60 * 1000)
+  return cutoff.toISOString().split('T')[0]
+}
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -28,6 +33,7 @@ export default function AvailabilityCalendar({
   existingDates: string[]
 }) {
   const days = getNext21Days()
+  const minBookableDate = getMinBookableDate()
   const [selected, setSelected] = useState<Set<string>>(new Set(existingDates))
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -58,21 +64,30 @@ export default function AvailabilityCalendar({
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Your Availability</h1>
       <p className="text-gray-500 text-sm mb-8">Hi {cookName}, tap the dates you are available to cook. Clients can see this when booking.</p>
 
-      <div className="grid grid-cols-3 gap-2 mb-8">
-        {days.map(date => (
-          <button
-            key={date}
-            onClick={() => toggle(date)}
-            className={`rounded-lg px-3 py-2 text-sm font-medium border transition-colors ${
-              selected.has(date)
-                ? 'bg-orange-600 text-white border-orange-600'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
-            }`}
-          >
-            {formatDate(date)}
-          </button>
-        ))}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        {days.map(date => {
+          const within48hrs = date <= minBookableDate
+          return (
+            <button
+              key={date}
+              onClick={() => toggle(date)}
+              className={`rounded-lg px-3 py-2 text-sm font-medium border transition-colors flex flex-col items-center gap-0.5 ${
+                selected.has(date)
+                  ? 'bg-orange-600 text-white border-orange-600'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
+              }`}
+            >
+              <span>{formatDate(date)}</span>
+              {within48hrs && (
+                <span className={`text-xs font-normal ${selected.has(date) ? 'text-orange-100' : 'text-amber-500'}`}>
+                  closed to clients
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
+      <p className="text-xs text-gray-400 mb-6">Dates within 48 hours are not shown to clients for new bookings.</p>
 
       <button
         onClick={handleSave}
