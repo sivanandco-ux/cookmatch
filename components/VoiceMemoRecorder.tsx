@@ -79,7 +79,8 @@ export default function VoiceMemoRecorder({ onUploaded }: Props) {
 
     const res = await fetch('/api/upload-voice-memo', { method: 'POST', body: formData })
     if (!res.ok) {
-      setError('Upload failed. Please try again.')
+      const data = await res.json().catch(() => ({}))
+      setError(`Upload failed: ${data.error || res.statusText}`)
       setState('recorded')
       return
     }
