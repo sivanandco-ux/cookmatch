@@ -4,13 +4,9 @@ import { useState, useRef } from 'react'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
 const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal']
-const OCCASIONS = ['Daily Meals / Tiffin', 'Weekend Family Cooking', 'Festival / Occasion', 'Dinner Party']
+const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 const AREAS = ['Fremont', 'Newark', 'Union City', 'Milpitas']
-const PRICE_UNITS = [
-  { value: 'per_session', label: 'Per Session' },
-  { value: 'hourly', label: 'Hourly' },
-]
 const JOB_CATEGORIES = [
   { value: 'family_cooking', label: 'Family Cooking (2–5 people)' },
   { value: 'small_event', label: 'Small Event (6–10 people)' },
@@ -37,11 +33,27 @@ export default function ApplyPage() {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [priceUnit, setPriceUnit] = useState('per_session')
   const [groceryPickup, setGroceryPickup] = useState(false)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [minHours, setMinHours] = useState(2)
+  const [intro, setIntro] = useState('')
+  const [polishing, setPolishing] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
+  const INTRO_LIMIT = 280
+
+  async function handlePolish() {
+    if (intro.trim().length < 10) return
+    setPolishing(true)
+    const res = await fetch('/api/polish-intro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: intro }),
+    })
+    const data = await res.json()
+    if (data.polished) setIntro(data.polished.slice(0, INTRO_LIMIT))
+    setPolishing(false)
+  }
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -60,9 +72,7 @@ export default function ApplyPage() {
     setError('')
 
     const formData = new FormData(e.currentTarget)
-
-    const getChecked = (name: string) =>
-      formData.getAll(name).map(String)
+    const getChecked = (name: string) => formData.getAll(name).map(String)
 
     const cuisineTypes = getChecked('cuisine_types')
     const otherCuisines = (formData.get('other_cuisines') as string || '').trim()
@@ -72,13 +82,19 @@ export default function ApplyPage() {
       return
     }
 
+    const intro = (formData.get('intro') as string || '').trim()
+    // Auto-generate tagline from first sentence of intro
+    const tagline = intro.split(/[.!?]/)[0].trim().slice(0, 100) || intro.slice(0, 100)
+
+    const hourlyRate = Number(formData.get('hourly_rate'))
+
     const body = {
       name: formData.get('name'),
       email: formData.get('email'),
       phone: formData.get('phone'),
       whatsapp: formData.get('whatsapp') || null,
-      bio: formData.get('bio'),
-      tagline: formData.get('tagline'),
+      bio: intro,
+      tagline,
       video_url: formData.get('video_url') || null,
       cuisine_types: cuisineTypes,
       other_cuisines: otherCuisines || null,
@@ -86,17 +102,17 @@ export default function ApplyPage() {
       dietary_specialties: getChecked('dietary_specialties'),
       occasion_types: getChecked('occasion_types'),
       languages: getChecked('languages'),
-      price_min: Number(formData.get('price_min')),
-      price_max: Number(formData.get('price_max')),
-      price_unit: formData.get('price_unit'),
-      min_hours: priceUnit === 'hourly' ? Number(formData.get('min_hours')) || null : null,
+      price_min: hourlyRate,
+      price_max: hourlyRate,
+      price_unit: 'hourly',
+      min_hours: minHours,
       service_areas: getChecked('service_areas'),
       group_size_min: 2,
-      group_size_max: Math.min(Number(formData.get('group_size_max')) || 14, 14),
-      signature_dishes: formData.get('signature_dishes'),
-      years_experience: Number(formData.get('years_experience')),
-      available_recurring: formData.get('available_recurring') === 'on',
-      recurring_options: getChecked('recurring_options'),
+      group_size_max: 14,
+      signature_dishes: null,
+      years_experience: 0,
+      available_recurring: false,
+      recurring_options: [],
       job_categories: getChecked('job_categories'),
       does_cleanup: formData.get('does_cleanup') === 'on',
       grocery_pickup: formData.get('grocery_pickup') === 'on',
@@ -141,7 +157,7 @@ export default function ApplyPage() {
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received!</h1>
         <p className="text-gray-600 mb-2">Thank you for applying to CookMatch. We will review your application and reach out within 2–3 business days.</p>
-        <p className="text-gray-500 text-sm">You will be notified via email and SMS once your profile is verified and live.</p>
+        <p className="text-gray-500 text-sm">You will be notified via email once your profile is verified and live.</p>
         <a href="/cooks" className="mt-8 inline-block text-orange-600 hover:underline">Browse other cooks →</a>
       </div>
     )
@@ -150,49 +166,17 @@ export default function ApplyPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">Join CookMatch as a Cook</h1>
-      <p className="text-gray-600 mb-8">Fill in your details below. We will verify your information and activate your profile within 2–3 business days.</p>
+      <p className="text-gray-600 mb-8">Share your love of cooking and get discovered by families in your area.</p>
 
-      {/* Requirements */}
-      <div className="flex flex-col gap-4 mb-2">
-        <section className="bg-white border border-gray-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">What you will need to get verified</h2>
-          <ul className="space-y-2 text-sm text-gray-700">
-            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Government-issued photo ID (driver's license, passport, or state ID)</li>
-            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Consent to a background check</li>
-            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Valid Food Handler certification (details below)</li>
-            <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Two references who can vouch for your cooking</li>
-          </ul>
-        </section>
-
-        <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-orange-900 mb-1">How to get your Food Handler's card</h2>
-          <p className="text-sm text-orange-800 mb-4">California law requires anyone handling food to hold a valid Food Handler certification. It is valid for 3 years and costs $15–$40.</p>
-
-          <div className="flex flex-col gap-4">
-            <div>
-              <p className="text-sm font-semibold text-gray-800 mb-1">Fastest option — Online</p>
-              <p className="text-sm text-gray-700">
-                <strong>ServSafe</strong> at{' '}
-                <a href="https://www.servsafe.com" target="_blank" rel="noopener noreferrer" className="text-orange-600 underline hover:text-orange-700">servsafe.com</a>
-                {' '}— complete the course online and take a proctored exam. Widely accepted and takes about 2–3 hours.
-              </p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-gray-800 mb-1">In-person options in the Bay Area</p>
-              <ul className="space-y-1.5 text-sm text-gray-700">
-                <li className="flex gap-2">
-                  <span className="text-orange-500 mt-0.5">•</span>
-                  <span><strong>Alameda County</strong> (Fremont, Newark, Union City) — contact Alameda County Environmental Health at <a href="tel:5105676700" className="text-orange-600 underline">(510) 567-6700</a> for local testing centers</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-orange-500 mt-0.5">•</span>
-                  <span><strong>Santa Clara County</strong> (Milpitas) — contact Santa Clara County Public Health for approved training providers</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
+      {/* Platform benefits */}
+      <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8">
+        <h2 className="text-base font-semibold text-orange-900 mb-3">Why join CookMatch?</h2>
+        <ul className="space-y-2 text-sm text-orange-800">
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Clients come to you with a clear brief — no guessing what they need</li>
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Your profile stays live so clients can find and book you any time</li>
+        </ul>
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -200,6 +184,7 @@ export default function ApplyPage() {
         {/* Personal Info */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Personal Information</h2>
+
           {/* Photo upload */}
           <div className="flex items-center gap-4">
             <div
@@ -223,13 +208,7 @@ export default function ApplyPage() {
                 {photoPreview ? 'Change photo' : 'Upload photo'}
               </button>
             </div>
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="hidden"
-            />
+            <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
           </div>
 
           <input name="name" required placeholder="Full name" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
@@ -240,12 +219,47 @@ export default function ApplyPage() {
 
         {/* Profile */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">Your Profile</h2>
-          <input name="tagline" required placeholder="One-line tagline e.g. 'South Indian home cooking specialist'" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          <textarea name="bio" required placeholder="Tell clients about yourself, your cooking style, and your story" rows={4} className="border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none" />
-          <input name="signature_dishes" required placeholder="Signature dishes e.g. Chettinad Chicken, Rasam, Pulao" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          <input name="video_url" type="url" placeholder="YouTube or Vimeo intro video URL (optional)" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          <input name="years_experience" type="number" required min={0} placeholder="Years of cooking experience" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+          <div>
+            <h2 className="text-lg font-semibold">Introduce Yourself</h2>
+            <p className="text-sm text-gray-500 mt-1">This is the first thing clients read on your profile.</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Where are you from and how did you learn to cook?
+            </label>
+            <textarea
+              name="intro"
+              required
+              rows={4}
+              maxLength={INTRO_LIMIT}
+              value={intro}
+              onChange={e => setIntro(e.target.value.slice(0, INTRO_LIMIT))}
+              placeholder="e.g. I grew up in Chennai and learned to cook from my mother. I have been cooking for Bay Area families for 8 years and love making food that tastes like home."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+            />
+            <div className="flex items-center justify-between mt-1.5">
+              <p className={`text-xs ${intro.length >= INTRO_LIMIT ? 'text-red-500' : 'text-gray-400'}`}>
+                {intro.length} / {INTRO_LIMIT} characters
+              </p>
+              <button
+                type="button"
+                onClick={handlePolish}
+                disabled={polishing || intro.trim().length < 10}
+                className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 disabled:opacity-40"
+              >
+                {polishing ? 'Polishing...' : '✦ Polish my intro'}
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">YouTube intro video (optional)</label>
+            <input
+              name="video_url"
+              type="url"
+              placeholder="Paste your YouTube video link — a short cooking video builds trust"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
         </section>
 
         {/* Cooking Details */}
@@ -260,51 +274,55 @@ export default function ApplyPage() {
               placeholder="e.g. Chettinad, Kongunadu, Malabar"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
-            <p className="text-xs text-gray-400 mt-1">Separate multiple cuisines with commas. We will verify these before publishing your profile.</p>
           </div>
           <CheckboxGroup name="dietary_specialties" options={DIETARY} label="Dietary specialties" />
           <CheckboxGroup name="occasion_types" options={OCCASIONS} label="Occasions you cook for" />
           <CheckboxGroup name="languages" options={LANGUAGES} label="Languages you speak" />
         </section>
 
-        {/* Pricing & Availability */}
+        {/* Pricing */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">Pricing &amp; Availability</h2>
-
-          <div className="flex gap-3 items-center">
-            <input name="price_min" type="number" required min={1} placeholder="Your rate ($)" className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            <select
-              name="price_unit"
-              value={priceUnit}
-              onChange={e => setPriceUnit(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            >
-              {PRICE_UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
-            </select>
+          <div>
+            <h2 className="text-lg font-semibold">Pricing</h2>
+            <p className="text-sm text-gray-500 mt-1">All sessions are billed hourly with a minimum of 2 hours.</p>
           </div>
 
-          {priceUnit === 'hourly' && (
-            <div className="flex flex-col gap-1">
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">Your hourly rate ($)</label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">$</span>
               <input
-                name="min_hours"
+                name="hourly_rate"
                 type="number"
                 required
                 min={1}
-                placeholder="Minimum hours per visit"
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                placeholder="e.g. 35"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
               />
-              <p className="text-xs text-gray-400">The minimum number of hours you require per visit to make the trip worthwhile</p>
+              <span className="text-sm text-gray-500">per hour</span>
             </div>
-          )}
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Minimum hours per visit: <span className="text-orange-600 font-semibold">{minHours} hours</span>
+            </label>
+            <input
+              type="range"
+              min={2}
+              max={6}
+              value={minHours}
+              onChange={e => setMinHours(Number(e.target.value))}
+              className="w-full accent-orange-600"
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+              <span>2 hrs (minimum)</span>
+              <span>6 hrs (maximum)</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-1">Set the minimum hours you require to make the trip worthwhile. Platform minimum is 2 hours.</p>
+          </div>
 
           <CheckboxGroup name="service_areas" options={AREAS} label="Areas you serve" />
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="available_recurring" className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">Available for recurring bookings</span>
-          </label>
-
-          <CheckboxGroup name="recurring_options" options={['Weekly', 'Bi-weekly', 'Monthly']} label="Recurring frequency options (if applicable)" />
         </section>
 
         {/* Job Preferences */}
@@ -321,19 +339,6 @@ export default function ApplyPage() {
                 </label>
               ))}
             </div>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">Maximum number of people you can cook for</p>
-            <input
-              name="group_size_max"
-              type="number"
-              min={2}
-              max={14}
-              placeholder="e.g. 10"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
-            />
-            <p className="text-xs text-gray-400 mt-1">Platform maximum is 14 people for v0.</p>
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer">
@@ -367,20 +372,14 @@ export default function ApplyPage() {
           </div>
         </section>
 
-        {/* Verification acknowledgement */}
+        {/* Verification */}
         <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-3">Verification Requirements</h2>
-          <p className="text-sm text-gray-700 mb-3">To be listed on CookMatch, you will need to provide:</p>
-          <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside mb-4">
-            <li>Government-issued ID</li>
-            <li>Consent to a background check</li>
-            <li>Food handler certification</li>
-            <li>References (at least 2)</li>
-          </ul>
-          <p className="text-xs text-gray-500">We will contact you via email after submission to guide you through the verification steps. Your raw documents are never stored or displayed publicly.</p>
-          <label className="flex items-center gap-2 mt-4 cursor-pointer">
+          <h2 className="text-lg font-semibold text-orange-900 mb-2">Verification</h2>
+          <p className="text-sm text-gray-700 mb-3">To be listed on CookMatch you will need to provide a government-issued photo ID (driver's license, passport, or state ID). We will contact you after submission to complete this step.</p>
+          <p className="text-xs text-gray-500 mb-4">Your documents are never stored or displayed publicly.</p>
+          <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I agree to the verification process and CookMatch Terms of Service</span>
+            <span className="text-sm text-gray-700">I agree to provide a government-issued ID and accept the CookMatch Terms of Service</span>
           </label>
         </section>
 
