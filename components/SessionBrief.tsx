@@ -94,8 +94,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
     setLoading(true)
     try {
       await onSubmit(data)
-    } catch {
-      setError('Something went wrong. Please try again.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     }
     setLoading(false)
   }
