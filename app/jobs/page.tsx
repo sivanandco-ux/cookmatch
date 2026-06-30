@@ -152,7 +152,10 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
             {job.parking_available ? ' · Parking available' : ''}
           </p>
         </div>
-        <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Open</span>
+        <div className="flex flex-col items-end gap-1">
+          <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Open</span>
+          <span className="text-xs text-gray-400">Posted {new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+        </div>
       </div>
 
       {/* Dietary */}
