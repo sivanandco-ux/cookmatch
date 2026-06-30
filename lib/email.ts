@@ -491,6 +491,64 @@ export async function sendSessionReminder({
   ]).catch(err => console.error('[Email] Session reminder failed:', err))
 }
 
+export async function sendNewJobNotification({
+  cookName,
+  cookEmail,
+  cookId,
+  jobId,
+  jobCategory,
+  occasion,
+  city,
+  numPeople,
+  needsGrocery,
+  needsCleanup,
+}: {
+  cookName: string
+  cookEmail: string
+  cookId: string
+  jobId: string
+  jobCategory: string
+  occasion: string
+  city: string
+  numPeople: number
+  needsGrocery: boolean
+  needsCleanup: boolean
+}) {
+  const jobUrl = `${SITE_URL}/jobs/${jobId}?cook_id=${cookId}`
+  const categoryLabel: Record<string, string> = {
+    family_cooking: 'Family Cooking',
+    small_event: 'Small Event',
+    medium_event: 'Medium Event',
+  }
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `New job posted in ${city} — ${categoryLabel[jobCategory] ?? jobCategory}`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>A new job has been posted on CookMatch that may be a good fit for you.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
+        <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
+        <tr><td><strong>Location</strong></td><td>${city}</td></tr>
+        <tr><td><strong>People</strong></td><td>${numPeople}</td></tr>
+        ${needsGrocery ? '<tr><td><strong>Note</strong></td><td>Grocery pickup needed</td></tr>' : ''}
+        ${needsCleanup ? '<tr><td><strong>Note</strong></td><td>Cleanup needed</td></tr>' : ''}
+      </table>
+      <p>View the full brief and express interest before another cook gets it.</p>
+      <p style="margin-top:24px;">
+        <a href="${jobUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          View Job Brief
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are a verified cook on CookMatch.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error(`[Email] New job notification failed for ${cookEmail}:`, error.message)
+}
+
 export async function sendDormantNotification({
   cookName,
   cookEmail,

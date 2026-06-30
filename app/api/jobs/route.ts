@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { sendNewJobNotification } from '@/lib/email'
 
 function getSupabase() {
   return createClient(
@@ -62,5 +63,27 @@ export async function POST(request: Request) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Notify all active cooks in the background
+  const { data: cooks } = await supabase
+    .from('cooks')
+    .select('id, name, email')
+    .eq('status', 'active')
+
+  for (const cook of cooks || []) {
+    await sendNewJobNotification({
+      cookName: cook.name,
+      cookEmail: cook.email,
+      cookId: cook.id,
+      jobId: data.id,
+      jobCategory: body.job_category,
+      occasion: body.occasion,
+      city: body.city,
+      numPeople: body.num_people,
+      needsGrocery: body.grocery_situation === 'need_grocery_pickup',
+      needsCleanup: body.cleanup_needed ?? false,
+    })
+  }
+
   return NextResponse.json({ success: true, job_id: data.id })
 }
