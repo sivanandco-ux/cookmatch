@@ -4,7 +4,7 @@ import { useState } from 'react'
 import VoiceMemoRecorder from './VoiceMemoRecorder'
 import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/types'
 
-const OCCASIONS = ['Regular Meal', 'Weekend Family Cooking', 'Dinner Party', 'Birthday', 'Festival / Occasion', 'Other']
+const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal', 'Gluten-Free']
 const CITIES = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 
