@@ -20,13 +20,12 @@ export async function POST(request: Request) {
   const ext = audio.name.endsWith('mp4') ? 'mp4' : 'webm'
   const filename = `${randomUUID()}.${ext}`
   const bytes = await audio.arrayBuffer()
-  const buffer = Buffer.from(bytes)
 
   const supabase = getSupabase()
   const { error } = await supabase.storage
     .from('voice-memo')
-    .upload(filename, buffer, {
-      contentType: audio.type || 'audio/webm',
+    .upload(filename, new Uint8Array(bytes), {
+      contentType: ext === 'webm' ? 'audio/webm;codecs=opus' : 'audio/mp4',
       upsert: false,
     })
 
