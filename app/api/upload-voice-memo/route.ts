@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
   const supabase = getSupabase()
   const { error } = await supabase.storage
-    .from('voice-memos')
+    .from('voice-memo')
     .upload(filename, buffer, {
       contentType: audio.type || 'audio/webm',
       upsert: false,
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   }
 
   const { data } = supabase.storage
-    .from('voice-memos')
+    .from('voice-memo')
     .getPublicUrl(filename)
 
   return NextResponse.json({ url: data.publicUrl })
