@@ -75,9 +75,9 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, occasion, requested_date, num_people, city')
+      .select('id, job_category, occasion, requested_date, num_people, city, grocery_situation, cleanup_needed, created_at')
       .eq('status', 'open')
-      .order('requested_date', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(5),
   ])
 
@@ -185,22 +185,40 @@ export default async function CookDashboardPage({
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string }[]).map(job => (
-              <a
-                key={job.id}
-                href={`/jobs/${job.id}?cook_id=${cook_id}`}
-                className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between hover:border-orange-300 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'}
-                    {' · '}{job.occasion}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{job.requested_date} · {job.num_people} people · {job.city}</p>
-                </div>
-                <span className="text-xs text-orange-600 font-medium">View →</span>
-              </a>
-            ))}
+            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; grocery_situation: string; cleanup_needed: boolean; created_at: string }[]).map(job => {
+              const postedAt = new Date(job.created_at)
+              const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+                ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+              const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
+              return (
+                <a
+                  key={job.id}
+                  href={`/jobs/${job.id}?cook_id=${cook_id}`}
+                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-2 hover:border-orange-300 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{categoryLabel} · {job.occasion}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+                      <span className="text-xs text-orange-600 font-medium">View →</span>
+                      <span className="text-xs text-gray-400">Posted {postedLabel}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">📍 {job.city}</span>
+                    {job.grocery_situation === 'need_grocery_pickup' && (
+                      <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2 py-0.5 rounded-full">🛒 Grocery pickup</span>
+                    )}
+                    {job.cleanup_needed && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">🧹 Cleanup</span>
+                    )}
+                  </div>
+                </a>
+              )
+            })}
           </div>
         </section>
       )}
