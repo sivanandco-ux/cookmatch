@@ -133,6 +133,11 @@ export default async function JobBoardPage({
 }
 
 function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookId?: string }) {
+  const postedAt = new Date(job.created_at)
+  const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+    ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  const needsGrocery = job.grocery_situation === 'need_grocery_pickup'
+
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
       {/* Header */}
@@ -142,29 +147,31 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
             {CATEGORY_LABELS[job.job_category] ?? job.job_category} · {job.occasion}
           </p>
           <p className="text-sm text-gray-600 mt-0.5">
-            {formatDate(job.requested_date)}
-            {job.requested_time ? ` at ${job.requested_time}` : ''}
-            {' · '}{job.num_people} people{' · '}{job.expected_duration_hours}+ hrs
-          </p>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {job.city}
-            {job.cleanup_needed ? ' · Cleanup needed' : ''}
-            {job.parking_available ? ' · Parking available' : ''}
+            {formatDate(job.requested_date)} · {job.num_people} people
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Open</span>
-          <span className="text-xs text-gray-400">Posted {new Date(job.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
+          <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full">Open</span>
+          <span className="text-xs text-gray-400">Posted {postedLabel}</span>
         </div>
       </div>
 
-      {/* Dietary */}
-      {job.dietary_restrictions?.length > 0 && (
-        <p className="text-sm text-gray-600">{job.dietary_restrictions.join(', ')}</p>
-      )}
-
-      {/* Grocery */}
-      <p className="text-sm text-gray-500">{GROCERY_LABELS[job.grocery_situation] ?? job.grocery_situation}</p>
+      {/* Key highlights */}
+      <div className="flex flex-wrap gap-2">
+        <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">📍 {job.city}</span>
+        {needsGrocery && (
+          <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2.5 py-1 rounded-full">🛒 Grocery pickup needed</span>
+        )}
+        {job.cleanup_needed && (
+          <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">🧹 Cleanup needed</span>
+        )}
+        {job.parking_available && (
+          <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">🅿️ Parking available</span>
+        )}
+        {job.dietary_restrictions?.length > 0 && (
+          <span className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full">{job.dietary_restrictions.join(', ')}</span>
+        )}
+      </div>
 
       {/* Cook-only: full brief */}
       {isCook && (
