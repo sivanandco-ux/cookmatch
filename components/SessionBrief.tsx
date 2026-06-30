@@ -14,11 +14,6 @@ const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: n
   { value: 'medium_event',   label: 'Medium Event',   range: '11–14 people', max: 14 },
 ]
 
-const GROCERY_OPTIONS: { value: GrocerySituation; label: string }[] = [
-  { value: 'client_has_everything',    label: 'I have all ingredients ready' },
-  { value: 'need_grocery_pickup',      label: 'I need the cook to pick up groceries' },
-  { value: 'cook_brings_ingredients',  label: 'Cook brings their own ingredients' },
-]
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
@@ -84,7 +79,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
       expected_duration_hours: 2,
       num_people: numPeople,
       dietary_restrictions: dietaryRestrictions,
-      grocery_situation: get('grocery_situation') as GrocerySituation,
+      grocery_situation: ((form.elements.namedItem('grocery_pickup') as HTMLInputElement)?.checked ? 'need_grocery_pickup' : 'client_has_everything') as GrocerySituation,
       cleanup_needed: (form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false,
       kitchen_access_time: '',
       city: get('city'),
@@ -238,14 +233,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
         <p className="text-sm font-semibold text-gray-900">Logistics</p>
 
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Groceries <span className="text-red-500">*</span></label>
-          <select name="grocery_situation" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">Select an option</option>
-            {GROCERY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-        </div>
-
-        <div>
           <label className="text-xs text-gray-500 mb-1 block">City <span className="text-red-500">*</span></label>
           <select name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
             <option value="">Select city</option>
@@ -254,6 +241,10 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
         </div>
 
         <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" name="grocery_pickup" className="rounded border-gray-300 text-orange-600" />
+            <span className="text-sm text-gray-700">I need the cook to pick up groceries</span>
+          </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-orange-600" />
             <span className="text-sm text-gray-700">I need the cook to clean up after cooking</span>
