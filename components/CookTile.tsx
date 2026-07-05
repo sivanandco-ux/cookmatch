@@ -40,9 +40,18 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
     per_session: '/session',
   }[cook.price_unit] ?? '/session'
 
+  const isPending = cook.status === 'pending'
+
   return (
     <Link href={`/cooks/${cook.id}`} className="block">
-      <div className="bg-white rounded-xl border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all overflow-hidden h-full flex flex-col">
+      <div className={`bg-white rounded-xl border hover:shadow-md transition-all overflow-hidden h-full flex flex-col ${isPending ? 'border-amber-300 opacity-80' : 'border-gray-200 hover:border-orange-300'}`}>
+
+        {/* Pending banner */}
+        {isPending && (
+          <div className="bg-amber-50 border-b border-amber-200 px-3 py-1.5 text-xs text-amber-800 font-medium text-center">
+            Profile under review — pending approval
+          </div>
+        )}
 
         {/* Hero gradient + overlapping photo */}
         <div className="relative h-24 bg-gradient-to-br from-amber-100 via-orange-100 to-orange-200 flex-shrink-0">
@@ -94,10 +103,14 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           <p className="text-xs text-gray-500">{cook.dietary_specialties.join(' · ')}</p>
 
           {/* Price */}
-          <p className="text-sm font-medium text-gray-900">
-            ${cook.price_min}
-            <span className="text-gray-400 font-normal">{priceLabel}</span>
-          </p>
+          {cook.price_min > 0 ? (
+            <p className="text-sm font-medium text-gray-900">
+              ${cook.price_min}
+              <span className="text-gray-400 font-normal">{priceLabel}</span>
+            </p>
+          ) : (
+            <p className="text-sm text-gray-400">Rate negotiable</p>
+          )}
 
           {/* Verified badges */}
           <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-gray-100">

@@ -5,7 +5,7 @@ import CookTile from '@/components/CookTile'
 import type { CookWithDetails } from '@/lib/types'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi']
-const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian']
 const OCCASIONS = ['Daily Meals / Tiffin', 'Weekend Family Cooking', 'Festival / Occasion', 'Dinner Party']
 
 export default async function CooksPage({
@@ -19,7 +19,7 @@ export default async function CooksPage({
   let query = supabase
     .from('cooks')
     .select('*, cook_verifications(*), cook_scores(*), cook_ratings(*)')
-    .eq('status', 'active')
+    .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
 
   if (filters.cuisine) {
@@ -45,7 +45,7 @@ export default async function CooksPage({
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
-        <p className="text-gray-600">Verified Indian home cooks in Fremont, Newark, Union City &amp; Milpitas</p>
+        <p className="text-gray-600">Approved cooks who visit your home to prepare healthy meals — serving Fremont, Newark, Union City &amp; Milpitas</p>
       </div>
 
       {/* Filters */}

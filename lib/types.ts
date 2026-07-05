@@ -209,10 +209,20 @@ export interface ClientRating {
   created_at: string
 }
 
+export interface CookDish {
+  id: string
+  cook_id: string
+  photo_url: string
+  description: string
+  sort_order: number
+  created_at: string
+}
+
 export interface CookWithDetails extends Cook {
   cook_verifications: CookVerification | null
   cook_scores: CookScore | null
   cook_ratings: CookRating[]
+  cook_dishes: CookDish[]
 }
 
 export interface SessionBriefFormData {

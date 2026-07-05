@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
-const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian']
 const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 const AREAS = ['Fremont', 'Newark', 'Union City', 'Milpitas']
@@ -234,7 +234,7 @@ export default function ApplyPage() {
               maxLength={INTRO_LIMIT}
               value={intro}
               onChange={e => setIntro(e.target.value.slice(0, INTRO_LIMIT))}
-              placeholder="e.g. I grew up in Chennai and learned to cook from my mother. I have been cooking for Bay Area families for 8 years and love making food that tastes like home."
+              placeholder="e.g. I am a cook from East India and have 10 years of cooking experience. I grew up in Kolkata and learned to cook from my mother, and I love making food that tastes like home."
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
             />
             <div className="flex items-center justify-between mt-1.5">
@@ -295,12 +295,14 @@ export default function ApplyPage() {
                 name="hourly_rate"
                 type="number"
                 required
-                min={1}
+                min={30}
+                defaultValue={30}
                 placeholder="e.g. 35"
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
               />
               <span className="text-sm text-gray-500">per hour</span>
             </div>
+            <p className="text-xs text-gray-400 mt-1">Starts at the platform minimum of $30/hr — raise it if you'd like</p>
           </div>
 
           <div>

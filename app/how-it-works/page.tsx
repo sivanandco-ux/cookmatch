@@ -3,7 +3,7 @@ export default function HowItWorksPage() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
       <p className="text-gray-600 mb-10">
-        Sivan Spices Home Cooks connects you with verified Indian home cooks who come to your home and cook fresh, healthy meals for you. Currently launched in select cities in Northern California - Fremont, Newark, Union City, and Milpitas. We will keep you posted as we roll out to new cities.
+        Sivan Spices Home Cooks connects you with cooks who visit your home to prepare healthy meals. Currently serving Fremont, Newark, Union City, and Milpitas in Northern California. We will keep you posted as we expand to new cities.
       </p>
 
       <div className="flex flex-col gap-10">
@@ -15,7 +15,7 @@ export default function HowItWorksPage() {
             <div>
               <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you verified, background-checked Indian home cooks in your area</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you approved cooks in your area who are ready to cook at your home</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Let you see their cuisine specialties, ratings, and availability before booking</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Connect you directly with the cook — you get their phone, email, and WhatsApp</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you a feedback link after your session to rate your experience</li>
@@ -40,7 +40,7 @@ export default function HowItWorksPage() {
               <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
               <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>List your profile, specialties, and availability so clients can find you</li>
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Verify your identity and background before activating your profile</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Review your application and activate your profile manually</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you weekly availability reminders so your profile stays active</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Monitor your ratings and provide coaching if feedback drops</li>
               </ul>

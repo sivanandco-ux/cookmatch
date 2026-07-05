@@ -5,7 +5,7 @@ import VoiceMemoRecorder from './VoiceMemoRecorder'
 import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
-const DIETARY = ['Pure Vegetarian', 'Jain / No Onion No Garlic', 'Eggetarian', 'Non-Vegetarian', 'Halal', 'Gluten-Free']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian']
 const CITIES = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 
 const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: number }[] = [
@@ -25,11 +25,12 @@ interface Props {
   availableDates?: string[]
   cookId?: string
   cookName?: string
+  cookDietarySpecialties?: string[]
   onSubmit: (data: SessionBriefFormData) => Promise<void>
   submitLabel?: string
 }
 
-export default function SessionBrief({ mode, availableDates = [], cookName, onSubmit, submitLabel }: Props) {
+export default function SessionBrief({ mode, availableDates = [], cookName, cookDietarySpecialties, onSubmit, submitLabel }: Props) {
   const [jobCategory, setJobCategory] = useState<JobCategory | ''>('')
   const [selectedDate, setSelectedDate] = useState('')
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([])
@@ -39,6 +40,9 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
   const [error, setError] = useState('')
 
   const categoryConfig = JOB_CATEGORIES.find(c => c.value === jobCategory)
+  const availableDietary = cookDietarySpecialties && cookDietarySpecialties.length > 0
+    ? DIETARY.filter(d => cookDietarySpecialties.includes(d))
+    : DIETARY
 
   function toggleDietary(item: string) {
     setDietaryRestrictions(prev =>
@@ -212,8 +216,13 @@ export default function SessionBrief({ mode, availableDates = [], cookName, onSu
 
         <div>
           <label className="text-xs text-gray-500 mb-2 block">Dietary restrictions (select all that apply)</label>
+          {cookDietarySpecialties && cookDietarySpecialties.length > 0 && (
+            <p className="text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mb-2">
+              This cook specialises in {cookDietarySpecialties.join(' and ')}. Only matching options are shown.
+            </p>
+          )}
           <div className="flex flex-wrap gap-2">
-            {DIETARY.map(item => (
+            {availableDietary.map(item => (
               <label key={item} className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
