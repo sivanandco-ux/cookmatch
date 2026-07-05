@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import DashboardActions from './DashboardActions'
+import JobInterestActions from './JobInterestActions'
+import CookProfileUploads from './CookProfileUploads'
+import LogoutButton from './LogoutButton'
 
 interface DashboardBooking {
   id: string
@@ -66,7 +69,9 @@ export default async function CookDashboardPage({
 
   if (!cook || cook.status === 'dormant') notFound()
 
-  const [{ data: bookings }, { data: openJobs }] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+
+  const [{ data: bookings }, { data: openJobs }, { data: myInterests }, { data: idDocument }, { data: dishes }] = await Promise.all([
     supabase
       .from('bookings')
       .select('*')
@@ -75,13 +80,51 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, occasion, requested_date, num_people, city, grocery_situation, cleanup_needed, created_at')
-      .eq('status', 'open')
-      .order('created_at', { ascending: false })
-      .limit(5),
+      .select('id, job_category, occasion, requested_date, num_people, city, grocery_situation, cleanup_needed, created_at, status')
+      .in('status', ['open', 'taken'])
+      .gte('requested_date', today)
+      .order('requested_date', { ascending: true })
+      .limit(8),
+    supabase
+      .from('job_interests')
+      .select('id, cook_confirmed, client_confirmed, created_at, job_posts(id, job_category, occasion, requested_date, num_people, city, client_name, client_phone, client_email)')
+      .eq('cook_id', cook_id)
+      .eq('status', 'pending'),
+    supabase
+      .from('cook_id_documents')
+      .select('cook_id')
+      .eq('cook_id', cook_id)
+      .maybeSingle(),
+    supabase
+      .from('cook_dishes')
+      .select('*')
+      .eq('cook_id', cook_id)
+      .order('sort_order', { ascending: true }),
   ])
 
   const allBookings = (bookings || []) as DashboardBooking[]
+
+  interface MyInterest {
+    id: string
+    cook_confirmed: boolean
+    client_confirmed: boolean
+    created_at: string
+    job_posts: {
+      id: string
+      job_category: string
+      occasion: string
+      requested_date: string
+      num_people: number
+      city: string
+      client_name: string
+      client_phone: string
+      client_email: string
+    } | null
+  }
+
+  const activeInterests = ((myInterests || []) as unknown as MyInterest[]).filter(
+    i => i.job_posts && i.job_posts.requested_date >= today
+  )
 
   // Batch-load cancellation counts for all client emails across pending + accepted bookings
   const clientEmails = [...new Set(
@@ -108,10 +151,15 @@ export default async function CookDashboardPage({
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Your Dashboard</h1>
-        <p className="text-gray-500 text-sm mt-1">Hi {cook.name} — review session briefs and manage your bookings here.</p>
+      <div className="flex items-start justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Your Dashboard</h1>
+          <p className="text-gray-500 text-sm mt-1">Hi {cook.name} — review session briefs and manage your bookings here.</p>
+        </div>
+        <LogoutButton />
       </div>
+
+      <CookProfileUploads cookId={cook_id} idUploaded={!!idDocument} initialDishes={dishes || []} />
 
       {/* Pending — needs action */}
       <section className="mb-10">
@@ -177,34 +225,76 @@ export default async function CookDashboardPage({
         </section>
       )}
 
+      {/* Jobs the cook has applied for */}
+      {activeInterests.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Job Applications</h2>
+          <div className="flex flex-col gap-4">
+            {activeInterests.map(interest => {
+              const job = interest.job_posts!
+              const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+              const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
+              return (
+                <div key={interest.id} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="font-semibold text-gray-900">{categoryLabel}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people · {job.city}</p>
+                    </div>
+                    <span className="text-xs bg-orange-100 text-orange-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Applied</span>
+                  </div>
+
+                  {/* Client contact */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-xs text-blue-700 font-medium mb-2">Client contact</p>
+                    <p className="text-sm font-medium text-blue-900">{job.client_name}</p>
+                    <div className="flex flex-col gap-1 mt-1">
+                      <a href={`tel:${job.client_phone}`} className="text-sm text-blue-800 hover:underline">📞 {job.client_phone}</a>
+                      <a href={`mailto:${job.client_email}`} className="text-sm text-blue-800 hover:underline">✉️ {job.client_email}</a>
+                    </div>
+                  </div>
+
+                  <JobInterestActions
+                    jobId={job.id}
+                    interestId={interest.id}
+                    cookId={cook_id}
+                    cookConfirmed={interest.cook_confirmed}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Available job posts */}
       {openJobs && openJobs.length > 0 && (
         <section className="mt-10 pt-8 border-t border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Jobs on the Board</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Community Job Board</h2>
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; grocery_situation: string; cleanup_needed: boolean; created_at: string }[]).map(job => {
-              const postedAt = new Date(job.created_at)
-              const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-                ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
+              const isTaken = job.status === 'taken'
               return (
                 <a
                   key={job.id}
                   href={`/jobs/${job.id}?cook_id=${cook_id}`}
-                  className="bg-white border border-gray-200 rounded-xl p-4 flex flex-col gap-2 hover:border-orange-300 transition-colors"
+                  className={`border rounded-xl p-4 flex flex-col gap-2 transition-colors ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200 hover:border-orange-300'}`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{categoryLabel} · {job.occasion}</p>
+                      <p className={`text-sm font-medium ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>{categoryLabel}</p>
                       <p className="text-xs text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people</p>
                     </div>
-                    <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-                      <span className="text-xs text-orange-600 font-medium">View →</span>
-                      <span className="text-xs text-gray-400">Posted {postedLabel}</span>
+                    <div className="flex-shrink-0">
+                      {isTaken
+                        ? <span className="text-xs bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded-full">Cook assigned</span>
+                        : <span className="text-xs text-orange-600 font-medium">View →</span>
+                      }
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5">

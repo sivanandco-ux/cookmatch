@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { verifyCookOwnership } from '@/lib/auth/verifyCookOwnership'
 
 function getSupabase() {
   return createClient(
@@ -17,16 +18,23 @@ function to(email: string) {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
+  const { cook_id } = await request.json()
+
+  if (!(await verifyCookOwnership(cook_id))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const supabase = getSupabase()
 
   const { data: booking } = await supabase
     .from('bookings')
     .select('*, cooks(name)')
     .eq('id', id)
+    .eq('cook_id', cook_id)
     .eq('status', 'pending')
     .single()
 

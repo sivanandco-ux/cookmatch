@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { verifyCookOwnership } from '@/lib/auth/verifyCookOwnership'
 
 function getSupabase() {
   return createClient(
@@ -10,6 +11,11 @@ function getSupabase() {
 
 export async function POST(request: Request) {
   const { cook_id, dates } = await request.json()
+
+  if (!(await verifyCookOwnership(cook_id))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const supabase = getSupabase()
   const today = new Date().toISOString().split('T')[0]
 
