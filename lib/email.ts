@@ -50,9 +50,9 @@ export async function sendCookNotification({
         ${notes ? `<tr><td><strong>Notes</strong></td><td>${notes}</td></tr>` : ''}
       </table>
       <p>Reach out to ${clientName} at <strong>${clientPhone}</strong> to confirm.</p>
-      <h3 style="margin-top:24px;">Your SivanSpices gift 🎁</h3>
+      <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
       <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off your first order.</p>
-      <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop SivanSpices →</a></p>
+      <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
       <p>— CookMatch Team</p>
     `,
   })
@@ -95,9 +95,9 @@ export async function sendClientConfirmation({
         <li>Email: ${cookEmail}</li>
         ${cookWhatsapp ? `<li>WhatsApp: ${cookWhatsapp}</li>` : ''}
       </ul>
-      <h3 style="margin-top:24px;">Your SivanSpices gift 🎁</h3>
+      <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
       <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off your first order.</p>
-      <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop SivanSpices →</a></p>
+      <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
       <p>— CookMatch Team</p>
     `,
   })
@@ -362,9 +362,9 @@ export async function sendSessionConfirmedToBoth({
           <tr><td><strong>Date</strong></td><td>${date}</td></tr>
         </table>
         <p>Please coordinate directly with ${cookName} for any final details.</p>
-        <h3 style="margin-top:24px;">Your SivanSpices gift 🎁</h3>
-        <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off at SivanSpices.com</p>
-        <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop SivanSpices →</a></p>
+        <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
+        <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off at Sivan Spices.com</p>
+        <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
         <p>— CookMatch Team</p>
       `,
     }),
@@ -390,6 +390,9 @@ export async function sendCookInterestedToClient({
   clientName,
   clientEmail,
   cookName,
+  cookPhone,
+  cookEmail,
+  cookWhatsapp,
   jobPostId,
   interestId,
   jobCategory,
@@ -399,6 +402,9 @@ export async function sendCookInterestedToClient({
   clientName: string
   clientEmail: string
   cookName: string
+  cookPhone: string
+  cookEmail: string
+  cookWhatsapp: string | null
   jobPostId: string
   interestId: string
   jobCategory: string
@@ -417,21 +423,30 @@ export async function sendCookInterestedToClient({
     subject: `${cookName} wants to cook for you`,
     html: `
       <p>Hi ${clientName},</p>
-      <p><strong>${cookName}</strong> has reviewed your job post and wants to cook for you.</p>
+      <p><strong>${cookName}</strong> has seen your job post and wants to cook for you on <strong>${date}</strong>.</p>
       <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
-        <tr><td><strong>Cook</strong></td><td>${cookName}</td></tr>
         <tr><td><strong>Job type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
         <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
         <tr><td><strong>Date</strong></td><td>${date}</td></tr>
       </table>
-      <p>Review their profile and confirm to complete the booking. Contact details are shared only after you confirm.</p>
-      <p style="margin-top:24px;">
+
+      <h3 style="margin-top:24px;">Step 1 — Contact ${cookName} to discuss details</h3>
+      <p>Before you confirm, reach out to ${cookName} directly to agree on the arrival time, menu, and any other details.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:12px 0;">
+        <tr><td><strong>Phone</strong></td><td>${cookPhone}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${cookEmail}</td></tr>
+        ${cookWhatsapp ? `<tr><td><strong>WhatsApp</strong></td><td>${cookWhatsapp}</td></tr>` : ''}
+      </table>
+
+      <h3 style="margin-top:24px;">Step 2 — Confirm once you are ready</h3>
+      <p>Once you have spoken with ${cookName} and everything looks good, confirm the booking below to lock it in.</p>
+      <p style="margin-top:16px;">
         <a href="${confirmUrl}"
            style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
-          Review &amp; Confirm
+          Confirm Booking
         </a>
       </p>
-      <p style="color:#9ca3af;font-size:13px;">If this cook is not a good fit, you can decline and wait for other cooks to express interest.</p>
+      <p style="color:#9ca3af;font-size:13px;">If this cook is not a good fit after your conversation, simply ignore this email and wait — other cooks may express interest too.</p>
       <p>— CookMatch Team</p>
     `,
   })
@@ -491,6 +506,119 @@ export async function sendSessionReminder({
   ]).catch(err => console.error('[Email] Session reminder failed:', err))
 }
 
+export async function sendWelcomeEmail({
+  cookName,
+  cookEmail,
+  cookId,
+}: {
+  cookName: string
+  cookEmail: string
+  cookId: string
+}) {
+  const dashboardUrl = `${SITE_URL}/dashboard/${cookId}`
+  const jobBoardUrl = `${SITE_URL}/jobs?cook_id=${cookId}`
+  const availabilityUrl = `${SITE_URL}/availability/${cookId}`
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `Welcome to CookMatch — you are approved!`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>Great news — your CookMatch application has been approved. You are now an active cook on our platform.</p>
+
+      <h3 style="margin-top:24px;">Your dashboard</h3>
+      <p>This is your home base. You can see session briefs from clients, respond to job postings, and manage your bookings here. <strong>Save this link</strong> — you will use it every time you log in.</p>
+      <p style="margin-top:16px;">
+        <a href="${dashboardUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Go to My Dashboard
+        </a>
+      </p>
+
+      <h3 style="margin-top:32px;">What to do next</h3>
+      <ol style="padding-left:20px;line-height:1.8;">
+        <li><a href="${availabilityUrl}" style="color:#ea580c;">Update your availability</a> so clients can see when you are free</li>
+        <li><a href="${jobBoardUrl}" style="color:#ea580c;">Check the job board</a> for clients already looking for a cook</li>
+      </ol>
+
+      <p style="margin-top:24px;color:#6b7280;font-size:13px;">
+        Your dashboard link: <a href="${dashboardUrl}" style="color:#ea580c;">${dashboardUrl}</a>
+      </p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Welcome email failed:', error.message)
+}
+
+export async function sendCookInterestNotification({
+  cookName,
+  cookEmail,
+  cookId,
+  clientName,
+  clientPhone,
+  clientEmail,
+  jobId,
+  jobCategory,
+  occasion,
+  date,
+  numPeople,
+  city,
+}: {
+  cookName: string
+  cookEmail: string
+  cookId: string
+  clientName: string
+  clientPhone: string
+  clientEmail: string
+  jobId: string
+  jobCategory: string
+  occasion: string
+  date: string
+  numPeople: number
+  city: string
+}) {
+  const dashboardUrl = `${SITE_URL}/dashboard/${cookId}`
+  const categoryLabel: Record<string, string> = {
+    family_cooking: 'Family Cooking',
+    small_event: 'Small Event',
+    medium_event: 'Medium Event',
+  }
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(cookEmail),
+    subject: `You expressed interest — contact the client and confirm when ready`,
+    html: `
+      <p>Hi ${cookName},</p>
+      <p>You expressed interest in a job in <strong>${city}</strong>. Here are the client's contact details so you can reach out to discuss the details.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Job type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
+        <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
+        <tr><td><strong>Date</strong></td><td>${date}</td></tr>
+        <tr><td><strong>People</strong></td><td>${numPeople}</td></tr>
+      </table>
+
+      <h3 style="margin-top:24px;">Step 1 — Contact the client</h3>
+      <table cellpadding="6" style="border-collapse:collapse;margin:12px 0;">
+        <tr><td><strong>Name</strong></td><td>${clientName}</td></tr>
+        <tr><td><strong>Phone</strong></td><td>${clientPhone}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${clientEmail}</td></tr>
+      </table>
+
+      <h3 style="margin-top:24px;">Step 2 — Confirm from your dashboard</h3>
+      <p>Once you have spoken with the client and are ready to commit, confirm your availability on your dashboard.</p>
+      <p style="margin-top:16px;">
+        <a href="${dashboardUrl}"
+           style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          Go to My Dashboard
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">The booking only locks in once both you and the client have confirmed.</p>
+      <p>— CookMatch Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Cook interest notification failed:', error.message)
+}
+
 export async function sendNewJobNotification({
   cookName,
   cookEmail,
@@ -515,6 +643,7 @@ export async function sendNewJobNotification({
   needsCleanup: boolean
 }) {
   const jobUrl = `${SITE_URL}/jobs/${jobId}?cook_id=${cookId}`
+  const dashboardUrl = `${SITE_URL}/dashboard/${cookId}`
   const categoryLabel: Record<string, string> = {
     family_cooking: 'Family Cooking',
     small_event: 'Small Event',
@@ -542,11 +671,47 @@ export async function sendNewJobNotification({
           View Job Brief
         </a>
       </p>
+      <p style="margin-top:12px;">
+        <a href="${dashboardUrl}" style="color:#ea580c;">Go to my dashboard →</a>
+      </p>
       <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are a verified cook on CookMatch.</p>
       <p>— CookMatch Team</p>
     `,
   })
   if (error) console.error(`[Email] New job notification failed for ${cookEmail}:`, error.message)
+}
+
+export async function sendJobReport({
+  jobId,
+  cookId,
+  cookName,
+  reason,
+  details,
+}: {
+  jobId: string
+  cookId: string
+  cookName: string
+  reason: string
+  details: string
+}) {
+  const jobUrl = `${SITE_URL}/jobs/${jobId}?cook_id=${cookId}`
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: 'sivanandco1904@gmail.com',
+    subject: `Job reported by cook — ${reason}`,
+    html: `
+      <p>A cook has flagged a job post for review.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Job ID</strong></td><td>${jobId}</td></tr>
+        <tr><td><strong>Reported by</strong></td><td>${cookName} (${cookId})</td></tr>
+        <tr><td><strong>Reason</strong></td><td>${reason}</td></tr>
+        ${details ? `<tr><td><strong>Details</strong></td><td>${details}</td></tr>` : ''}
+      </table>
+      <p><a href="${jobUrl}" style="color:#ea580c;">View job post →</a></p>
+      <p>— CookMatch System</p>
+    `,
+  })
+  if (error) console.error('[Email] Job report failed:', error.message)
 }
 
 export async function sendDormantNotification({

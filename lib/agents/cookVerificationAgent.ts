@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { scoreProfile } from '@/lib/agents/profileScoringAgent'
-import { sendCheckinEmail } from '@/lib/email'
+import { sendCheckinEmail, sendWelcomeEmail } from '@/lib/email'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
@@ -146,6 +146,11 @@ Cook:
         else {
           console.log(`[Agent 1] APPROVED — ${name} is now active`)
           scoreProfile(cook_id).catch(err => console.error('[Agent 5] Error from Agent 1:', err))
+          sendWelcomeEmail({
+            cookName: name,
+            cookEmail: email,
+            cookId: cook_id,
+          }).catch(err => console.error('[Agent 1] Welcome email failed:', err))
           sendCheckinEmail({
             cookName: name,
             cookEmail: email,
