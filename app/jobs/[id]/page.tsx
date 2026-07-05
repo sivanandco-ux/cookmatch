@@ -1,8 +1,10 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import JobInterestButton from './JobInterestButton'
+import ReportButton from './ReportButton'
+import { createClient as createSessionClient } from '@/lib/supabase/server'
 
 function getSupabase() {
   return createClient(
@@ -39,6 +41,28 @@ export default async function JobDetailPage({
   const { cook_id } = await searchParams
   const supabase = getSupabase()
 
+  // A cook_id in the URL claims to identify a specific cook — verify the
+  // logged-in session actually owns that cook before granting the cook view.
+  if (cook_id) {
+    const sessionSupabase = await createSessionClient()
+    const { data: { user } } = await sessionSupabase.auth.getUser()
+    const currentPath = `/jobs/${id}?cook_id=${cook_id}`
+
+    if (!user) {
+      redirect(`/login?error=not_authorized&redirectTo=${encodeURIComponent(currentPath)}`)
+    }
+
+    const { data: ownedCook } = await supabase
+      .from('cooks')
+      .select('user_id')
+      .eq('id', cook_id)
+      .maybeSingle()
+
+    if (!ownedCook || ownedCook.user_id !== user.id) {
+      redirect(`/login?error=not_authorized&redirectTo=${encodeURIComponent(currentPath)}`)
+    }
+  }
+
   const [{ data: job }, cookResult] = await Promise.all([
     supabase.from('job_posts').select('*').eq('id', id).single(),
     cook_id
@@ -51,16 +75,16 @@ export default async function JobDetailPage({
   const cook = cookResult.data
   const isCook = !!(cook && cook.status === 'active')
 
-  // Check if cook already expressed interest
-  let alreadyInterested = false
+  // Check if cook already expressed interest and get full status
+  let existingInterest: { id: string; cook_confirmed: boolean; client_confirmed: boolean } | null = null
   if (isCook && cook_id) {
     const { data: existing } = await supabase
       .from('job_interests')
-      .select('id')
+      .select('id, cook_confirmed, client_confirmed')
       .eq('job_post_id', id)
       .eq('cook_id', cook_id)
       .single()
-    alreadyInterested = !!existing
+    existingInterest = existing ?? null
   }
 
   return (
@@ -74,7 +98,7 @@ export default async function JobDetailPage({
           <h1 className="text-2xl font-bold text-gray-900">
             {CATEGORY_LABELS[job.job_category] ?? job.job_category}
           </h1>
-          <p className="text-gray-500 mt-1">{job.occasion} · {job.city}</p>
+          <p className="text-gray-500 mt-1">{job.city}</p>
         </div>
         <span className={`text-sm font-medium px-3 py-1 rounded-full ${
           job.status === 'open' ? 'bg-green-100 text-green-700' :
@@ -175,9 +199,14 @@ export default async function JobDetailPage({
           <JobInterestButton
             jobId={id}
             cookId={cook_id}
-            alreadyInterested={alreadyInterested}
+            existingInterest={existingInterest}
           />
         </div>
+      )}
+
+      {/* Report button — cook only */}
+      {isCook && cook_id && (
+        <ReportButton jobId={id} cookId={cook_id} />
       )}
     </div>
   )

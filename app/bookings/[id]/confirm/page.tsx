@@ -73,7 +73,7 @@ export default async function ConfirmBookingPage({
   return (
     <div className="max-w-lg mx-auto px-6 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">{cook?.name} accepted your brief</h1>
-      <p className="text-gray-500 text-sm mb-8">Review the session details and confirm to complete the booking.</p>
+      <p className="text-gray-500 text-sm mb-8">Contact {cook?.name} to discuss the session, then confirm once you are happy to proceed.</p>
 
       {/* Session summary */}
       <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
@@ -112,12 +112,51 @@ export default async function ConfirmBookingPage({
         </div>
       </div>
 
-      {/* Commitment statement */}
+      {/* Step 1 — Contact the cook */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-4">
+        <p className="text-sm font-semibold text-blue-900 mb-3">Step 1 — Contact {cook?.name}</p>
+        <div className="flex flex-col gap-2">
+          {cook?.phone && (
+            <a
+              href={`tel:${cook.phone}`}
+              className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium"
+            >
+              <span>Call / SMS</span>
+              <span className="font-normal text-blue-600">{cook.phone}</span>
+            </a>
+          )}
+          {cook?.whatsapp && (
+            <a
+              href={`https://wa.me/${cook.whatsapp.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium"
+            >
+              <span>WhatsApp</span>
+              <span className="font-normal text-blue-600">{cook.whatsapp}</span>
+            </a>
+          )}
+          {cook?.email && (
+            <a
+              href={`mailto:${cook.email}`}
+              className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium"
+            >
+              <span>Email</span>
+              <span className="font-normal text-blue-600">{cook.email}</span>
+            </a>
+          )}
+        </div>
+        <p className="text-xs text-blue-600 mt-3">
+          Discuss the menu, timing, and any details before committing. {cook?.name} is expecting your message.
+        </p>
+      </div>
+
+      {/* Step 2 — Confirm */}
       <div className="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6">
-        <p className="text-sm font-semibold text-orange-900 mb-2">Before you confirm</p>
+        <p className="text-sm font-semibold text-orange-900 mb-2">Step 2 — Confirm once you have spoken</p>
         <p className="text-sm text-orange-800">
-          {cook?.name} is reserving time specifically for you on {formatDate(booking.preferred_date)}.
-          Last-minute cancellations directly affect their income. Please only confirm if you are fully committed to this session.
+          Once you are happy with the session plan, confirm below.
+          {cook?.name} is reserving time specifically for you — please only confirm if you are fully committed.
         </p>
         <p className="text-xs text-orange-700 mt-2">
           Free cancellation is available up to 48 hours before the session. Cancellations after that will be logged on your profile.

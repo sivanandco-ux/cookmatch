@@ -27,10 +27,15 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
+function getInitials(name: string): string {
+  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('.')
+}
+
 interface JobTile {
   id: string
   job_category: string
   occasion: string
+  client_name?: string
   requested_date: string
   requested_time: string | null
   expected_duration_hours: number
@@ -78,12 +83,15 @@ export default async function JobBoardPage({
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url'
+    : 'id, job_category, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
+
+  const today = new Date().toISOString().split('T')[0]
 
   const { data: jobs } = await supabase
     .from('job_posts')
     .select(selectFields)
-    .eq('status', 'open')
+    .in('status', ['open', 'taken'])
+    .gte('requested_date', today)
     .order('requested_date', { ascending: true })
 
   const jobList = (jobs || []) as unknown as JobTile[]
@@ -137,21 +145,26 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
   const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
     ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
   const needsGrocery = job.grocery_situation === 'need_grocery_pickup'
+  const isTaken = job.status === 'taken'
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3">
+    <div className={`border rounded-xl p-5 flex flex-col gap-3 ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200'}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-semibold text-gray-900">
-            {CATEGORY_LABELS[job.job_category] ?? job.job_category} · {job.occasion}
+          <p className={`font-semibold ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
+            {CATEGORY_LABELS[job.job_category] ?? job.job_category}
           </p>
-          <p className="text-sm text-gray-600 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5">
             {formatDate(job.requested_date)} · {job.num_people} people
+            {job.client_name && <span className="ml-1">· posted by {getInitials(job.client_name)}</span>}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full">Open</span>
+          {isTaken
+            ? <span className="text-xs bg-blue-100 text-blue-700 font-medium px-2 py-1 rounded-full">Cook assigned</span>
+            : <span className="text-xs bg-green-100 text-green-700 font-medium px-2 py-1 rounded-full">Open</span>
+          }
           <span className="text-xs text-gray-400">Posted {postedLabel}</span>
         </div>
       </div>
@@ -208,7 +221,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
         >
           View details →
         </Link>
-        {isCook && cookId && (
+        {isCook && cookId && !isTaken && (
           <Link
             href={`/jobs/${job.id}?cook_id=${cookId}#interest`}
             className="ml-auto text-sm bg-orange-600 text-white px-4 py-1.5 rounded-lg hover:bg-orange-700"
