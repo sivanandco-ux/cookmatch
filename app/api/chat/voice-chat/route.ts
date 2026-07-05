@@ -5,11 +5,13 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const today = () => new Date().toISOString().split('T')[0]
 
-const LANGUAGE_NOTE = `The user is speaking in {{LANGUAGE}}. Conduct this entire conversation in {{LANGUAGE}} — every reply you speak (including your very first greeting) must be written in {{LANGUAGE}}, not English, unless {{LANGUAGE}} is English. Regardless of the conversation language, when you call the submit tool: city, occasion, dietary_restrictions, grocery_situation, and cuisine_types must always be the exact canonical English values listed below, never translated or transliterated. Free-text fields (intro / text_description) must be translated into clear, natural English before submitting — never submit non-English text in those fields.`
+const LANGUAGE_NOTE = `CRITICAL LANGUAGE RULE: Speak ONLY in {{LANGUAGE}}. Every single reply you generate — your opening greeting, every follow-up question, everything — must be written entirely in {{LANGUAGE}}. Do not use English at all, even partially, unless {{LANGUAGE}} is English. This rule overrides your default behavior; do not slip back into English no matter how many turns the conversation runs.
 
-const CLIENT_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+The only exception: when you call the submit tool, city, occasion, dietary_restrictions, grocery_situation, and cuisine_types must always be the exact canonical English values listed below, never translated or transliterated. Free-text fields (intro / text_description) must be translated into clear, natural English before submitting — never submit non-English text in those fields.`
 
-${LANGUAGE_NOTE}
+const CLIENT_SYSTEM = `${LANGUAGE_NOTE}
+
+You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
 
 Help the client post a cooking job. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
 
@@ -27,11 +29,13 @@ Collect ALL of these fields before submitting:
 - cleanup_needed: true or false
 - text_description: brief summary
 
-When you have ALL fields, give a one-sentence confirmation of what you're posting, then call submit_job_post.`
+When you have ALL fields, give a one-sentence confirmation of what you're posting, then call submit_job_post.
 
-const COOK_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+Reminder: reply only in {{LANGUAGE}}, never English (unless {{LANGUAGE}} is English).`
 
-${LANGUAGE_NOTE}
+const COOK_SYSTEM = `${LANGUAGE_NOTE}
+
+You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
 
 Help a cook create their profile. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
 
@@ -46,7 +50,9 @@ Collect ALL of these fields before submitting:
 - hourly_rate: their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
 - intro: 2-3 sentence bio about their cooking background and style
 
-When you have ALL fields, give a one-sentence confirmation, then call submit_cook_profile.`
+When you have ALL fields, give a one-sentence confirmation, then call submit_cook_profile.
+
+Reminder: reply only in {{LANGUAGE}}, never English (unless {{LANGUAGE}} is English).`
 
 const CLIENT_TOOL: Anthropic.Tool = {
   name: 'submit_job_post',
@@ -101,8 +107,11 @@ export async function POST(request: Request) {
   const tool = type === 'client' ? CLIENT_TOOL : COOK_TOOL
 
   const convo = (!messages || messages.length === 0)
-    ? [{ role: 'user' as const, content: 'Begin the conversation now with your opening greeting and first question.' }]
-    : messages
+    ? [{ role: 'user' as const, content: `Begin the conversation now with your opening greeting and first question. Written entirely in ${lang} — do not use English${lang === 'English' ? '' : ' at all'}.` }]
+    : [
+        ...messages.slice(0, -1),
+        { ...messages[messages.length - 1], content: `${messages[messages.length - 1].content}\n\n(Reminder: reply only in ${lang}, never English${lang === 'English' ? '' : ', even if this transcript looks garbled'}.)` },
+      ]
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
