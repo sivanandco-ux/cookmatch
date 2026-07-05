@@ -11,7 +11,7 @@ function getSupabase() {
 
 export async function POST(request: Request) {
   try {
-    const { type, data } = await request.json()
+    const { type, data, language } = await request.json()
     const supabase = getSupabase()
 
     if (type === 'cook') {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
           cuisine_types: data.cuisine_types || [],
           dietary_specialties: data.dietary_specialties || [],
           occasion_types: ['Daily Meals / Tiffin', 'Weekend Family Cooking', 'Festival / Occasion', 'Dinner Party'],
-          languages: ['English'],
+          languages: [language || 'English'],
           price_min: Math.max(Number(data.hourly_rate) || 0, 30),
           price_max: Math.max(Number(data.hourly_rate) || 0, 30),
           price_unit: 'hourly',

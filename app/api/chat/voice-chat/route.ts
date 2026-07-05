@@ -5,7 +5,11 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const today = () => new Date().toISOString().split('T')[0]
 
+const LANGUAGE_NOTE = `The user is speaking in {{LANGUAGE}}. Conduct this entire conversation in {{LANGUAGE}} — every reply you speak (including your very first greeting) must be written in {{LANGUAGE}}, not English, unless {{LANGUAGE}} is English. Regardless of the conversation language, when you call the submit tool: city, occasion, dietary_restrictions, grocery_situation, and cuisine_types must always be the exact canonical English values listed below, never translated or transliterated. Free-text fields (intro / text_description) must be translated into clear, natural English before submitting — never submit non-English text in those fields.`
+
 const CLIENT_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+
+${LANGUAGE_NOTE}
 
 Help the client post a cooking job. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
 
@@ -26,6 +30,8 @@ Collect ALL of these fields before submitting:
 When you have ALL fields, give a one-sentence confirmation of what you're posting, then call submit_job_post.`
 
 const COOK_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+
+${LANGUAGE_NOTE}
 
 Help a cook create their profile. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
 
@@ -86,24 +92,24 @@ const COOK_TOOL: Anthropic.Tool = {
 }
 
 export async function POST(request: Request) {
-  const { type, messages } = await request.json()
+  const { type, messages, language } = await request.json()
+  const lang = language || 'English'
 
-  if (!messages || messages.length === 0) {
-    const greeting = type === 'client'
-      ? "Hi! I'm here to help you post a cooking job. What's the occasion — everyday meals or something special like a festival?"
-      : "Hi! I'm here to help set up your cook profile on SivanSpices. Let's start — what's your name and which city are you based in?"
-    return NextResponse.json({ response: greeting, done: false })
-  }
-
-  const system = (type === 'client' ? CLIENT_SYSTEM : COOK_SYSTEM).replace('{{TODAY}}', today())
+  const system = (type === 'client' ? CLIENT_SYSTEM : COOK_SYSTEM)
+    .replace('{{TODAY}}', today())
+    .replace(/{{LANGUAGE}}/g, lang)
   const tool = type === 'client' ? CLIENT_TOOL : COOK_TOOL
+
+  const convo = (!messages || messages.length === 0)
+    ? [{ role: 'user' as const, content: 'Begin the conversation now with your opening greeting and first question.' }]
+    : messages
 
   const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 300,
     system,
     tools: [tool],
-    messages,
+    messages: convo,
   })
 
   if (response.stop_reason === 'tool_use') {
@@ -118,7 +124,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       response: confirmText,
       done: true,
-      submitData: { type, data: toolBlock.input },
+      submitData: { type, data: toolBlock.input, language: lang },
     })
   }
 

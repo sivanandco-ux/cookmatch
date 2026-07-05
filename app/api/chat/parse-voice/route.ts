@@ -3,29 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-export async function POST(request: Request) {
-  const { transcript } = await request.json()
-  if (!transcript || typeof transcript !== 'string' || transcript.trim().length < 5) {
-    return NextResponse.json({ error: 'No transcript provided' }, { status: 400 })
-  }
-
-  const today = new Date().toISOString().split('T')[0]
-
-  const response = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 600,
-    messages: [{
-      role: 'user',
-      content: `Extract home cooking job details from this voice description. Return ONLY valid JSON — no prose, no markdown fences. Omit any field you cannot confidently determine.
-
-Today's date: ${today}
-Available cities: Fremont, Newark, Union City, Milpitas
-Dietary options: "Vegetarian", "Non-Vegetarian"
-Occasion values: "Regular Meal", "Festival / Occasion"
-Grocery values: "client_has_everything", "need_grocery_pickup", "cook_brings_ingredients"
-
-Return JSON with only the fields you can confidently extract:
-{
+const CLIENT_SCHEMA = `{
   "client_name": "string",
   "city": "string (one of the available cities only)",
   "requested_date": "YYYY-MM-DD",
@@ -35,8 +13,48 @@ Return JSON with only the fields you can confidently extract:
   "grocery_situation": "string (one of the grocery values only)",
   "cleanup_needed": boolean,
   "num_dishes": number,
-  "text_description": "string (rephrase the request clearly in 1-2 sentences)"
-}
+  "text_description": "string (rephrase the request clearly in 1-2 sentences, in English)"
+}`
+
+const COOK_SCHEMA = `{
+  "name": "string",
+  "city": "string (one of the available cities only)",
+  "cuisine_types": ["string array — cuisines mentioned, matched to the closest option(s) from the cuisine list"],
+  "dietary_specialties": ["string array from dietary options only"],
+  "years_experience": number,
+  "hourly_rate": number,
+  "intro": "string (2-3 sentence bio about their cooking background and style, in English)"
+}`
+
+export async function POST(request: Request) {
+  const { transcript, type, language } = await request.json()
+  if (!transcript || typeof transcript !== 'string' || transcript.trim().length < 5) {
+    return NextResponse.json({ error: 'No transcript provided' }, { status: 400 })
+  }
+
+  const isCook = type === 'cook'
+  const today = new Date().toISOString().split('T')[0]
+  const lang = language || 'English'
+
+  const response = await anthropic.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 600,
+    messages: [{
+      role: 'user',
+      content: `Extract ${isCook ? 'a home cook profile' : 'a home cooking job'} from this voice description. The speaker was talking in ${lang}. Return ONLY valid JSON — no prose, no markdown fences. Omit any field you cannot confidently determine.
+
+Today's date: ${today}
+Available cities: Fremont, Newark, Union City, Milpitas
+Cuisine options: South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan
+Dietary options: "Vegetarian", "Non-Vegetarian"
+Occasion values: "Regular Meal", "Festival / Occasion"
+Grocery values: "client_has_everything", "need_grocery_pickup", "cook_brings_ingredients"
+Platform minimum hourly rate: $30 — if a rate below 30 is mentioned, still return the number they said, do not adjust it yourself.
+
+Regardless of what language the transcript is in: city, cuisine_types, dietary_specialties, occasion, and grocery_situation must always be returned using the exact canonical English values listed above. Free-text fields (intro / text_description) must be translated into clear, natural English — never return non-English text in those fields.
+
+Return JSON matching this shape (only the fields you can confidently extract):
+${isCook ? COOK_SCHEMA : CLIENT_SCHEMA}
 
 Voice transcript: "${transcript.trim().replace(/"/g, "'")}"`,
     }],

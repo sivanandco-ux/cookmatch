@@ -15,6 +15,15 @@ const GROCERY = [
   { value: 'need_grocery_pickup', label: 'Cook picks up groceries' },
   { value: 'cook_brings_ingredients', label: 'Cook brings everything' },
 ]
+const VOICE_LANGUAGES = [
+  { code: 'en-US', label: 'English' },
+  { code: 'hi-IN', label: 'Hindi' },
+  { code: 'pa-IN', label: 'Punjabi' },
+  { code: 'ta-IN', label: 'Tamil' },
+  { code: 'te-IN', label: 'Telugu' },
+  { code: 'kn-IN', label: 'Kannada' },
+  { code: 'ml-IN', label: 'Malayalam' },
+]
 
 const ic = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full bg-white'
 
@@ -79,6 +88,10 @@ export default function ChatWidget() {
   const [chatPhase, setChatPhase] = useState<ChatPhase>('idle')
   const [chatTranscript, setChatTranscript] = useState('')
 
+  // Voice language (applies to both voice memo and voice conversation modes)
+  const [language, setLanguage] = useState('en-US')
+  const languageLabel = VOICE_LANGUAGES.find(l => l.code === language)?.label ?? 'English'
+
   const recRef = useRef<any>(null)
   const chatMsgRef = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([])
 
@@ -115,7 +128,7 @@ export default function ChatWidget() {
     if (!SR) return
     try {
       const rec = new SR()
-      rec.continuous = true; rec.interimResults = true; rec.lang = 'en-US'
+      rec.continuous = true; rec.interimResults = true; rec.lang = language
       rec.onresult = (e: any) => {
         let full = ''
         for (let i = 0; i < e.results.length; i++) full += e.results[i][0].transcript + ' '
@@ -136,23 +149,36 @@ export default function ChatWidget() {
     if (!voiceTranscript.trim()) return
     stopRecording(); setParsing(true)
     try {
-      const res = await fetch('/api/chat/parse-voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transcript: voiceTranscript }) })
+      const res = await fetch('/api/chat/parse-voice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ transcript: voiceTranscript, type: path, language: languageLabel }) })
       const data = await res.json()
       const f = data.fields ?? {}
       if (Object.keys(f).length > 0) {
-        setClient(prev => ({
-          ...prev,
-          ...(f.client_name !== undefined ? { client_name: f.client_name } : {}),
-          ...(f.city !== undefined ? { city: f.city } : {}),
-          ...(f.requested_date !== undefined ? { requested_date: f.requested_date } : {}),
-          ...(f.num_people !== undefined ? { num_people: String(f.num_people) } : {}),
-          ...(f.occasion !== undefined ? { occasion: f.occasion } : {}),
-          ...(f.dietary_restrictions !== undefined ? { dietary_restrictions: f.dietary_restrictions } : {}),
-          ...(f.grocery_situation !== undefined ? { grocery_situation: f.grocery_situation } : {}),
-          ...(f.cleanup_needed !== undefined ? { cleanup_needed: f.cleanup_needed } : {}),
-          ...(f.num_dishes !== undefined ? { num_dishes: String(f.num_dishes) } : {}),
-          ...(f.text_description !== undefined ? { text_description: f.text_description } : {}),
-        }))
+        if (path === 'cook') {
+          setCook(prev => ({
+            ...prev,
+            ...(f.name !== undefined ? { name: f.name } : {}),
+            ...(f.city !== undefined ? { city: f.city } : {}),
+            ...(f.cuisine_types !== undefined ? { cuisine_types: f.cuisine_types } : {}),
+            ...(f.dietary_specialties !== undefined ? { dietary_specialties: f.dietary_specialties } : {}),
+            ...(f.years_experience !== undefined ? { years_experience: String(f.years_experience) } : {}),
+            ...(f.hourly_rate !== undefined ? { hourly_rate: String(Math.max(Number(f.hourly_rate) || 0, DEFAULT_HOURLY_RATE)) } : {}),
+            ...(f.intro !== undefined ? { intro: f.intro } : {}),
+          }))
+        } else {
+          setClient(prev => ({
+            ...prev,
+            ...(f.client_name !== undefined ? { client_name: f.client_name } : {}),
+            ...(f.city !== undefined ? { city: f.city } : {}),
+            ...(f.requested_date !== undefined ? { requested_date: f.requested_date } : {}),
+            ...(f.num_people !== undefined ? { num_people: String(f.num_people) } : {}),
+            ...(f.occasion !== undefined ? { occasion: f.occasion } : {}),
+            ...(f.dietary_restrictions !== undefined ? { dietary_restrictions: f.dietary_restrictions } : {}),
+            ...(f.grocery_situation !== undefined ? { grocery_situation: f.grocery_situation } : {}),
+            ...(f.cleanup_needed !== undefined ? { cleanup_needed: f.cleanup_needed } : {}),
+            ...(f.num_dishes !== undefined ? { num_dishes: String(f.num_dishes) } : {}),
+            ...(f.text_description !== undefined ? { text_description: f.text_description } : {}),
+          }))
+        }
         setVoicePrefilled(true)
       }
       setVoiceActive(false); setVoiceTranscript('')
@@ -161,11 +187,11 @@ export default function ChatWidget() {
   }
 
   // ── Voice conversation ───────────────────────────────────────
-  function speakText(text: string, onEnd: () => void) {
+  function speakText(text: string, lang: string, onEnd: () => void) {
     if (typeof window === 'undefined' || !window.speechSynthesis) { onEnd(); return }
     window.speechSynthesis.cancel()
     const utt = new SpeechSynthesisUtterance(text)
-    utt.rate = 1.0; utt.lang = 'en-US'
+    utt.rate = 1.0; utt.lang = lang
     utt.onend = onEnd; utt.onerror = onEnd
     window.speechSynthesis.speak(utt)
   }
@@ -175,7 +201,7 @@ export default function ChatWidget() {
     if (!SR) { setChatPhase('idle'); return }
     try {
       const rec = new SR()
-      rec.continuous = false; rec.interimResults = true; rec.lang = 'en-US'
+      rec.continuous = false; rec.interimResults = true; rec.lang = language
       let finalText = ''
       rec.onresult = (e: any) => {
         let interim = ''
@@ -200,12 +226,12 @@ export default function ChatWidget() {
     setView('voice-chat')
     chatMsgRef.current = []; setChatMessages([]); setChatTranscript(''); setChatPhase('thinking')
     try {
-      const res = await fetch('/api/chat/voice-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, messages: [] }) })
+      const res = await fetch('/api/chat/voice-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, messages: [], language: languageLabel }) })
       const data = await res.json()
       const greeting = [{ role: 'assistant' as const, content: data.response }]
       chatMsgRef.current = greeting; setChatMessages(greeting)
       setChatPhase('speaking')
-      speakText(data.response, () => startConvListening())
+      speakText(data.response, language, () => startConvListening())
     } catch { setChatPhase('idle') }
   }
 
@@ -215,7 +241,7 @@ export default function ChatWidget() {
     chatMsgRef.current = newMessages; setChatMessages(newMessages)
     setChatTranscript(''); setChatPhase('thinking')
     try {
-      const res = await fetch('/api/chat/voice-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, messages: newMessages }) })
+      const res = await fetch('/api/chat/voice-chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, messages: newMessages, language: languageLabel }) })
       const data = await res.json()
       const reply = data.response as string
       const withReply = [...chatMsgRef.current, { role: 'assistant' as const, content: reply }]
@@ -223,7 +249,7 @@ export default function ChatWidget() {
 
       if (data.done && data.submitData) {
         setChatPhase('speaking')
-        speakText(reply, async () => {
+        speakText(reply, language, async () => {
           setChatPhase('thinking')
           try {
             const submitRes = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data.submitData) })
@@ -234,7 +260,7 @@ export default function ChatWidget() {
         })
       } else {
         setChatPhase('speaking')
-        speakText(reply, () => startConvListening())
+        speakText(reply, language, () => startConvListening())
       }
     } catch { setChatPhase('idle') }
   }
@@ -267,7 +293,7 @@ export default function ChatWidget() {
   async function submit() {
     setLoading(true); setError('')
     try {
-      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cook : client }) })
+      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cook : client, language: languageLabel }) })
       const data = await res.json()
       if (!res.ok || data.error) { setError(data.error || 'Something went wrong.'); return }
       if (data.matchingCooks) setMatchingCooks(data.matchingCooks)
@@ -336,20 +362,37 @@ export default function ChatWidget() {
               <ModeCard icon="📝" title="Fill a form"
                 desc="Fill in your details at your own pace"
                 onClick={() => setView(path as View)} />
-              {path === 'client' && (
-                <ModeCard icon="🎤" title="Describe by voice"
-                  desc="Speak once — we fill the form for you"
-                  onClick={() => { setVoiceActive(true); setVoiceTranscript(''); setView('client') }} />
-              )}
+              <ModeCard icon="🎤" title="Describe by voice"
+                desc="Speak once — we fill the form for you"
+                onClick={() => { setVoiceActive(true); setVoiceTranscript(''); setView(path as View) }} />
               <ModeCard icon="💬" title="Talk to our assistant"
                 desc="Back-and-forth voice conversation"
                 onClick={startConversation} />
+              <div className="flex items-center gap-2 justify-center mt-1">
+                <label className="text-xs text-gray-400">🌐 Voice language:</label>
+                <select className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-orange-400"
+                  value={language} onChange={e => setLanguage(e.target.value)}>
+                  {VOICE_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
+                </select>
+              </div>
             </div>
           )}
 
           {/* Cook form */}
-          {view === 'cook' && (
+          {view === 'cook' && !voiceActive && (
             <form onSubmit={goReview} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
+              {voicePrefilled ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700 flex items-center gap-2">
+                  <span className="text-green-500">✓</span>
+                  <span>Form pre-filled from your voice — review and adjust below.</span>
+                  <button type="button" onClick={() => setVoicePrefilled(false)} className="ml-auto text-green-400 hover:text-green-600 leading-none">✕</button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => { setVoiceActive(true); setVoiceTranscript(''); setRecording(false) }}
+                  className="w-full border-2 border-dashed border-orange-200 rounded-xl py-3 px-4 text-sm text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-colors flex items-center justify-center gap-2 font-medium">
+                  🎤 Describe yourself by voice instead
+                </button>
+              )}
               <div className="flex flex-col gap-1.5">
                 <Label>Full Name</Label>
                 <input className={ic} value={cook.name} onChange={e => setCook(p => ({ ...p, name: e.target.value }))} placeholder="Your full name" required />
@@ -408,12 +451,15 @@ export default function ChatWidget() {
             </form>
           )}
 
-          {/* Client — voice memo screen */}
-          {view === 'client' && voiceActive && (
+          {/* Voice memo screen — cook or client */}
+          {(view === 'cook' || view === 'client') && voiceActive && (
             <div className="flex-1 overflow-y-auto flex flex-col px-4 py-5 gap-5">
               <p className="text-xs text-gray-500 text-center leading-relaxed">
-                Speak naturally — mention the date, number of people, dietary needs, and what you'd like cooked.
+                {path === 'cook'
+                  ? "Speak naturally — mention your name, city, cuisines you cook, years of experience, your rate, and a bit about yourself."
+                  : "Speak naturally — mention the date, number of people, dietary needs, and what you'd like cooked."}
               </p>
+              <p className="text-xs text-gray-400 text-center -mt-3">Speaking in {languageLabel}</p>
               {hasSpeech() ? (
                 <div className="flex flex-col items-center gap-3">
                   <button type="button" onClick={recording ? stopRecording : startRecording} disabled={parsing}
@@ -547,6 +593,7 @@ export default function ChatWidget() {
           {/* Voice conversation */}
           {view === 'voice-chat' && (
             <div className="flex-1 flex flex-col px-4 py-5 gap-4">
+              <p className="text-xs text-gray-400 text-center">Speaking in {languageLabel}</p>
               {/* Orb */}
               <div className="flex flex-col items-center gap-3 flex-1 justify-center">
                 <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 ${
