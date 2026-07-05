@@ -1,0 +1,127 @@
+import { NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+const today = () => new Date().toISOString().split('T')[0]
+
+const CLIENT_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+
+Help the client post a cooking job. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
+
+Collect ALL of these fields before submitting:
+- client_name
+- client_email
+- client_phone
+- city: must be one of Fremont, Newark, Union City, Milpitas
+- requested_date in YYYY-MM-DD. Today is {{TODAY}}.
+- occasion: "Regular Meal" or "Festival / Occasion"
+- num_people (2–14)
+- num_dishes
+- dietary_restrictions: array from ["Vegetarian","Non-Vegetarian"] — empty array if none
+- grocery_situation: "client_has_everything" | "need_grocery_pickup" | "cook_brings_ingredients"
+- cleanup_needed: true or false
+- text_description: brief summary
+
+When you have ALL fields, give a one-sentence confirmation of what you're posting, then call submit_job_post.`
+
+const COOK_SYSTEM = `You are a friendly voice assistant for SivanSpices, a home cook platform in the Bay Area.
+
+Help a cook create their profile. Be warm and conversational. Ask 1-2 questions at a time. Keep responses very short (1-2 sentences) — this is a voice conversation.
+
+Collect ALL of these fields before submitting:
+- name
+- email
+- phone
+- city: must be one of Fremont, Newark, Union City, Milpitas
+- cuisine_types: array from [South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan]
+- dietary_specialties: array from ["Vegetarian","Non-Vegetarian"]
+- years_experience (number)
+- hourly_rate: their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
+- intro: 2-3 sentence bio about their cooking background and style
+
+When you have ALL fields, give a one-sentence confirmation, then call submit_cook_profile.`
+
+const CLIENT_TOOL: Anthropic.Tool = {
+  name: 'submit_job_post',
+  description: 'Submit the cooking job post once every required field has been collected',
+  input_schema: {
+    type: 'object',
+    properties: {
+      client_name: { type: 'string' },
+      client_email: { type: 'string' },
+      client_phone: { type: 'string' },
+      city: { type: 'string' },
+      requested_date: { type: 'string' },
+      occasion: { type: 'string' },
+      num_people: { type: 'number' },
+      num_dishes: { type: 'number' },
+      dietary_restrictions: { type: 'array', items: { type: 'string' } },
+      grocery_situation: { type: 'string' },
+      cleanup_needed: { type: 'boolean' },
+      text_description: { type: 'string' },
+    },
+    required: ['client_name','client_email','client_phone','city','requested_date','occasion','num_people','num_dishes','dietary_restrictions','grocery_situation','cleanup_needed'],
+  },
+}
+
+const COOK_TOOL: Anthropic.Tool = {
+  name: 'submit_cook_profile',
+  description: 'Submit the cook profile once every required field has been collected',
+  input_schema: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      email: { type: 'string' },
+      phone: { type: 'string' },
+      city: { type: 'string' },
+      cuisine_types: { type: 'array', items: { type: 'string' } },
+      dietary_specialties: { type: 'array', items: { type: 'string' } },
+      years_experience: { type: 'number' },
+      hourly_rate: { type: 'number' },
+      intro: { type: 'string' },
+    },
+    required: ['name','email','phone','city','cuisine_types','dietary_specialties','years_experience','hourly_rate','intro'],
+  },
+}
+
+export async function POST(request: Request) {
+  const { type, messages } = await request.json()
+
+  if (!messages || messages.length === 0) {
+    const greeting = type === 'client'
+      ? "Hi! I'm here to help you post a cooking job. What's the occasion — everyday meals or something special like a festival?"
+      : "Hi! I'm here to help set up your cook profile on SivanSpices. Let's start — what's your name and which city are you based in?"
+    return NextResponse.json({ response: greeting, done: false })
+  }
+
+  const system = (type === 'client' ? CLIENT_SYSTEM : COOK_SYSTEM).replace('{{TODAY}}', today())
+  const tool = type === 'client' ? CLIENT_TOOL : COOK_TOOL
+
+  const response = await anthropic.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 300,
+    system,
+    tools: [tool],
+    messages,
+  })
+
+  if (response.stop_reason === 'tool_use') {
+    const toolBlock = response.content.find(b => b.type === 'tool_use')
+    const textBlock = response.content.find(b => b.type === 'text')
+    if (!toolBlock || toolBlock.type !== 'tool_use') {
+      return NextResponse.json({ response: "Something went wrong — let's try again.", done: false })
+    }
+    const confirmText = textBlock?.type === 'text' && textBlock.text
+      ? textBlock.text
+      : "Got it! Submitting now."
+    return NextResponse.json({
+      response: confirmText,
+      done: true,
+      submitData: { type, data: toolBlock.input },
+    })
+  }
+
+  const text = response.content.find(b => b.type === 'text')?.text ?? "Could you say that again?"
+  return NextResponse.json({ response: text, done: false })
+}
