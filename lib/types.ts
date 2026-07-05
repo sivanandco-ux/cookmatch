@@ -5,7 +5,7 @@ export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly'
 export type JobCategory = 'family_cooking' | 'small_event' | 'medium_event'
 export type GrocerySituation = 'client_has_everything' | 'need_grocery_pickup' | 'cook_brings_ingredients'
 export type JobPostStatus = 'open' | 'taken' | 'done' | 'expired'
-export type BookingStatus = 'legacy' | 'pending' | 'cook_interested' | 'confirmed' | 'cancelled' | 'completed'
+export type BookingStatus = 'legacy' | 'pending' | 'cook_interested' | 'confirmed' | 'in_progress' | 'cancelled' | 'completed'
 export type JobInterestStatus = 'pending' | 'accepted' | 'rejected'
 
 export interface Cook {
@@ -108,6 +108,7 @@ export interface Booking {
   status: BookingStatus
   cook_interested_at: string | null
   confirmed_at: string | null
+  started_at: string | null
   cancelled_at: string | null
   cancelled_by: 'client' | 'cook' | null
   created_at: string

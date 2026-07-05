@@ -6,6 +6,7 @@ import DashboardActions from './DashboardActions'
 import JobInterestActions from './JobInterestActions'
 import CookProfileUploads from './CookProfileUploads'
 import LogoutButton from './LogoutButton'
+import StartJobActions from './StartJobActions'
 
 interface DashboardBooking {
   id: string
@@ -27,6 +28,7 @@ interface DashboardBooking {
   voice_memo_url: string | null
   specific_dishes: string | null
   notes: string | null
+  started_at: string | null
 }
 
 function getSupabase() {
@@ -76,7 +78,7 @@ export default async function CookDashboardPage({
       .from('bookings')
       .select('*')
       .eq('cook_id', cook_id)
-      .in('status', ['pending', 'cook_interested', 'confirmed'])
+      .in('status', ['pending', 'cook_interested', 'confirmed', 'in_progress'])
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
@@ -148,6 +150,7 @@ export default async function CookDashboardPage({
   const pending = allBookings.filter(b => b.status === 'pending')
   const accepted = allBookings.filter(b => b.status === 'cook_interested')
   const confirmed = allBookings.filter(b => b.status === 'confirmed')
+  const inProgress = allBookings.filter(b => b.status === 'in_progress')
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
@@ -201,6 +204,24 @@ export default async function CookDashboardPage({
                 cookId={cook_id}
                 mode="accepted"
                 cancellationCount={cancellationCounts[booking.client_email] ?? 0}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* In progress */}
+      {inProgress.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">In Progress</h2>
+          <div className="flex flex-col gap-4">
+            {inProgress.map(booking => (
+              <BriefCard
+                key={booking.id}
+                booking={booking}
+                cookId={cook_id}
+                mode="in_progress"
+                cancellationCount={0}
               />
             ))}
           </div>
@@ -322,11 +343,12 @@ export default async function CookDashboardPage({
   )
 }
 
-function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: DashboardBooking; cookId: string; mode: 'pending' | 'accepted' | 'confirmed'; cancellationCount: number }) {
+function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: DashboardBooking; cookId: string; mode: 'pending' | 'accepted' | 'confirmed' | 'in_progress'; cancellationCount: number }) {
   const statusColors = {
     pending: 'bg-amber-50 border-amber-200',
     accepted: 'bg-blue-50 border-blue-200',
     confirmed: 'bg-green-50 border-green-200',
+    in_progress: 'bg-orange-50 border-orange-200',
   }
 
   return (
@@ -356,9 +378,10 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
         <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
           mode === 'pending' ? 'bg-amber-100 text-amber-700' :
           mode === 'accepted' ? 'bg-blue-100 text-blue-700' :
+          mode === 'in_progress' ? 'bg-orange-100 text-orange-700' :
           'bg-green-100 text-green-700'
         }`}>
-          {mode === 'pending' ? 'Needs response' : mode === 'accepted' ? 'Awaiting client' : 'Confirmed'}
+          {mode === 'pending' ? 'Needs response' : mode === 'accepted' ? 'Awaiting client' : mode === 'in_progress' ? 'In progress' : 'Confirmed'}
         </span>
       </div>
 
@@ -395,13 +418,19 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
         <p className="text-sm text-gray-500 italic">{booking.notes}</p>
       )}
 
-      {/* Confirmed — show client contact */}
-      {mode === 'confirmed' && (
+      {/* Confirmed / in progress — show client contact */}
+      {(mode === 'confirmed' || mode === 'in_progress') && (
         <div className="bg-white rounded-lg p-3 border border-gray-200">
           <p className="text-xs text-gray-500 mb-1">Client contact</p>
           <p className="text-sm font-medium">{booking.client_name}</p>
           <p className="text-sm text-gray-600">{booking.client_phone}</p>
         </div>
+      )}
+
+      {mode === 'in_progress' && booking.started_at && (
+        <p className="text-xs text-gray-500">
+          Started {new Date(booking.started_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </p>
       )}
 
       {/* Client cancellation history */}
@@ -420,6 +449,10 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
 
       {mode === 'accepted' && (
         <p className="text-xs text-gray-500">Waiting for the client to confirm. You will be notified when they do.</p>
+      )}
+
+      {mode === 'confirmed' && (
+        <StartJobActions bookingId={booking.id as string} cookId={cookId} />
       )}
     </div>
   )
