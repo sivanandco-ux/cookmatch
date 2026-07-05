@@ -23,7 +23,7 @@ export default async function CookProfilePage({
 
   const { data: cook } = await supabase
     .from('cooks')
-    .select('*, cook_verifications(*), cook_scores(*), cook_ratings(*)')
+    .select('*, cook_verifications(*), cook_scores(*), cook_ratings(*), cook_dishes(*)')
     .eq('id', id)
     .single()
 
@@ -137,6 +137,21 @@ export default async function CookProfilePage({
             </div>
           </div>
 
+          {/* Dish photos */}
+          {c.cook_dishes && c.cook_dishes.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold mb-3">Dishes</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {c.cook_dishes.map(dish => (
+                  <div key={dish.id}>
+                    <img src={dish.photo_url} alt={dish.description || 'Dish photo'} className="w-full aspect-square object-cover rounded-lg" />
+                    {dish.description && <p className="text-xs text-gray-600 mt-1">{dish.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Verification badges */}
           <div>
             <h2 className="text-lg font-semibold mb-3">Verified</h2>
@@ -184,19 +199,32 @@ export default async function CookProfilePage({
         {/* Right column — booking form */}
         <div className="md:col-span-1">
           <div className="sticky top-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-            <div className="mb-4">
-              <p className="text-2xl font-bold text-gray-900">
-                ${c.price_min}
-                <span className="text-sm font-normal text-gray-400">{priceLabel}</span>
-              </p>
-              {c.price_unit === 'hourly' && c.min_hours && (
-                <p className="text-xs text-amber-700 mt-1">Minimum {c.min_hours} hour{c.min_hours > 1 ? 's' : ''} per visit</p>
-              )}
-              {c.available_recurring && (
-                <p className="text-xs text-green-600 mt-1">Available for recurring bookings</p>
-              )}
-            </div>
-            <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} />
+            {c.status === 'pending' ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                <p className="text-sm font-semibold text-amber-800 mb-1">Profile under review</p>
+                <p className="text-xs text-amber-700">This cook's application is being reviewed. Bookings will open once approved.</p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4">
+                  {c.price_min > 0 ? (
+                    <p className="text-2xl font-bold text-gray-900">
+                      ${c.price_min}
+                      <span className="text-sm font-normal text-gray-400">{priceLabel}</span>
+                    </p>
+                  ) : (
+                    <p className="text-sm text-gray-500">Rate negotiable — discuss directly with the cook</p>
+                  )}
+                  {c.price_min > 0 && c.price_unit === 'hourly' && c.min_hours && (
+                    <p className="text-xs text-amber-700 mt-1">Minimum {c.min_hours} hour{c.min_hours > 1 ? 's' : ''} per visit</p>
+                  )}
+                  {c.available_recurring && (
+                    <p className="text-xs text-green-600 mt-1">Available for recurring bookings</p>
+                  )}
+                </div>
+                <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} cookDietarySpecialties={c.dietary_specialties} />
+              </>
+            )}
           </div>
         </div>
       </div>
