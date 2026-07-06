@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useRef, FormEvent } from 'react'
+import { useState, useRef, useEffect, FormEvent } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
-type View = 'home' | 'mode' | 'cook' | 'client' | 'voice-chat' | 'review' | 'done'
+type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done'
 type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
@@ -92,8 +93,68 @@ export default function ChatWidget() {
   const [language, setLanguage] = useState('en-US')
   const languageLabel = VOICE_LANGUAGES.find(l => l.code === language)?.label ?? 'English'
 
+  // Cook email verification gate — a cook profile can't be created until the
+  // email is confirmed via magic link, so identity is proven up front.
+  const [cookAuthState, setCookAuthState] = useState<'unknown' | 'unverified' | 'verified'>('unknown')
+  const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [sendingLink, setSendingLink] = useState(false)
+  const [linkSent, setLinkSent] = useState(false)
+  const [authError, setAuthError] = useState('')
+
   const recRef = useRef<any>(null)
   const chatMsgRef = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([])
+
+  useEffect(() => {
+    try {
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user?.email) {
+          setVerifiedEmail(user.email)
+          setCookAuthState('verified')
+          setCook(p => ({ ...p, email: user.email! }))
+        } else {
+          setCookAuthState('unverified')
+        }
+
+        if (typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search)
+          if (params.get('opencookwidget') === '1' && user?.email) {
+            setOpen(true); setPath('cook'); setView('mode')
+            params.delete('opencookwidget')
+            const query = params.toString()
+            window.history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash)
+          }
+        }
+      }).catch(() => setCookAuthState('unverified'))
+    } catch {
+      setCookAuthState('unverified')
+    }
+  }, [])
+
+  async function handleSendVerifyLink(e: FormEvent) {
+    e.preventDefault()
+    setSendingLink(true); setAuthError('')
+    try {
+      const supabase = createClient()
+      const callbackUrl = new URL('/auth/callback', window.location.origin)
+      callbackUrl.searchParams.set('intent', 'signup')
+      callbackUrl.searchParams.set('redirectTo', window.location.pathname + '?opencookwidget=1')
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: signupEmail,
+        options: { emailRedirectTo: callbackUrl.toString() },
+      })
+      if (otpError) {
+        setAuthError(`Something went wrong: ${otpError.message}`)
+      } else {
+        setLinkSent(true)
+      }
+    } catch {
+      setAuthError('Something went wrong. Please try again.')
+    } finally {
+      setSendingLink(false)
+    }
+  }
 
 
   function reset() {
@@ -310,6 +371,7 @@ export default function ChatWidget() {
   const headerTitle = voiceActive ? 'Voice Description'
     : view === 'home' ? 'Sivan Spices Home Cooks'
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
+    : view === 'cook-verify' ? 'Verify Your Email'
     : view === 'cook' ? 'Cook Sign Up'
     : view === 'client' ? 'Post a Job'
     : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post a Job')
@@ -345,7 +407,11 @@ export default function ChatWidget() {
                 <p className="font-semibold text-gray-800 text-sm">🏠 Hire a Cook</p>
                 <p className="text-xs text-gray-500 mt-1">Post a job and connect with home cooks in your area</p>
               </button>
-              <button onClick={() => { setPath('cook'); setView('mode') }}
+              <button onClick={() => {
+                  setPath('cook')
+                  if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); setView('mode') }
+                  else { setLinkSent(false); setAuthError(''); setView('cook-verify') }
+                }}
                 className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
                 <p className="font-semibold text-gray-800 text-sm">👨‍🍳 Sign Up as a Cook</p>
                 <p className="text-xs text-gray-500 mt-1">Create your cook profile and start getting hired</p>
@@ -378,6 +444,27 @@ export default function ChatWidget() {
             </div>
           )}
 
+          {/* Cook email verification gate */}
+          {view === 'cook-verify' && (
+            <div className="flex-1 overflow-y-auto flex flex-col px-5 py-8 gap-4">
+              <p className="text-sm text-gray-500 text-center">First, verify your email — we'll send a link to confirm it's really you before you fill out your cook profile.</p>
+              {linkSent ? (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800 text-center">
+                  Check your email — we sent a verification link to <strong>{signupEmail}</strong>. Click it to continue, then come back here.
+                </div>
+              ) : (
+                <form onSubmit={handleSendVerifyLink} className="flex flex-col gap-3">
+                  <input type="email" required value={signupEmail} onChange={e => setSignupEmail(e.target.value)} placeholder="you@email.com" className={ic} />
+                  {authError && <p className="text-xs text-red-600 text-center">{authError}</p>}
+                  <button type="submit" disabled={sendingLink}
+                    className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">
+                    {sendingLink ? 'Sending...' : 'Send verification link'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
           {/* Cook form */}
           {view === 'cook' && !voiceActive && (
             <form onSubmit={goReview} className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4">
@@ -400,7 +487,7 @@ export default function ChatWidget() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label>Email</Label>
-                  <input className={ic} type="email" value={cook.email} onChange={e => setCook(p => ({ ...p, email: e.target.value }))} placeholder="you@email.com" required />
+                  <input className={`${ic} ${verifiedEmail ? 'bg-gray-50 text-gray-500' : ''}`} type="email" value={cook.email} readOnly={!!verifiedEmail} onChange={e => setCook(p => ({ ...p, email: e.target.value }))} placeholder="you@email.com" required />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>Phone</Label>

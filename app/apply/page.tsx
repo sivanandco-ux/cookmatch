@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian']
@@ -41,6 +42,52 @@ export default function ApplyPage() {
   const [polishing, setPolishing] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
   const INTRO_LIMIT = 280
+
+  // Email verification gate — a cook profile can't be created until the
+  // email is confirmed via magic link, so identity is proven up front.
+  const [authState, setAuthState] = useState<'checking' | 'unverified' | 'verified'>('checking')
+  const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [sendingLink, setSendingLink] = useState(false)
+  const [linkSent, setLinkSent] = useState(false)
+  const [authError, setAuthError] = useState('')
+
+  useEffect(() => {
+    try {
+      const supabase = createClient()
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user?.email) { setVerifiedEmail(user.email); setAuthState('verified') }
+        else setAuthState('unverified')
+      }).catch(() => setAuthState('unverified'))
+    } catch {
+      setAuthState('unverified')
+    }
+  }, [])
+
+  async function handleSendLink(e: React.FormEvent) {
+    e.preventDefault()
+    setSendingLink(true)
+    setAuthError('')
+    try {
+      const supabase = createClient()
+      const callbackUrl = new URL('/auth/callback', window.location.origin)
+      callbackUrl.searchParams.set('intent', 'signup')
+      callbackUrl.searchParams.set('redirectTo', '/apply')
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email: signupEmail,
+        options: { emailRedirectTo: callbackUrl.toString() },
+      })
+      if (otpError) {
+        setAuthError(`Something went wrong sending the link: ${otpError.message}`)
+      } else {
+        setLinkSent(true)
+      }
+    } catch {
+      setAuthError('Something went wrong sending the link. Please try again.')
+    } finally {
+      setSendingLink(false)
+    }
+  }
 
   async function handlePolish() {
     if (intro.trim().length < 10) return
@@ -151,6 +198,44 @@ export default function ApplyPage() {
     setLoading(false)
   }
 
+  if (authState === 'checking') {
+    return <div className="max-w-sm mx-auto px-6 py-20 text-center text-sm text-gray-400">Loading...</div>
+  }
+
+  if (authState === 'unverified') {
+    return (
+      <div className="max-w-sm mx-auto px-6 py-16">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
+        <p className="text-sm text-gray-500 mb-6">First, verify your email — we'll send a link to confirm it's really you before you fill out your profile.</p>
+
+        {linkSent ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
+            Check your email — we sent a verification link to <strong>{signupEmail}</strong>. Click it to continue.
+          </div>
+        ) : (
+          <form onSubmit={handleSendLink} className="flex flex-col gap-3">
+            <input
+              type="email"
+              required
+              value={signupEmail}
+              onChange={e => setSignupEmail(e.target.value)}
+              placeholder="you@email.com"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+            {authError && <p className="text-sm text-red-600">{authError}</p>}
+            <button
+              type="submit"
+              disabled={sendingLink}
+              className="bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50"
+            >
+              {sendingLink ? 'Sending...' : 'Send verification link'}
+            </button>
+          </form>
+        )}
+      </div>
+    )
+  }
+
   if (submitted) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
@@ -212,7 +297,7 @@ export default function ApplyPage() {
           </div>
 
           <input name="name" required placeholder="Full name" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          <input name="email" type="email" required placeholder="Email address" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+          <input name="email" type="email" required readOnly defaultValue={verifiedEmail} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500" />
           <input name="phone" type="tel" required placeholder="Phone number" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           <input name="whatsapp" type="tel" placeholder="WhatsApp number (optional, if different from phone)" className="border border-gray-300 rounded-lg px-3 py-2 text-sm" />
         </section>

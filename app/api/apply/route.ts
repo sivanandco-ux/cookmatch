@@ -33,6 +33,16 @@ export async function POST(request: Request) {
   const body = await request.json()
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user || !user.email) {
+    return NextResponse.json({ error: 'Please verify your email before submitting.' }, { status: 401 })
+  }
+
+  const { data: existingCook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
+  if (existingCook) {
+    return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
+  }
+
   // Validate and merge custom cuisines
   let cuisineTypes: string[] = body.cuisine_types || []
   if (body.other_cuisines?.trim()) {
@@ -58,7 +68,8 @@ export async function POST(request: Request) {
     .from('cooks')
     .insert({
       name: body.name,
-      email: body.email,
+      email: user.email,
+      user_id: user.id,
       phone: body.phone,
       whatsapp: body.whatsapp,
       bio: body.bio,

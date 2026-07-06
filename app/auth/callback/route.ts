@@ -21,6 +21,7 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const redirectTo = safeRedirectPath(searchParams.get('redirectTo'))
+  const intent = searchParams.get('intent') // 'signup' when verifying email to create a new cook profile
 
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
@@ -59,6 +60,12 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (!cookByEmail) {
+      // No existing profile. For a plain login this is an error — but if this
+      // link was requested to verify an email ahead of a brand-new signup,
+      // the session is now established and there's simply no profile yet.
+      if (intent === 'signup') {
+        return NextResponse.redirect(`${origin}${redirectTo || '/apply'}`)
+      }
       return NextResponse.redirect(`${origin}/login?error=no_application`)
     }
     if (cookByEmail.user_id && cookByEmail.user_id !== user.id) {

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/lib/supabase/server'
 import { sendNewJobNotification } from '@/lib/email'
 
 function getSupabase() {
@@ -15,6 +16,17 @@ export async function POST(request: Request) {
     const supabase = getSupabase()
 
     if (type === 'cook') {
+      const sessionSupabase = await createServerClient()
+      const { data: { user } } = await sessionSupabase.auth.getUser()
+      if (!user || !user.email) {
+        return NextResponse.json({ error: 'Please verify your email before submitting.' }, { status: 401 })
+      }
+
+      const { data: existingCook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
+      if (existingCook) {
+        return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
+      }
+
       const bio = String(data.intro || '')
       const tagline = bio.split(/[.!?]/)[0].trim().substring(0, 120) || `Home Cook in ${data.city}`
 
@@ -22,7 +34,8 @@ export async function POST(request: Request) {
         .from('cooks')
         .insert({
           name: data.name,
-          email: data.email,
+          email: user.email,
+          user_id: user.id,
           phone: data.phone,
           whatsapp: data.phone,
           bio,
