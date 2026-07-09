@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { isValidUsPhone } from '@/lib/phone'
+import EducationChat from '@/components/EducationChat'
 
-type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done'
+type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
@@ -401,6 +402,7 @@ export default function ChatWidget() {
     : view === 'client' ? 'Post a Job'
     : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post a Job')
     : view === 'review' ? 'Review & Confirm'
+    : view === 'learn' ? 'Become a Cook'
     : 'All Done!'
 
   const showBack = view !== 'home' && view !== 'done'
@@ -441,6 +443,17 @@ export default function ChatWidget() {
                 <p className="font-semibold text-gray-800 text-sm">👨‍🍳 Sign Up as a Cook</p>
                 <p className="text-xs text-gray-500 mt-1">Create your cook profile and start getting hired</p>
               </button>
+              <button onClick={() => setView('learn')}
+                className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                <p className="font-semibold text-gray-800 text-sm">📚 Learn How to Become a Cook</p>
+                <p className="text-xs text-gray-500 mt-1">Certification, selling food from home, and getting paid</p>
+              </button>
+            </div>
+          )}
+
+          {view === 'learn' && (
+            <div className="flex-1 overflow-y-auto">
+              <EducationChat compact />
             </div>
           )}
 
