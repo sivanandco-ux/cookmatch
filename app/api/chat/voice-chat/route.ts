@@ -5,9 +5,9 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const today = () => new Date().toISOString().split('T')[0]
 
-const LANGUAGE_NOTE = `CRITICAL LANGUAGE RULE: Speak ONLY in {{LANGUAGE}}. Every single reply you generate — your opening greeting, every follow-up question, everything — must be written entirely in {{LANGUAGE}}. Do not use English at all, even partially, unless {{LANGUAGE}} is English. This rule overrides your default behavior; do not slip back into English no matter how many turns the conversation runs.
+const LANGUAGE_NOTE = `CRITICAL LANGUAGE RULE: Speak ONLY in {{LANGUAGE}}. Every single reply you generate — your opening greeting, every follow-up question, everything — must be written entirely in {{LANGUAGE}}. Do not use English at all, even partially, unless {{LANGUAGE}} is English. This rule overrides your default behavior; do not slip back into English no matter how many turns the conversation runs. NEVER tell the user you need them to speak English, and NEVER ask them to switch languages or repeat themselves in English — that is never true and would be a mistake.
 
-The only exception: when you call the submit tool, city, occasion, dietary_restrictions, grocery_situation, and cuisine_types must always be the exact canonical English values listed below, never translated or transliterated. Free-text fields (intro / text_description) must be translated into clear, natural English before submitting — never submit non-English text in those fields.`
+Separately, and invisibly to the user, purely as a background data-formatting step: when you call the submit tool, city, occasion, dietary_restrictions, grocery_situation, and cuisine_types must always be the exact canonical English values listed below, never translated or transliterated, and free-text fields (intro / text_description) must be translated into clear, natural English inside the tool call arguments only. This is something you silently do on your own when filling out the tool call — it is not a requirement you place on the user, not something to mention to them, and not a reason to ask them for English at any point in the conversation.`
 
 const CLIENT_SYSTEM = `${LANGUAGE_NOTE}
 
@@ -18,7 +18,7 @@ Help the client post a cooking job. Be warm and conversational. Ask 1-2 question
 Collect ALL of these fields before submitting:
 - client_name
 - client_email
-- client_phone
+- client_phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
 - city: must be one of Fremont, Newark, Union City, Milpitas
 - requested_date in YYYY-MM-DD. Today is {{TODAY}}.
 - occasion: "Regular Meal" or "Festival / Occasion"
@@ -29,7 +29,9 @@ Collect ALL of these fields before submitting:
 - cleanup_needed: true or false
 - text_description: brief summary
 
-When you have ALL fields, give a one-sentence confirmation of what you're posting, then call submit_job_post.
+Before the final summary: once you have the email and phone, explicitly read each one back on its own and ask the user to confirm — spell out the email address, and read the phone number one digit at a time (e.g. "five, one, zero, five, five, five, ..."). Only move on once they've confirmed both are correct; if either is wrong, ask them to repeat just that one.
+
+When you have ALL fields and both email and phone are confirmed, give a one-sentence confirmation of what you're posting, then call submit_job_post.
 
 Reminder: reply only in {{LANGUAGE}}, never English (unless {{LANGUAGE}} is English).`
 
@@ -42,7 +44,7 @@ Help a cook create their profile. Be warm and conversational. Ask 1-2 questions 
 Collect ALL of these fields before submitting:
 - name
 - email
-- phone
+- phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
 - city: must be one of Fremont, Newark, Union City, Milpitas
 - cuisine_types: array from [South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan]
 - dietary_specialties: array from ["Vegetarian","Non-Vegetarian"]
@@ -50,7 +52,9 @@ Collect ALL of these fields before submitting:
 - hourly_rate: their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
 - intro: 2-3 sentence bio about their cooking background and style
 
-When you have ALL fields, give a one-sentence confirmation, then call submit_cook_profile.
+Before the final summary: once you have the email and phone, explicitly read each one back on its own and ask the user to confirm — spell out the email address, and read the phone number one digit at a time (e.g. "five, one, zero, five, five, five, ..."). Only move on once they've confirmed both are correct; if either is wrong, ask them to repeat just that one.
+
+When you have ALL fields and both email and phone are confirmed, give a one-sentence confirmation, then call submit_cook_profile.
 
 Reminder: reply only in {{LANGUAGE}}, never English (unless {{LANGUAGE}} is English).`
 
@@ -62,7 +66,7 @@ const CLIENT_TOOL: Anthropic.Tool = {
     properties: {
       client_name: { type: 'string' },
       client_email: { type: 'string' },
-      client_phone: { type: 'string' },
+      client_phone: { type: 'string', description: 'Exactly 10 digits, US number, confirmed with the caller' },
       city: { type: 'string' },
       requested_date: { type: 'string' },
       occasion: { type: 'string' },
@@ -85,7 +89,7 @@ const COOK_TOOL: Anthropic.Tool = {
     properties: {
       name: { type: 'string' },
       email: { type: 'string' },
-      phone: { type: 'string' },
+      phone: { type: 'string', description: 'Exactly 10 digits, US number, confirmed with the caller' },
       city: { type: 'string' },
       cuisine_types: { type: 'array', items: { type: 'string' } },
       dietary_specialties: { type: 'array', items: { type: 'string' } },

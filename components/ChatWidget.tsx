@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isValidUsPhone } from '@/lib/phone'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done'
 type PathType = 'cook' | 'client'
@@ -248,10 +249,18 @@ export default function ChatWidget() {
   }
 
   // ── Voice conversation ───────────────────────────────────────
+  // Browser TTS has no SSML support and reads a raw 10-digit string as a huge
+  // cardinal number ("five billion...") instead of a phone number. Spacing the
+  // digits out makes every mainstream engine read them one at a time instead.
+  function spellOutPhoneNumbers(text: string): string {
+    const phoneRe = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g
+    return text.replace(phoneRe, match => match.replace(/\D/g, '').split('').join(' '))
+  }
+
   function speakText(text: string, lang: string, onEnd: () => void) {
     if (typeof window === 'undefined' || !window.speechSynthesis) { onEnd(); return }
     window.speechSynthesis.cancel()
-    const utt = new SpeechSynthesisUtterance(text)
+    const utt = new SpeechSynthesisUtterance(spellOutPhoneNumbers(text))
     utt.rate = 1.0; utt.lang = lang
     utt.onend = onEnd; utt.onerror = onEnd
     window.speechSynthesis.speak(utt)
@@ -315,9 +324,23 @@ export default function ChatWidget() {
           try {
             const submitRes = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data.submitData) })
             const sd = await submitRes.json()
+            if (!submitRes.ok || sd.error) {
+              const errMsg = sd.error || "Something went wrong on our end and I couldn't submit this — let's try again."
+              const withError = [...chatMsgRef.current, { role: 'assistant' as const, content: errMsg }]
+              chatMsgRef.current = withError; setChatMessages(withError)
+              setChatPhase('speaking')
+              speakText(errMsg, language, () => startConvListening())
+              return
+            }
             if (sd.matchingCooks) setMatchingCooks(sd.matchingCooks)
-          } catch { /* still navigate to done */ }
-          setChatPhase('idle'); setView('done')
+            setChatPhase('idle'); setView('done')
+          } catch {
+            const errMsg = "I couldn't reach the server to submit this — let's try again."
+            const withError = [...chatMsgRef.current, { role: 'assistant' as const, content: errMsg }]
+            chatMsgRef.current = withError; setChatMessages(withError)
+            setChatPhase('speaking')
+            speakText(errMsg, language, () => startConvListening())
+          }
         })
       } else {
         setChatPhase('speaking')
@@ -347,6 +370,8 @@ export default function ChatWidget() {
 
   function goReview(e: FormEvent) {
     e.preventDefault(); setError('')
+    const phone = path === 'cook' ? cook.phone : client.client_phone
+    if (!isValidUsPhone(phone)) { setError('Please enter a valid 10-digit US phone number.'); return }
     if (path === 'client' && client.cleanup_needed === null) { setError('Please select Yes or No for cleanup.'); return }
     setView('review')
   }
@@ -532,6 +557,7 @@ export default function ChatWidget() {
                 </div>
                 <textarea className={`${ic} resize-none`} rows={3} value={cook.intro} onChange={e => setCook(p => ({ ...p, intro: e.target.value }))} placeholder="e.g. I am a cook from East India and have 10 years of cooking experience. I grew up in Kolkata and learned to cook from my mother, and I love making food that tastes like home." required />
               </div>
+              {error && <p className="text-sm text-red-600">{error}</p>}
               <button type="submit" className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 mt-1">
                 Review Application →
               </button>
@@ -671,6 +697,7 @@ export default function ChatWidget() {
                 </div>
                 <textarea className={`${ic} resize-none`} rows={3} value={client.text_description} onChange={e => setClient(p => ({ ...p, text_description: e.target.value }))} placeholder="Describe dishes, cuisine style, any preferences..." />
               </div>
+              {error && <p className="text-sm text-red-600">{error}</p>}
               <button type="submit" className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 mt-1">
                 Review Job Post →
               </button>

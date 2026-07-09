@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { sendNewJobNotification } from '@/lib/email'
+import { normalizeUsPhone } from '@/lib/phone'
 
 function getSupabase() {
   return createClient(
@@ -27,6 +28,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
       }
 
+      const cookPhone = normalizeUsPhone(String(data.phone || ''))
+      if (!cookPhone) {
+        return NextResponse.json({ error: 'Please provide a valid 10-digit US phone number.' }, { status: 400 })
+      }
+
       const bio = String(data.intro || '')
       const tagline = bio.split(/[.!?]/)[0].trim().substring(0, 120) || `Home Cook in ${data.city}`
 
@@ -36,8 +42,8 @@ export async function POST(request: Request) {
           name: data.name,
           email: user.email,
           user_id: user.id,
-          phone: data.phone,
-          whatsapp: data.phone,
+          phone: cookPhone,
+          whatsapp: cookPhone,
           bio,
           tagline,
           video_url: null,
@@ -80,7 +86,23 @@ export async function POST(request: Request) {
     }
 
     if (type === 'client') {
+      const clientPhone = normalizeUsPhone(String(data.client_phone || ''))
+      if (!clientPhone) {
+        return NextResponse.json({ error: 'Please provide a valid 10-digit US phone number.' }, { status: 400 })
+      }
+
       const numPeople = Number(data.num_people)
+      const numDishes = Number(data.num_dishes)
+      if (!Number.isFinite(numPeople) || numPeople < 2 || numPeople > 14) {
+        return NextResponse.json({ error: 'Number of people must be between 2 and 14.' }, { status: 400 })
+      }
+      if (!Number.isFinite(numDishes) || numDishes < 1) {
+        return NextResponse.json({ error: 'Number of dishes is missing or invalid.' }, { status: 400 })
+      }
+      if (!data.requested_date || !/^\d{4}-\d{2}-\d{2}$/.test(String(data.requested_date))) {
+        return NextResponse.json({ error: 'Requested date is missing or invalid.' }, { status: 400 })
+      }
+
       const jobCategory =
         numPeople <= 5 ? 'family_cooking' : numPeople <= 10 ? 'small_event' : 'medium_event'
 
@@ -89,11 +111,11 @@ export async function POST(request: Request) {
         .insert({
           client_name: data.client_name,
           client_email: data.client_email,
-          client_phone: data.client_phone,
+          client_phone: clientPhone,
           job_category: jobCategory,
           occasion: data.occasion,
           specific_dishes: null,
-          num_dishes: Number(data.num_dishes),
+          num_dishes: numDishes,
           requested_date: data.requested_date,
           requested_time: null,
           expected_duration_hours: Number(data.expected_duration_hours) || 3,
