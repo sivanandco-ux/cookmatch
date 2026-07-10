@@ -4,16 +4,40 @@ import { useState, useRef, useEffect, FormEvent } from 'react'
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
+const US_STATES = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware',
+  'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa',
+  'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+  'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+  'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon',
+  'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah',
+  'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming',
+]
+
 const TOPICS = [
-  { label: '🚗 Travel to cook in homes', prompt: 'I want to travel to client homes to cook. What do I need to get started?' },
-  { label: '🏠 Cook & sell from your home', prompt: 'I want to cook food at home and sell it. What do I need to do?' },
-  { label: '💵 Getting paid & taxes', prompt: 'How does getting paid work, and do I need to report my earnings?' },
+  {
+    label: '🚗 Travel to cook in homes',
+    needsState: true,
+    prompt: (state: string) => `I'm in ${state} and I want to travel to client homes to cook. What do I need to get started?`,
+  },
+  {
+    label: '🏠 Cook & sell from your home',
+    needsState: true,
+    prompt: (state: string) => `I'm in ${state} and I want to cook food at home and sell it. What do I need to do?`,
+  },
+  {
+    label: '💵 Getting paid & taxes',
+    needsState: false,
+    prompt: () => 'How does getting paid work, and do I need to report my earnings?',
+  },
 ]
 
 export default function EducationChat({ compact = false }: { compact?: boolean }) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [pendingTopic, setPendingTopic] = useState<typeof TOPICS[number] | null>(null)
+  const [selectedState, setSelectedState] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -41,6 +65,18 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
     }
   }
 
+  function pickTopic(topic: typeof TOPICS[number]) {
+    if (topic.needsState) { setPendingTopic(topic); return }
+    send(topic.prompt(''))
+  }
+
+  function confirmState() {
+    if (!pendingTopic || !selectedState) return
+    send(pendingTopic.prompt(selectedState))
+    setPendingTopic(null)
+    setSelectedState('')
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault()
     send(input)
@@ -51,20 +87,37 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
       {!compact && (
         <div>
           <h2 className="text-xl font-bold text-gray-900">Become a Cook</h2>
-          <p className="text-sm text-gray-500 mt-1">Ask about certification, selling food from home, or getting paid.</p>
+          <p className="text-sm text-gray-500 mt-1">Ask about certification, selling food from home, or getting paid — anywhere in the US.</p>
         </div>
       )}
 
       <div ref={scrollRef} className={`flex-1 overflow-y-auto flex flex-col gap-3 ${compact ? 'px-4 py-4' : 'py-2'}`} style={compact ? undefined : { maxHeight: 420 }}>
-        {messages.length === 0 && (
+        {messages.length === 0 && !pendingTopic && (
           <div className="flex flex-col gap-2">
             <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">Pick a topic to start</p>
             {TOPICS.map(t => (
-              <button key={t.label} onClick={() => send(t.prompt)}
+              <button key={t.label} onClick={() => pickTopic(t)}
                 className="text-left border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 hover:border-orange-400 hover:bg-orange-50 transition-colors">
                 {t.label}
               </button>
             ))}
+          </div>
+        )}
+        {messages.length === 0 && pendingTopic && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-gray-700">{pendingTopic.label} — which state are you in? The requirements depend on where you live.</p>
+            <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 bg-white"
+              value={selectedState} onChange={e => setSelectedState(e.target.value)}>
+              <option value="">Select your state</option>
+              {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <div className="flex gap-2">
+              <button onClick={() => setPendingTopic(null)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:border-orange-400 hover:text-orange-600 transition-colors">Back</button>
+              <button onClick={confirmState} disabled={!selectedState}
+                className="flex-1 bg-orange-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">
+                Continue
+              </button>
+            </div>
           </div>
         )}
         {messages.map((m, i) => (
@@ -93,7 +146,7 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
           </button>
         </form>
         <p className="text-xs text-gray-400 mt-2">
-          General information only, not legal or tax advice — confirm specifics with Alameda County Environmental Health or a tax professional.
+          General information only, not legal or tax advice — confirm specifics with your state health/agriculture department or a tax professional.
         </p>
       </div>
     </div>
