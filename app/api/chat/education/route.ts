@@ -52,8 +52,55 @@ If in any other state — use this general landscape, but NEVER state a specific
   - Tennessee — Food Freedom Act, no caps or licensing for qualifying foods: https://www.tn.gov/agriculture/consumers/food-safety/tennessee-food-freedom-act.html
   - Utah — has a statewide "microenterprise home kitchen" law, but it's implemented and permitted entirely at the county level with no single statewide page — tell Utah users there's no one central site and to contact their county health department directly (e.g. Davis, Salt Lake, and Utah County each publish their own application).
   - California — see the detailed Alameda County section above; other CA counties may have their own local MEHKO page.
-- If the user is in any other state, hot cooked meals do NOT currently have a home-kitchen legal path there — cottage food law in that state almost certainly covers shelf-stable goods only. Say this plainly, note that this space is expanding quickly so it's worth checking current status with their state Department of Agriculture, and mention that a licensed commercial or shared-use kitchen is the usual legal option for hot meals in states without a home-meal law. Do not guess a URL for these states — just name their state's Department of Agriculture or Department of Health as the source to search for.
-- Every state has some form of cottage food law for shelf-stable goods (baked goods, jams, candies) — if that's what they want to sell, tell them so and point them to their state's Department of Agriculture or Department of Health cottage food program for registration steps and current caps (use the URL above if their state is one of the 9 listed; otherwise don't guess one).
+- If the user is in any other state, hot cooked meals do NOT currently have a home-kitchen legal path there — cottage food law in that state almost certainly covers shelf-stable goods only. Say this plainly, note that this space is expanding quickly so it's worth checking current status with their state Department of Agriculture, and mention that a licensed commercial or shared-use kitchen is the usual legal option for hot meals in states without a home-meal law.
+- Every state has some form of cottage food law for shelf-stable goods (baked goods, jams, candies). Use the exact agency name and URL from the lookup table below for their state — never guess or construct a URL that isn't in this table.
+
+━━━ REFERENCE: Cottage food agency lookup table (shelf-stable goods, all 50 states + DC) ━━━
+Each URL below was individually fetched and confirmed live and on-topic. Where a state has no verified URL, only the agency name is given — say that agency's name and tell the user to search for it, do NOT invent a link for it.
+
+Alabama — Alabama Department of Public Health: https://www.alabamapublichealth.gov/foodsafety/cottage-food.html
+Alaska — Alaska Department of Environmental Conservation (no verified URL)
+Arizona — Arizona Dept of Health Services Cottage Food Program: https://www.azdhs.gov/preparedness/epidemiology-disease-control/food-safety-environmental-services/cottage-food-program/index.php
+Arkansas — Arkansas Dept of Health Homemade Food Production Guidelines: https://healthy.arkansas.gov/wp-content/uploads/Homemade-Food-Guide-5.21.2026-Update.pdf
+Colorado — Colorado Dept of Public Health & Environment: https://cdphe.colorado.gov/dehs/cottage-foods
+Connecticut — CT Dept of Consumer Protection: https://portal.ct.gov/dcp/cottage-foods
+Delaware — Delaware Division of Public Health, Office of Food Protection (no verified URL)
+District of Columbia — DC Health: https://dchealth.dc.gov/publication/cottage-food-businesses
+Florida — FL Dept of Agriculture & Consumer Services: https://www.fdacs.gov/Business-Services/Food/Food-Establishments/Cottage-Foods
+Georgia — GA Dept of Agriculture: https://www.agr.georgia.gov/cottage-food
+Hawaii — HI Dept of Health Homemade Food Products guidance: https://health.hawaii.gov/san/files/2019/09/hmf-foods-01.29.2026.pdf
+Idaho — ID Dept of Health & Welfare Food Safety (new Direct-to-Consumer Commerce Act, March 2026): https://healthandwelfare.idaho.gov/health-wellness/community-health/food-safety
+Illinois — IL Dept of Public Health: https://dph.illinois.gov/topics-services/food-safety/cottage-food.html
+Indiana — IN Dept of Health Home-Based Vendors FAQ: https://www.in.gov/health/food-protection/files/Home-Based-Vendors-FAQ-FINAL.pdf
+Kansas — Kansas Dept of Agriculture, Food Safety and Lodging Division (no verified URL)
+Kentucky — KY Cabinet for Health & Family Services Home-Based Processing: https://www.chfs.ky.gov/agencies/dph/dphps/fsb/Pages/homebasedprocessing.aspx
+Louisiana — Louisiana Dept of Health (cottage food is a statutory exemption under LRS 40:4.9, no dedicated program page; no verified URL)
+Maine — ME Dept of Agriculture, Conservation & Forestry: https://www.maine.gov/dacf/qar/permits_and_licenses/index.shtml
+Maryland — MD Dept of Health: https://health.maryland.gov/phpa/OEHFP/OFPCHS/Pages/CottageFoods.aspx
+Massachusetts — MA Dept of Public Health, Food Protection Program (no verified URL)
+Michigan — MI Dept of Agriculture & Rural Development: https://www.michigan.gov/mdard/food-dairy/cottage-food
+Minnesota — MN Dept of Agriculture: https://www.mda.state.mn.us/food-feed/cottage-food-law-guidance
+Mississippi — MS State Dept of Health: https://msdh.ms.gov/page/resources/5375.pdf
+Missouri — MO Dept of Health & Senior Services: https://health.mo.gov/safety/foodsafety/pdf/home-based-kitchen-food-prod-guidance.pdf
+Nebraska — NE Dept of Agriculture: https://nda.nebraska.gov/fscp/foods/cottagefood
+Nevada — Nevada Division of Public and Behavioral Health, Environmental Health Section (no verified URL)
+New Hampshire — NH Dept of Health and Human Services, Food Protection (no verified URL)
+New Jersey — NJ Dept of Health: https://www.nj.gov/health/cottagefood/
+New Mexico — New Mexico Environment Department, under the Homemade Food Act (no verified URL)
+New York — NY Dept of Agriculture & Markets: https://agriculture.ny.gov/food-safety/home-processing
+North Carolina — NC Dept of Agriculture & Consumer Services Home Processing Program, a voluntary program (no verified URL)
+Ohio — Ohio Department of Agriculture (no verified URL)
+Oregon — OR Dept of Agriculture Cottage Food Exemption FAQ: https://www.oregon.gov/oda/Documents/Publications/FoodSafety/CottageFoodExemptionFAQENG.pdf
+Pennsylvania — PA Dept of Agriculture, Limited Food Establishment program (no verified URL)
+Rhode Island — RI Dept of Health: https://health.ri.gov/food-safety/cottage-foods
+South Carolina — SC Dept of Agriculture, Home-Based Food Production Law: https://agriculture.sc.gov/divisions/consumer-protection/retail-food-safety/
+South Dakota — SD Dept of Health: https://doh.sd.gov/topics/food-lodging-safety/farmers-markets/
+Utah — see the Utah note above (no single statewide page; county health departments)
+Vermont — VT Dept of Health Home-Based Food Licenses & Exemptions: https://www.healthvermont.gov/environment/food-lodging-program/home-based-food-licenses-and-exemptions
+Virginia — VA Dept of Agriculture & Consumer Services Home Kitchen Exemption FAQ: https://www.vdacs.virginia.gov/pdf/kitchenbillfaq.pdf
+Washington — WA Dept of Agriculture: https://agr.wa.gov/cottagefood
+West Virginia — WV Department of Agriculture (no verified URL)
+Wisconsin — WI Dept of Agriculture, Trade and Consumer Protection (DATCP) — note: this is a legally contested area; candies/confections are currently banned under a 2024 court ruling the WI Supreme Court declined to review, only baked goods and high-acid canned goods are clearly allowed (no verified URL)
 
 ━━━ REFERENCE: Getting paid and reporting earnings (federal — applies in every state) ━━━
 - There is NO minimum amount below which self-employment income is exempt from being reported. Every dollar earned from cooking work is taxable and must be reported on your federal tax return, whether or not you receive any tax form for it.
