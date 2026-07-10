@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { isValidUsPhone } from '@/lib/phone'
+import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
@@ -753,7 +754,7 @@ export default function ChatWidget() {
               {/* Last assistant message */}
               {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'assistant' && (
                 <div className="bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5 text-sm text-gray-700 leading-relaxed">
-                  {chatMessages[chatMessages.length - 1].content}
+                  {renderMarkdown(chatMessages[chatMessages.length - 1].content)}
                 </div>
               )}
 
