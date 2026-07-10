@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { isValidUsPhone } from '@/lib/phone'
 import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
+import BecomeCookTimeline from '@/components/BecomeCookTimeline'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
@@ -453,8 +454,13 @@ export default function ChatWidget() {
           )}
 
           {view === 'learn' && (
-            <div className="flex-1 overflow-y-auto">
-              <EducationChat compact />
+            <div className="flex-1 overflow-y-auto flex flex-col">
+              <div className="px-4 pt-4 pb-2 border-b border-gray-100">
+                <BecomeCookTimeline compact />
+              </div>
+              <div className="flex-1 flex flex-col min-h-[360px]">
+                <EducationChat compact />
+              </div>
             </div>
           )}
 
