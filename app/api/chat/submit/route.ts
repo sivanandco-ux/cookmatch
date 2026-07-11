@@ -50,7 +50,7 @@ export async function POST(request: Request) {
           photo_url: null,
           cuisine_types: data.cuisine_types || [],
           dietary_specialties: data.dietary_specialties || [],
-          occasion_types: ['Daily Meals / Tiffin', 'Weekend Family Cooking', 'Festival / Occasion', 'Dinner Party'],
+          occasion_types: ['Daily Meals / Tiffin', 'Festival / Occasion'],
           languages: [language || 'English'],
           price_min: Math.max(Number(data.hourly_rate) || 0, 30),
           price_max: Math.max(Number(data.hourly_rate) || 0, 30),
