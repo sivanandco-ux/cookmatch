@@ -6,7 +6,7 @@ import type { CookWithDetails } from '@/lib/types'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian']
-const OCCASIONS = ['Daily Meals / Tiffin', 'Weekend Family Cooking', 'Festival / Occasion', 'Dinner Party']
+const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 
 export default async function CooksPage({
   searchParams,
