@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const FROM = 'CookMatch <onboarding@resend.dev>'
+const FROM = 'CookMatch <cookmatch-admin@sivanspices.com>'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 function getResend() {
