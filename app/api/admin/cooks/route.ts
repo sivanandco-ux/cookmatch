@@ -56,9 +56,9 @@ export async function PATCH(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   scoreProfile(cook.id).catch(err => console.error('[Admin activate] scoreProfile failed:', err))
-  sendWelcomeEmail({ cookName: cook.name, cookEmail: cook.email, cookId: cook.id })
+  await sendWelcomeEmail({ cookName: cook.name, cookEmail: cook.email, cookId: cook.id })
     .catch(err => console.error('[Admin activate] Welcome email failed:', err))
-  sendCheckinEmail({
+  await sendCheckinEmail({
     cookName: cook.name,
     cookEmail: cook.email,
     availabilityUrl: `${SITE_URL}/availability/${cook.id}`,

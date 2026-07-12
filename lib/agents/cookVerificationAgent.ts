@@ -146,12 +146,12 @@ Cook:
         else {
           console.log(`[Agent 1] APPROVED — ${name} is now active`)
           scoreProfile(cook_id).catch(err => console.error('[Agent 5] Error from Agent 1:', err))
-          sendWelcomeEmail({
+          await sendWelcomeEmail({
             cookName: name,
             cookEmail: email,
             cookId: cook_id,
           }).catch(err => console.error('[Agent 1] Welcome email failed:', err))
-          sendCheckinEmail({
+          await sendCheckinEmail({
             cookName: name,
             cookEmail: email,
             availabilityUrl: `${SITE_URL}/availability/${cook_id}`,
