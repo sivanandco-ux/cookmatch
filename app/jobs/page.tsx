@@ -142,10 +142,11 @@ export default async function JobBoardPage({
 
 function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookId?: string }) {
   const postedAt = new Date(job.created_at)
-  const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-    ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+  const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) +
+    ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' }) + ' PST'
   const needsGrocery = job.grocery_situation === 'need_grocery_pickup'
   const isTaken = job.status === 'taken'
+  const categoryLabel = CATEGORY_LABELS[job.job_category] ?? job.job_category
 
   return (
     <div className={`border rounded-xl p-5 flex flex-col gap-3 ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200'}`}>
@@ -153,11 +154,10 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className={`font-semibold ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
-            {CATEGORY_LABELS[job.job_category] ?? job.job_category}
+            {job.client_name ? `Posted by ${getInitials(job.client_name)} for ${categoryLabel}` : categoryLabel}
           </p>
           <p className="text-sm text-gray-500 mt-0.5">
             {formatDate(job.requested_date)} · {job.num_people} people
-            {job.client_name && <span className="ml-1">· posted by {getInitials(job.client_name)}</span>}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">

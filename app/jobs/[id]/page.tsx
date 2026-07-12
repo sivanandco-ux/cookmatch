@@ -98,6 +98,7 @@ export default async function JobDetailPage({
           <h1 className="text-2xl font-bold text-gray-900">
             {CATEGORY_LABELS[job.job_category] ?? job.job_category}
           </h1>
+          {job.client_name && <p className="text-gray-600 mt-1">Posted by {job.client_name}</p>}
           <p className="text-gray-500 mt-1">{job.city}</p>
         </div>
         <span className={`text-sm font-medium px-3 py-1 rounded-full ${
