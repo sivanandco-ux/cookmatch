@@ -5,10 +5,14 @@ type Track = {
   title: string
   subtitle: string
   totalTime: string
-  color: 'blue' | 'orange'
+  color: 'blue' | 'orange' | 'green'
   steps: Step[]
 }
 
+// Colors picked from and validated with the dataviz skill's categorical
+// palette (blue/aqua/orange ordering) — CVD separation ΔE 35.6, well clear
+// of the safety floor. "Green" here maps to the aqua/emerald family, not a
+// generic green, to preserve that separation from orange.
 const COLORS = {
   blue: {
     dot: 'bg-blue-600',
@@ -21,6 +25,12 @@ const COLORS = {
     line: 'bg-orange-200',
     chip: 'text-orange-700 bg-orange-50 border-orange-200',
     header: 'bg-orange-50 border-orange-200 text-orange-700',
+  },
+  green: {
+    dot: 'bg-emerald-600',
+    line: 'bg-emerald-200',
+    chip: 'text-emerald-700 bg-emerald-50 border-emerald-200',
+    header: 'bg-emerald-50 border-emerald-200 text-emerald-700',
   },
 } as const
 
@@ -53,11 +63,25 @@ const TRACKS: Track[] = [
       { title: 'Permit approved — start selling', description: 'Subject to meal and revenue caps (e.g. 30 meals/day, $100k/year in Alameda County).', time: '🎉' },
     ],
   },
+  {
+    icon: '🍪',
+    title: 'Sell Shelf-Stable Snacks & Baked Goods',
+    subtitle: 'Cottage Food — allowed in all 50 states + DC, no MEHKO permit needed',
+    totalTime: 'Roughly 1–3 weeks',
+    color: 'green',
+    steps: [
+      { title: 'Know what qualifies', description: 'Shelf-stable only: baked goods (no cream/custard fillings), candies & chocolates, jams/jellies/preserves, dried herbs & spices, roasted nuts, honey, granola, popcorn. Nothing needing refrigeration.', time: 'Day 0' },
+      { title: 'Complete a food safety course', description: 'Most states require a short training before you register.', time: '~2–4 hrs' },
+      { title: 'Register with your state/county', description: 'Many states only need registration; some add a permit + kitchen inspection for higher sales tiers.', time: '~1–2 weeks' },
+      { title: 'Label your products', description: 'A "made in a home kitchen, not state-inspected" disclosure, plus ingredients and allergens.', time: '~1 day' },
+      { title: 'Start selling', description: 'Direct to consumers — home pickup, farmers markets, or online orders, depending on your state.', time: '🎉' },
+    ],
+  },
 ]
 
 export default function BecomeCookTimeline({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={compact ? 'flex flex-col gap-6' : 'grid grid-cols-1 md:grid-cols-2 gap-8'}>
+    <div className={compact ? 'flex flex-col gap-6' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}>
       {TRACKS.map(track => {
         const c = COLORS[track.color]
         return (
