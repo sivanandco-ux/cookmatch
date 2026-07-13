@@ -5,7 +5,7 @@ export default function BecomeACookPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Three Paths to Become a Cook</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Three Paths to Cook & Sell Food</h1>
         <p className="text-sm text-gray-500 mt-1">What each path looks like step by step, from getting started to your first sale or booking.</p>
       </div>
 

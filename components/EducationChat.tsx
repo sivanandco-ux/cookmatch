@@ -87,7 +87,7 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
     <div className={`flex flex-col ${compact ? 'h-full' : 'gap-4'}`}>
       {!compact && (
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Become a Cook</h2>
+          <h2 className="text-xl font-bold text-gray-900">Cook & Sell Food</h2>
           <p className="text-sm text-gray-500 mt-1">Ask about certification, selling food from home, or getting paid — anywhere in the US.</p>
         </div>
       )}

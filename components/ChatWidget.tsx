@@ -404,7 +404,7 @@ export default function ChatWidget() {
     : view === 'client' ? 'Post a Job'
     : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post a Job')
     : view === 'review' ? 'Review & Confirm'
-    : view === 'learn' ? 'Become a Cook'
+    : view === 'learn' ? 'Cook & Sell Food'
     : 'All Done!'
 
   const showBack = view !== 'home' && view !== 'done'
@@ -447,7 +447,7 @@ export default function ChatWidget() {
               </button>
               <button onClick={() => setView('learn')}
                 className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
-                <p className="font-semibold text-gray-800 text-sm">📚 Learn How to Become a Cook</p>
+                <p className="font-semibold text-gray-800 text-sm">📚 Learn How to Cook & Sell Food</p>
                 <p className="text-xs text-gray-500 mt-1">Certification, selling food from home, and getting paid</p>
               </button>
             </div>

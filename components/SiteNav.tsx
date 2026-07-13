@@ -5,7 +5,7 @@ import { useState } from 'react'
 const LINKS = [
   { href: '/cooks', label: 'Hire a Cook' },
   { href: '/jobs', label: 'Job Board' },
-  { href: '/become-a-cook', label: 'Become a Cook' },
+  { href: '/become-a-cook', label: 'Cook & Sell Food' },
 ]
 
 export default function SiteNav() {
