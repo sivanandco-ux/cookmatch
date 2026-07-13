@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import ChatWidget from '@/components/ChatWidget'
+import SiteNav from '@/components/SiteNav'
 
 export const metadata: Metadata = {
   title: 'Home Cooks — Sivan Spices',
@@ -26,25 +27,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-screen bg-gray-50 text-gray-900">
-        <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <a href="https://sivanspices.com" target="_blank" rel="noopener noreferrer">
-              <img src="/sivanspices-logo.png" alt="Sivan Spices" className="h-36 w-auto" />
+        <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <a href="https://sivanspices.com" target="_blank" rel="noopener noreferrer" className="shrink-0">
+              <img src="/sivanspices-logo.png" alt="Sivan Spices" className="h-12 sm:h-16 md:h-36 w-auto" />
             </a>
-            <div className="flex flex-col">
+            <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
-              <span className="text-xs text-gray-600 leading-tight">Cooks who visit your home to prepare healthy meals</span>
+              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Cooks who visit your home to prepare healthy meals</span>
             </div>
           </div>
-          <nav className="flex gap-6 items-center text-sm font-medium">
-            <a href="/cooks" className="text-gray-600 hover:text-orange-600">Hire a Cook</a>
-            <a href="/jobs" className="text-gray-600 hover:text-orange-600">Job Board</a>
-            <a href="/become-a-cook" className="text-gray-600 hover:text-orange-600">Become a Cook</a>
-            <div className="flex items-center border border-orange-300 rounded-lg overflow-hidden">
-              <a href="/login" className="px-4 py-2 text-gray-600 hover:bg-orange-50 hover:text-orange-600">Log In</a>
-              <a href="/apply" className="px-4 py-2 bg-orange-600 text-white hover:bg-orange-700">Sign Up</a>
-            </div>
-          </nav>
+          <SiteNav />
         </header>
         <main>{children}</main>
         <ChatWidget />
