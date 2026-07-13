@@ -3,7 +3,7 @@ export default function HowItWorksPage() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
       <p className="text-gray-600 mb-10">
-        Sivan Spices Home Cooks connects you with cooks across the USA who deliver healthy home-cooked meals or come cook them in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
+        Sivan Spices Home Cooks connects you with cooks across the USA who deliver healthy home-cooked food or come cook it in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
       </p>
 
       <div className="flex flex-col gap-10">
