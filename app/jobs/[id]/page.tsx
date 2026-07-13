@@ -38,15 +38,19 @@ export default async function JobDetailPage({
   searchParams: Promise<{ cook_id?: string }>
 }) {
   const { id } = await params
-  const { cook_id } = await searchParams
+  const { cook_id: cookIdParam } = await searchParams
   const supabase = getSupabase()
+  const sessionSupabase = await createSessionClient()
+  const { data: { user } } = await sessionSupabase.auth.getUser()
 
   // A cook_id in the URL claims to identify a specific cook — verify the
-  // logged-in session actually owns that cook before granting the cook view.
-  if (cook_id) {
-    const sessionSupabase = await createSessionClient()
-    const { data: { user } } = await sessionSupabase.auth.getUser()
-    const currentPath = `/jobs/${id}?cook_id=${cook_id}`
+  // logged-in session actually owns that cook, so a stale/guessed/foreign
+  // cook_id can't be used to impersonate. The cook view itself is always
+  // driven by the session below, never by this param, so it also works
+  // when someone reaches this page without a cook_id in the URL at all
+  // (e.g. via the top nav, a bookmark, or an email link).
+  if (cookIdParam) {
+    const currentPath = `/jobs/${id}?cook_id=${cookIdParam}`
 
     if (!user) {
       redirect(`/login?error=not_authorized&redirectTo=${encodeURIComponent(currentPath)}`)
@@ -55,7 +59,7 @@ export default async function JobDetailPage({
     const { data: ownedCook } = await supabase
       .from('cooks')
       .select('user_id')
-      .eq('id', cook_id)
+      .eq('id', cookIdParam)
       .maybeSingle()
 
     if (!ownedCook || ownedCook.user_id !== user.id) {
@@ -65,8 +69,8 @@ export default async function JobDetailPage({
 
   const [{ data: job }, cookResult] = await Promise.all([
     supabase.from('job_posts').select('*').eq('id', id).single(),
-    cook_id
-      ? supabase.from('cooks').select('id, name, status').eq('id', cook_id).single()
+    user
+      ? supabase.from('cooks').select('id, name, status').eq('user_id', user.id).maybeSingle()
       : Promise.resolve({ data: null }),
   ])
 
@@ -74,6 +78,7 @@ export default async function JobDetailPage({
 
   const cook = cookResult.data
   const isCook = !!(cook && cook.status === 'active')
+  const cook_id = cook?.id
 
   // Check if cook already expressed interest and get full status
   let existingInterest: { id: string; cook_confirmed: boolean; client_confirmed: boolean } | null = null

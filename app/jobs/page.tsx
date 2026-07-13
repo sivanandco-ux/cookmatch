@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
+import { createClient as createSessionClient } from '@/lib/supabase/server'
 
 function getSupabase() {
   return createClient(
@@ -58,26 +59,30 @@ interface JobTile {
   additional_notes?: string | null
 }
 
-export default async function JobBoardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ cook_id?: string }>
-}) {
-  const { cook_id } = await searchParams
+export default async function JobBoardPage() {
   const supabase = getSupabase()
 
-  // Verify cook_id if provided
+  // Cook identity is derived from the actual login session, never from a URL
+  // param — otherwise anyone could see the cook-only view by pasting a
+  // guessed ?cook_id= into the URL, and a genuinely logged-in cook would lose
+  // that view the moment a link (or a bookmark, or an email link) didn't
+  // happen to carry it.
   let isCook = false
   let cookName = ''
-  if (cook_id) {
+  let cook_id: string | undefined
+
+  const sessionSupabase = await createSessionClient()
+  const { data: { user } } = await sessionSupabase.auth.getUser()
+  if (user) {
     const { data: cook } = await supabase
       .from('cooks')
-      .select('name, status')
-      .eq('id', cook_id)
-      .single()
+      .select('id, name, status')
+      .eq('user_id', user.id)
+      .maybeSingle()
     if (cook && cook.status === 'active') {
       isCook = true
       cookName = cook.name
+      cook_id = cook.id
     }
   }
 
