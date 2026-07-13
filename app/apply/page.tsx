@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { US_STATES } from '@/lib/usStates'
+import CityInput from '@/components/CityInput'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian']
 const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
-const AREAS = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 const JOB_CATEGORIES = [
   { value: 'family_cooking', label: 'Family Cooking (2–5 people)' },
   { value: 'small_event', label: 'Small Event (6–10 people)' },
@@ -38,6 +39,7 @@ export default function ApplyPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [minHours, setMinHours] = useState(2)
+  const [pricingMode, setPricingMode] = useState<'hourly' | 'per_item'>('hourly')
   const [intro, setIntro] = useState('')
   const [polishing, setPolishing] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -133,7 +135,27 @@ export default function ApplyPage() {
     // Auto-generate tagline from first sentence of intro
     const tagline = intro.split(/[.!?]/)[0].trim().slice(0, 100) || intro.slice(0, 100)
 
-    const hourlyRate = Number(formData.get('hourly_rate'))
+    let priceValue: number
+    let priceUnit: string
+    if (pricingMode === 'hourly') {
+      priceValue = Number(formData.get('hourly_rate'))
+      priceUnit = 'hourly'
+    } else {
+      priceValue = Number(formData.get('item_price'))
+      priceUnit = String(formData.get('item_unit') || '').trim()
+      if (!priceUnit) {
+        setError('Please describe what your price covers, e.g. "dozen cookies" or "cake".')
+        setLoading(false)
+        return
+      }
+    }
+
+    const primaryCity = String(formData.get('primary_city') || '').trim()
+    if (!primaryCity) {
+      setError('Please enter the city you\'re located in.')
+      setLoading(false)
+      return
+    }
 
     const body = {
       name: formData.get('name'),
@@ -149,12 +171,13 @@ export default function ApplyPage() {
       dietary_specialties: getChecked('dietary_specialties'),
       occasion_types: getChecked('occasion_types'),
       languages: getChecked('languages'),
-      price_min: hourlyRate,
-      price_max: hourlyRate,
-      price_unit: 'hourly',
-      min_hours: minHours,
+      price_min: priceValue,
+      price_max: priceValue,
+      price_unit: priceUnit,
+      min_hours: pricingMode === 'hourly' ? minHours : null,
+      state: formData.get('state') || null,
       service_areas: [...new Set([
-        ...getChecked('service_areas'),
+        primaryCity,
         ...String(formData.get('service_areas_other') || '').split(',').map(s => s.trim()).filter(Boolean),
       ])],
       group_size_min: 2,
@@ -244,7 +267,7 @@ export default function ApplyPage() {
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received!</h1>
-        <p className="text-gray-600 mb-2">Thank you for applying to CookMatch. We will review your application and reach out within 2–3 business days.</p>
+        <p className="text-gray-600 mb-2">Thank you for applying to Sivan Spices Home Cooks. We will review your application and reach out within 2–3 business days.</p>
         <p className="text-gray-500 text-sm">You will be notified via email once your profile is verified and live.</p>
         <a href="/cooks" className="mt-8 inline-block text-orange-600 hover:underline">Browse other cooks →</a>
       </div>
@@ -253,15 +276,15 @@ export default function ApplyPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join CookMatch as a Cook</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Sivan Spices as a Cook</h1>
       <p className="text-gray-600 mb-8">Share your love of cooking and get discovered by families in your area.</p>
 
       {/* Platform benefits */}
       <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8">
-        <h2 className="text-base font-semibold text-orange-900 mb-3">Why join CookMatch?</h2>
+        <h2 className="text-base font-semibold text-orange-900 mb-3">Why join Sivan Spices?</h2>
         <ul className="space-y-2 text-sm text-orange-800">
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
-          <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own price, hourly or per item — no bidding, no rate cuts</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Clients come to you with a clear brief — no guessing what they need</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Your profile stays live so clients can find and book you any time</li>
         </ul>
@@ -372,49 +395,111 @@ export default function ApplyPage() {
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
           <div>
             <h2 className="text-lg font-semibold">Pricing</h2>
-            <p className="text-sm text-gray-500 mt-1">All sessions are billed hourly with a minimum of 2 hours.</p>
+            <p className="text-sm text-gray-500 mt-1">Choose how you charge, depending on how you cook.</p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Your hourly rate ($)</label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">$</span>
-              <input
-                name="hourly_rate"
-                type="number"
-                required
-                min={30}
-                defaultValue={30}
-                placeholder="e.g. 35"
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
-              />
-              <span className="text-sm text-gray-500">per hour</span>
+            <p className="text-sm font-medium text-gray-700 mb-2">How do you charge?</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPricingMode('hourly')}
+                className={`flex-1 border rounded-lg px-3 py-2 text-left ${pricingMode === 'hourly' ? 'border-orange-400 bg-orange-50' : 'border-gray-300'}`}
+              >
+                <span className="text-sm font-medium text-gray-800 block">Hourly</span>
+                <span className="text-xs text-gray-500">I cook in the client's home</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPricingMode('per_item')}
+                className={`flex-1 border rounded-lg px-3 py-2 text-left ${pricingMode === 'per_item' ? 'border-orange-400 bg-orange-50' : 'border-gray-300'}`}
+              >
+                <span className="text-sm font-medium text-gray-800 block">Per item</span>
+                <span className="text-xs text-gray-500">I sell snacks, cakes, cookies, etc.</span>
+              </button>
             </div>
-            <p className="text-xs text-gray-400 mt-1">Starts at the platform minimum of $30/hr — raise it if you'd like</p>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">
-              Minimum hours per visit: <span className="text-orange-600 font-semibold">{minHours} hours</span>
-            </label>
-            <input
-              type="range"
-              min={2}
-              max={6}
-              value={minHours}
-              onChange={e => setMinHours(Number(e.target.value))}
-              className="w-full accent-orange-600"
-            />
-            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
-              <span>2 hrs (minimum)</span>
-              <span>6 hrs (maximum)</span>
+          {pricingMode === 'hourly' ? (
+            <>
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">Your hourly rate ($)</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">$</span>
+                  <input
+                    name="hourly_rate"
+                    type="number"
+                    required
+                    min={30}
+                    defaultValue={30}
+                    placeholder="e.g. 35"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
+                  />
+                  <span className="text-sm text-gray-500">per hour</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Starts at the platform minimum of $30/hr — raise it if you'd like</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Minimum hours per visit: <span className="text-orange-600 font-semibold">{minHours} hours</span>
+                </label>
+                <input
+                  type="range"
+                  min={2}
+                  max={6}
+                  value={minHours}
+                  onChange={e => setMinHours(Number(e.target.value))}
+                  className="w-full accent-orange-600"
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                  <span>2 hrs (minimum)</span>
+                  <span>6 hrs (maximum)</span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Set the minimum hours you require to make the trip worthwhile. Platform minimum is 2 hours.</p>
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">Your price ($)</label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-gray-500">$</span>
+                <input
+                  name="item_price"
+                  type="number"
+                  required
+                  min={1}
+                  placeholder="e.g. 15"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28"
+                />
+                <span className="text-sm text-gray-500">per</span>
+                <input
+                  name="item_unit"
+                  type="text"
+                  required
+                  placeholder="e.g. dozen cookies, cake, batch of 12"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-[160px]"
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1">e.g. &quot;$15 per dozen cookies&quot; or &quot;$25 per cake&quot;</p>
             </div>
-            <p className="text-xs text-gray-400 mt-1">Set the minimum hours you require to make the trip worthwhile. Platform minimum is 2 hours.</p>
-          </div>
+          )}
 
-          <CheckboxGroup name="service_areas" options={AREAS} label="Areas you serve" />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">State</label>
+              <select name="state" required defaultValue="" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                <option value="" disabled>Select your state</option>
+                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">City</label>
+              <CityInput name="primary_city" required placeholder="Enter your city" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+          </div>
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-2 block">Other areas you serve (optional)</label>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Other cities you serve (optional)</label>
             <input
               name="service_areas_other"
               placeholder="e.g. San Jose, Oakland — comma-separated"
@@ -473,10 +558,10 @@ export default function ApplyPage() {
         {/* Approval */}
         <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-orange-900 mb-2">Approval</h2>
-          <p className="text-sm text-gray-700 mb-3">At this time, CookMatch approves cooks by checking references. We may follow up with you after you apply.</p>
+          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Spices approves cooks by checking references. We may follow up with you after you apply.</p>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I accept the CookMatch Terms of Service</span>
+            <span className="text-sm text-gray-700">I accept the Sivan Spices Terms of Service</span>
           </label>
         </section>
 

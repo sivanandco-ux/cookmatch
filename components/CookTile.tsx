@@ -35,10 +35,9 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
   const hasRating = sessionCount >= 3
   const isTraining = cook.status === 'training'
 
-  const priceLabel = {
-    hourly: '/hr',
-    per_session: '/session',
-  }[cook.price_unit] ?? '/session'
+  const priceLabel = cook.price_unit === 'hourly' ? '/hr'
+    : cook.price_unit === 'per_session' ? '/session'
+    : cook.price_unit ? ` / ${cook.price_unit}` : '/session'
 
   const isPending = cook.status === 'pending'
 

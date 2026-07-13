@@ -48,10 +48,9 @@ export default async function CookProfilePage({
   const sessionCount = score?.session_count ?? 0
   const hasRating = sessionCount >= 3
 
-  const priceLabel = {
-    hourly: '/hr',
-    per_session: '/session',
-  }[c.price_unit] ?? '/session'
+  const priceLabel = c.price_unit === 'hourly' ? '/hr'
+    : c.price_unit === 'per_session' ? '/session'
+    : c.price_unit ? ` / ${c.price_unit}` : '/session'
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">

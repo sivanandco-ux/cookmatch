@@ -63,6 +63,13 @@ export async function POST(request: Request) {
     cuisineTypes = [...cuisineTypes, ...validated]
   }
 
+  // The $30 platform minimum only applies to hourly (in-home cooking) pricing —
+  // a per-item price like "$15 per dozen cookies" is a different pricing
+  // model entirely and shouldn't be floored to an hourly-rate minimum.
+  const isHourly = body.price_unit === 'hourly'
+  const priceMin = isHourly ? Math.max(Number(body.price_min) || 0, 30) : Number(body.price_min) || 0
+  const priceMax = isHourly ? Math.max(Number(body.price_max) || 0, 30) : Number(body.price_max) || 0
+
   // Insert cook application (status = 'pending' until verified by Agent 1 in Phase 2)
   const { data: cook, error } = await supabase
     .from('cooks')
@@ -80,10 +87,11 @@ export async function POST(request: Request) {
       dietary_specialties: body.dietary_specialties,
       occasion_types: body.occasion_types,
       languages: body.languages,
-      price_min: Math.max(Number(body.price_min) || 0, 30),
-      price_max: Math.max(Number(body.price_min) || 0, 30),
+      price_min: priceMin,
+      price_max: priceMax,
       price_unit: body.price_unit,
       min_hours: body.min_hours ?? null,
+      state: body.state ?? null,
       service_areas: body.service_areas,
       group_size_min: 2,
       group_size_max: Math.min(body.group_size_max || 14, 14),
