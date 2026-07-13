@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { US_STATES } from '@/lib/usStates'
 import CityInput from '@/components/CityInput'
 
-const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
+const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
