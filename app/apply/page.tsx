@@ -40,6 +40,8 @@ export default function ApplyPage() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [minHours, setMinHours] = useState(2)
   const [pricingMode, setPricingMode] = useState<'hourly' | 'per_item'>('hourly')
+  const [menuDescription, setMenuDescription] = useState('')
+  const [polishingMenu, setPolishingMenu] = useState(false)
   const [intro, setIntro] = useState('')
   const [polishing, setPolishing] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -104,6 +106,19 @@ export default function ApplyPage() {
     setPolishing(false)
   }
 
+  async function handlePolishMenu() {
+    if (menuDescription.trim().length < 10) return
+    setPolishingMenu(true)
+    const res = await fetch('/api/polish-intro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: menuDescription, context: 'menu' }),
+    })
+    const data = await res.json()
+    if (data.polished) setMenuDescription(data.polished)
+    setPolishingMenu(false)
+  }
+
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -137,14 +152,22 @@ export default function ApplyPage() {
 
     let priceValue: number
     let priceUnit: string
+    const menuText = menuDescription.trim()
     if (pricingMode === 'hourly') {
       priceValue = Number(formData.get('hourly_rate'))
       priceUnit = 'hourly'
     } else {
-      priceValue = Number(formData.get('item_price'))
-      priceUnit = String(formData.get('item_unit') || '').trim()
-      if (!priceUnit) {
-        setError('Please describe what your price covers, e.g. "dozen cookies" or "cake".')
+      // Per-item pricing is optional here — a cook selling many different
+      // things (cookies, cakes, snacks...) may not have one single price to
+      // give, and can describe their menu and pricing in their own words
+      // instead. Require at least one of the two so the section isn't
+      // submitted completely blank.
+      const itemPriceRaw = String(formData.get('item_price') || '').trim()
+      const itemUnit = String(formData.get('item_unit') || '').trim()
+      priceValue = itemPriceRaw ? Number(itemPriceRaw) : 0
+      priceUnit = itemUnit || 'per_item'
+      if (!itemPriceRaw && !menuText) {
+        setError('Please add a price, or describe what you sell and your pricing below.')
         setLoading(false)
         return
       }
@@ -182,7 +205,7 @@ export default function ApplyPage() {
       ])],
       group_size_min: 2,
       group_size_max: 14,
-      signature_dishes: '',
+      signature_dishes: pricingMode === 'per_item' ? menuText : '',
       years_experience: 0,
       available_recurring: false,
       recurring_options: [],
@@ -460,28 +483,50 @@ export default function ApplyPage() {
               </div>
             </>
           ) : (
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">Your price ($)</label>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-gray-500">$</span>
-                <input
-                  name="item_price"
-                  type="number"
-                  required
-                  min={1}
-                  placeholder="e.g. 15"
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28"
-                />
-                <span className="text-sm text-gray-500">per</span>
-                <input
-                  name="item_unit"
-                  type="text"
-                  required
-                  placeholder="e.g. dozen cookies, cake, batch of 12"
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-[160px]"
-                />
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">Your price ($) — optional if you sell several different items</label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm text-gray-500">$</span>
+                  <input
+                    name="item_price"
+                    type="number"
+                    min={1}
+                    placeholder="e.g. 15"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28"
+                  />
+                  <span className="text-sm text-gray-500">per</span>
+                  <input
+                    name="item_unit"
+                    type="text"
+                    placeholder="e.g. dozen cookies, cake, batch of 12"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-[160px]"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 mt-1">e.g. &quot;$15 per dozen cookies&quot; or &quot;$25 per cake&quot;</p>
               </div>
-              <p className="text-xs text-gray-400 mt-1">e.g. &quot;$15 per dozen cookies&quot; or &quot;$25 per cake&quot;</p>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-sm font-medium text-gray-700">Describe what you sell &amp; your pricing</label>
+                  <button
+                    type="button"
+                    onClick={handlePolishMenu}
+                    disabled={polishingMenu || menuDescription.trim().length < 10}
+                    className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 disabled:opacity-40"
+                  >
+                    {polishingMenu ? 'Polishing...' : '✦ Polish'}
+                  </button>
+                </div>
+                <textarea
+                  value={menuDescription}
+                  onChange={e => setMenuDescription(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. Chocolate chip cookies $12/dozen, red velvet cake $25, samosas $1.50 each"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
+                />
+                <p className="text-xs text-gray-400 mt-1">If you sell many kinds of items, list them here instead of a single price above — we can help polish the wording.</p>
+              </div>
             </div>
           )}
 

@@ -1,5 +1,9 @@
 export type CookStatus = 'pending' | 'active' | 'watch' | 'training' | 'dormant'
-export type PriceUnit = 'hourly' | 'per_session'
+// price_unit is a free-text DB column — 'hourly' and 'per_session' are the
+// known values checked against directly, 'per_item' is the per-item pricing
+// mode, and (string & {}) preserves those literals for autocomplete while
+// still accepting any custom unit text (e.g. "dozen cookies").
+export type PriceUnit = 'hourly' | 'per_session' | 'per_item' | (string & {})
 export type SessionType = 'one_time' | 'recurring'
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly'
 export type JobCategory = 'family_cooking' | 'small_event' | 'medium_event'
