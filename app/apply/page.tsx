@@ -470,14 +470,13 @@ export default function ApplyPage() {
           </div>
         </section>
 
-        {/* Verification */}
+        {/* Approval */}
         <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-orange-900 mb-2">Verification</h2>
-          <p className="text-sm text-gray-700 mb-3">To be listed on CookMatch you will need to provide a government-issued photo ID (driver's license, passport, or state ID). We will contact you after submission to complete this step.</p>
-          <p className="text-xs text-gray-500 mb-4">Your documents are never stored or displayed publicly.</p>
+          <h2 className="text-lg font-semibold text-orange-900 mb-2">Approval</h2>
+          <p className="text-sm text-gray-700 mb-3">At this time, CookMatch approves cooks by checking references. We may follow up with you after you apply.</p>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I agree to provide a government-issued ID and accept the CookMatch Terms of Service</span>
+            <span className="text-sm text-gray-700">I accept the CookMatch Terms of Service</span>
           </label>
         </section>
 

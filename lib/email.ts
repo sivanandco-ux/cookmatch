@@ -674,7 +674,7 @@ export async function sendNewJobNotification({
       <p style="margin-top:12px;">
         <a href="${dashboardUrl}" style="color:#ea580c;">Go to my dashboard →</a>
       </p>
-      <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are a verified cook on CookMatch.</p>
+      <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are an approved cook on CookMatch.</p>
       <p>— CookMatch Team</p>
     `,
   })

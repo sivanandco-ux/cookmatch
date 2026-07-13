@@ -156,8 +156,6 @@ export default async function CookProfilePage({
           <div>
             <h2 className="text-lg font-semibold mb-3">Verified</h2>
             <div className="flex flex-wrap gap-2">
-              {verification?.id_verified && <VerifiedBadge label="ID Verified" detail={verification.id_verified_at ? new Date(verification.id_verified_at).toLocaleDateString() : undefined} />}
-              {verification?.background_check_passed && <VerifiedBadge label="Background Checked" />}
               {verification?.food_handler_certified && (
                 <VerifiedBadge
                   label="Food Handler Certified"

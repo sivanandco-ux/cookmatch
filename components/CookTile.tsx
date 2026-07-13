@@ -114,8 +114,6 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
 
           {/* Verified badges */}
           <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-gray-100">
-            {verification?.id_verified && <VerifiedBadge label="ID" />}
-            {verification?.background_check_passed && <VerifiedBadge label="Background" />}
             {verification?.food_handler_certified && <VerifiedBadge label="Food Handler" />}
             {verification?.references_verified && <VerifiedBadge label="References" />}
           </div>

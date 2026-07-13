@@ -27,7 +27,7 @@ export default function PostJobPage() {
         <div className="text-5xl mb-4">✓</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Job posted</h1>
         <p className="text-gray-600 mb-2">
-          Your job brief is now live on the board. Verified cooks will review it and express interest.
+          Your job brief is now live on the board. Approved cooks will review it and express interest.
         </p>
         <p className="text-gray-500 text-sm mb-8">
           You will receive an email when a cook wants the job. You then confirm the cook before contact details are shared.
@@ -51,7 +51,7 @@ export default function PostJobPage() {
       </a>
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Post a Job</h1>
       <p className="text-gray-600 mb-8 text-sm">
-        Describe what you need and verified cooks will express interest. You choose who to confirm.
+        Describe what you need and approved cooks will express interest. You choose who to confirm.
       </p>
       <SessionBrief
         mode="job-board"

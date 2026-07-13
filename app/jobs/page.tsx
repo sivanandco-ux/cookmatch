@@ -122,7 +122,7 @@ export default async function JobBoardPage() {
 
       {!isCook && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 text-sm text-blue-800">
-          Are you a verified cook? Access the full job brief and express interest from your{' '}
+          Are you an approved cook? Access the full job brief and express interest from your{' '}
           <span className="font-medium">cook dashboard</span>.
         </div>
       )}

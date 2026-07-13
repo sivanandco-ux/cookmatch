@@ -115,7 +115,7 @@ export default function CookProfileUploads({
         {hasId ? (
           <p className="text-sm text-green-700 mb-2">✓ ID on file</p>
         ) : (
-          <p className="text-sm text-gray-500 mb-2">Upload a driver's license, passport, or state ID to complete verification.</p>
+          <p className="text-sm text-gray-500 mb-2">Upload a driver's license, passport, or state ID to keep on file with your profile.</p>
         )}
         <input ref={idInputRef} type="file" accept="image/*,.pdf" onChange={handleIdUpload} className="hidden" />
         <div className="flex items-center gap-2">
