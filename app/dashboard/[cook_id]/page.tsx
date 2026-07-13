@@ -55,6 +55,10 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
 }
 
+function getInitials(name: string): string {
+  return name.trim().split(/\s+/).map(w => w[0].toUpperCase()).join('.')
+}
+
 export default async function CookDashboardPage({
   params,
 }: {
@@ -82,10 +86,10 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, occasion, requested_date, num_people, city, grocery_situation, cleanup_needed, created_at, status')
+      .select('id, job_category, occasion, requested_date, num_people, city, client_name, grocery_situation, cleanup_needed, created_at, status')
       .in('status', ['open', 'taken'])
       .gte('requested_date', today)
-      .order('requested_date', { ascending: true })
+      .order('created_at', { ascending: false })
       .limit(8),
     supabase
       .from('job_interests')
@@ -296,10 +300,13 @@ export default async function CookDashboardPage({
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
+            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
               const isTaken = job.status === 'taken'
+              const postedAt = new Date(job.created_at)
+              const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) +
+                ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' }) + ' PST'
               return (
                 <a
                   key={job.id}
@@ -308,8 +315,11 @@ export default async function CookDashboardPage({
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className={`text-sm font-medium ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>{categoryLabel}</p>
+                      <p className={`text-sm font-medium ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
+                        {job.client_name ? `Posted by ${getInitials(job.client_name)} for ${categoryLabel}` : categoryLabel}
+                      </p>
                       <p className="text-xs text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Posted {postedLabel}</p>
                     </div>
                     <div className="flex-shrink-0">
                       {isTaken
