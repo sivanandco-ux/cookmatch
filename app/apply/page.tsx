@@ -125,7 +125,11 @@ export default function ApplyPage() {
     const formData = new FormData(e.currentTarget)
     const getChecked = (name: string) => formData.getAll(name).map(String)
 
-    const cuisineTypes = getChecked('cuisine_types')
+    // "Other" itself isn't a real cuisine — it's just the checkbox that
+    // points at the free-text field below it, so it must never be stored as
+    // if it were an actual cuisine type (that field's validated text is what
+    // actually gets saved, below).
+    const cuisineTypes = getChecked('cuisine_types').filter(c => c !== 'Other')
     const otherCuisines = (formData.get('other_cuisines') as string || '').trim()
     if (cuisineTypes.length === 0 && !otherCuisines) {
       setError('Please select at least one cuisine you cook.')
