@@ -13,7 +13,7 @@ type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
 const CUISINES = ['South Indian', 'North Indian', 'Tamil', 'Gujarati', 'Punjabi', 'Bengali', 'Maharashtrian', 'Hyderabadi', 'Rajasthani', 'Goan']
-const DIETARY = ['Vegetarian', 'Non-Vegetarian']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const GROCERY = [
   { value: 'client_has_everything', label: 'I have everything ready' },

@@ -123,8 +123,8 @@ export default async function CookProfilePage({
               <p className="font-medium">{c.languages.join(', ')}</p>
             </div>
             <div>
-              <p className="text-gray-500 mb-1">{c.price_unit === 'per_item' ? 'Menu & Pricing' : 'Signature Dishes'}</p>
-              <p className="font-medium whitespace-pre-line">{c.signature_dishes}</p>
+              <p className="text-gray-500 mb-1">Signature Dishes</p>
+              <p className="font-medium">{c.signature_dishes}</p>
             </div>
             <div>
               <p className="text-gray-500 mb-1">Service Areas</p>

@@ -24,7 +24,7 @@ Collect ALL of these fields before submitting:
 - occasion: "Regular Meal" or "Festival / Occasion"
 - num_people (2–14)
 - num_dishes
-- dietary_restrictions: array from ["Vegetarian","Non-Vegetarian"] — empty array if none
+- dietary_restrictions: array from ["Vegetarian","Non-Vegetarian","Eggetarian"] — empty array if none
 - grocery_situation: "client_has_everything" | "need_grocery_pickup" | "cook_brings_ingredients"
 - cleanup_needed: true or false
 - text_description: brief summary
@@ -47,7 +47,7 @@ Collect ALL of these fields before submitting:
 - phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
 - city: any city/town (this is a nationwide platform — accept whatever city they say, do not restrict to a fixed list)
 - cuisine_types: array from [South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan]
-- dietary_specialties: array from ["Vegetarian","Non-Vegetarian"]
+- dietary_specialties: array from ["Vegetarian","Non-Vegetarian","Eggetarian"]
 - years_experience (number)
 - hourly_rate: their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
 - intro: 2-3 sentence bio about their cooking background and style

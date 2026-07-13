@@ -6,7 +6,7 @@ import { US_STATES } from '@/lib/usStates'
 import CityInput from '@/components/CityInput'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other Indian']
-const DIETARY = ['Vegetarian', 'Non-Vegetarian']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 const JOB_CATEGORIES = [
@@ -39,9 +39,9 @@ export default function ApplyPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [minHours, setMinHours] = useState(2)
-  const [pricingMode, setPricingMode] = useState<'hourly' | 'per_item'>('hourly')
-  const [menuDescription, setMenuDescription] = useState('')
-  const [polishingMenu, setPolishingMenu] = useState(false)
+  const [cooksAtClientLocation, setCooksAtClientLocation] = useState(false)
+  const [arrangementOtherChecked, setArrangementOtherChecked] = useState(false)
+  const [occasionOtherChecked, setOccasionOtherChecked] = useState(false)
   const [intro, setIntro] = useState('')
   const [polishing, setPolishing] = useState(false)
   const photoInputRef = useRef<HTMLInputElement>(null)
@@ -106,19 +106,6 @@ export default function ApplyPage() {
     setPolishing(false)
   }
 
-  async function handlePolishMenu() {
-    if (menuDescription.trim().length < 10) return
-    setPolishingMenu(true)
-    const res = await fetch('/api/polish-intro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: menuDescription, context: 'menu' }),
-    })
-    const data = await res.json()
-    if (data.polished) setMenuDescription(data.polished)
-    setPolishingMenu(false)
-  }
-
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
@@ -150,27 +137,26 @@ export default function ApplyPage() {
     // Auto-generate tagline from first sentence of intro
     const tagline = intro.split(/[.!?]/)[0].trim().slice(0, 100) || intro.slice(0, 100)
 
-    let priceValue: number
-    let priceUnit: string
-    const menuText = menuDescription.trim()
-    if (pricingMode === 'hourly') {
-      priceValue = Number(formData.get('hourly_rate'))
-      priceUnit = 'hourly'
-    } else {
-      // Per-item pricing is optional here — a cook selling many different
-      // things (cookies, cakes, snacks...) may not have one single price to
-      // give, and can describe their menu and pricing in their own words
-      // instead. Require at least one of the two so the section isn't
-      // submitted completely blank.
-      const itemPriceRaw = String(formData.get('item_price') || '').trim()
-      const itemUnit = String(formData.get('item_unit') || '').trim()
-      priceValue = itemPriceRaw ? Number(itemPriceRaw) : 0
-      priceUnit = itemUnit || 'per_item'
-      if (!itemPriceRaw && !menuText) {
-        setError('Please add a price, or describe what you sell and your pricing below.')
-        setLoading(false)
-        return
-      }
+    // Hourly rate only applies when the cook actually cooks at the client's
+    // location — a cook who only cooks from their own setup, or does
+    // something else entirely ("Other"), isn't billing by the hour.
+    const priceValue = cooksAtClientLocation ? Number(formData.get('hourly_rate')) : 0
+
+    const occasionOtherText = String(formData.get('occasion_types_other') || '').trim()
+    const occasionTypes = [...new Set([
+      ...getChecked('occasion_types'),
+      ...(occasionOtherText ? [occasionOtherText] : []),
+    ])]
+
+    const arrangementOtherText = String(formData.get('cooking_arrangement_other') || '').trim()
+    const cookingArrangement = [...new Set([
+      ...getChecked('cooking_arrangement'),
+      ...(arrangementOtherText ? [arrangementOtherText] : []),
+    ])]
+    if (cookingArrangement.length === 0) {
+      setError('Please select at least one option for how you cook.')
+      setLoading(false)
+      return
     }
 
     const primaryCity = String(formData.get('primary_city') || '').trim()
@@ -192,12 +178,13 @@ export default function ApplyPage() {
       other_cuisines: otherCuisines || null,
       photo_url: null as string | null,
       dietary_specialties: getChecked('dietary_specialties'),
-      occasion_types: getChecked('occasion_types'),
+      occasion_types: occasionTypes,
+      cooking_arrangement: cookingArrangement,
       languages: getChecked('languages'),
       price_min: priceValue,
       price_max: priceValue,
-      price_unit: priceUnit,
-      min_hours: pricingMode === 'hourly' ? minHours : null,
+      price_unit: 'hourly',
+      min_hours: cooksAtClientLocation ? minHours : null,
       state: formData.get('state') || null,
       service_areas: [...new Set([
         primaryCity,
@@ -205,7 +192,7 @@ export default function ApplyPage() {
       ])],
       group_size_min: 2,
       group_size_max: 14,
-      signature_dishes: pricingMode === 'per_item' ? menuText : '',
+      signature_dishes: '',
       years_experience: 0,
       available_recurring: false,
       recurring_options: [],
@@ -307,7 +294,7 @@ export default function ApplyPage() {
         <h2 className="text-base font-semibold text-orange-900 mb-3">Why join Sivan Spices?</h2>
         <ul className="space-y-2 text-sm text-orange-800">
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
-          <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own price, hourly or per item — no bidding, no rate cuts</li>
+          <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Clients come to you with a clear brief — no guessing what they need</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Your profile stays live so clients can find and book you any time</li>
         </ul>
@@ -410,40 +397,94 @@ export default function ApplyPage() {
             />
           </div>
           <CheckboxGroup name="dietary_specialties" options={DIETARY} label="Dietary specialties" />
-          <CheckboxGroup name="occasion_types" options={OCCASIONS} label="Occasions you cook for" />
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-2">Occasions you cook for</p>
+            <div className="flex flex-wrap gap-2">
+              {OCCASIONS.map(opt => (
+                <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" name="occasion_types" value={opt} className="rounded border-gray-300 text-orange-600" />
+                  <span className="text-sm text-gray-700">{opt}</span>
+                </label>
+              ))}
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={occasionOtherChecked}
+                  onChange={e => setOccasionOtherChecked(e.target.checked)}
+                  className="rounded border-gray-300 text-orange-600"
+                />
+                <span className="text-sm text-gray-700">Other</span>
+              </label>
+            </div>
+            {occasionOtherChecked && (
+              <input
+                name="occasion_types_other"
+                type="text"
+                placeholder="Describe the occasion"
+                className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+            )}
+          </div>
           <CheckboxGroup name="languages" options={LANGUAGES} label="Languages you speak" />
+        </section>
+
+        {/* Cooking Arrangement */}
+        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">How Do You Cook?</h2>
+            <p className="text-sm text-gray-500 mt-1">Select all that apply — you can cook at a client's home and prepare something else too.</p>
+          </div>
+
+          <div>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="cooking_arrangement"
+                  value="Cook at client's location"
+                  checked={cooksAtClientLocation}
+                  onChange={e => setCooksAtClientLocation(e.target.checked)}
+                  className="rounded border-gray-300 text-orange-600"
+                />
+                <span className="text-sm text-gray-700">Cook at client&apos;s location</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" name="cooking_arrangement" value="Cook from my setup" className="rounded border-gray-300 text-orange-600" />
+                <span className="text-sm text-gray-700">Cook from my setup</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={arrangementOtherChecked}
+                  onChange={e => setArrangementOtherChecked(e.target.checked)}
+                  className="rounded border-gray-300 text-orange-600"
+                />
+                <span className="text-sm text-gray-700">Other</span>
+              </label>
+            </div>
+            {arrangementOtherChecked && (
+              <input
+                name="cooking_arrangement_other"
+                type="text"
+                placeholder="Describe your arrangement"
+                className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+            )}
+          </div>
         </section>
 
         {/* Pricing */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
           <div>
             <h2 className="text-lg font-semibold">Pricing</h2>
-            <p className="text-sm text-gray-500 mt-1">Choose how you charge, depending on how you cook.</p>
+            <p className="text-sm text-gray-500 mt-1">
+              {cooksAtClientLocation
+                ? 'Sessions cooking at a client\'s location are billed hourly with a minimum of 2 hours.'
+                : 'Hourly pricing applies once you select "Cook at client\'s location" above.'}
+            </p>
           </div>
 
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">How do you charge?</p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setPricingMode('hourly')}
-                className={`flex-1 border rounded-lg px-3 py-2 text-left ${pricingMode === 'hourly' ? 'border-orange-400 bg-orange-50' : 'border-gray-300'}`}
-              >
-                <span className="text-sm font-medium text-gray-800 block">Hourly</span>
-                <span className="text-xs text-gray-500">I cook in the client's home</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPricingMode('per_item')}
-                className={`flex-1 border rounded-lg px-3 py-2 text-left ${pricingMode === 'per_item' ? 'border-orange-400 bg-orange-50' : 'border-gray-300'}`}
-              >
-                <span className="text-sm font-medium text-gray-800 block">Per item</span>
-                <span className="text-xs text-gray-500">I sell snacks, cakes, cookies, etc.</span>
-              </button>
-            </div>
-          </div>
-
-          {pricingMode === 'hourly' ? (
+          {cooksAtClientLocation && (
             <>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">Your hourly rate ($)</label>
@@ -482,52 +523,6 @@ export default function ApplyPage() {
                 <p className="text-xs text-gray-400 mt-1">Set the minimum hours you require to make the trip worthwhile. Platform minimum is 2 hours.</p>
               </div>
             </>
-          ) : (
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Your price ($) — optional if you sell several different items</label>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-gray-500">$</span>
-                  <input
-                    name="item_price"
-                    type="number"
-                    min={1}
-                    placeholder="e.g. 15"
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-28"
-                  />
-                  <span className="text-sm text-gray-500">per</span>
-                  <input
-                    name="item_unit"
-                    type="text"
-                    placeholder="e.g. dozen cookies, cake, batch of 12"
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm flex-1 min-w-[160px]"
-                  />
-                </div>
-                <p className="text-xs text-gray-400 mt-1">e.g. &quot;$15 per dozen cookies&quot; or &quot;$25 per cake&quot;</p>
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-sm font-medium text-gray-700">Describe what you sell &amp; your pricing</label>
-                  <button
-                    type="button"
-                    onClick={handlePolishMenu}
-                    disabled={polishingMenu || menuDescription.trim().length < 10}
-                    className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 disabled:opacity-40"
-                  >
-                    {polishingMenu ? 'Polishing...' : '✦ Polish'}
-                  </button>
-                </div>
-                <textarea
-                  value={menuDescription}
-                  onChange={e => setMenuDescription(e.target.value)}
-                  rows={3}
-                  placeholder="e.g. Chocolate chip cookies $12/dozen, red velvet cake $25, samosas $1.50 each"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
-                />
-                <p className="text-xs text-gray-400 mt-1">If you sell many kinds of items, list them here instead of a single price above — we can help polish the wording.</p>
-              </div>
-            </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">

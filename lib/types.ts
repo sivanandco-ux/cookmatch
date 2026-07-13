@@ -25,11 +25,13 @@ export interface Cook {
   cuisine_types: string[]
   dietary_specialties: string[]
   occasion_types: string[]
+  cooking_arrangement: string[]
   languages: string[]
   price_min: number
   price_max: number
   price_unit: PriceUnit
   min_hours: number | null
+  state: string | null
   service_areas: string[]
   group_size_min: number
   group_size_max: number

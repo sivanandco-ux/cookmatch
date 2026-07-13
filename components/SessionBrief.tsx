@@ -6,7 +6,7 @@ import CityInput from './CityInput'
 import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
-const DIETARY = ['Vegetarian', 'Non-Vegetarian']
+const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 
 const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: number }[] = [
   { value: 'family_cooking', label: 'Family Cooking', range: '2–5 people', max: 5 },

@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
 Today's date: ${today}
 Cuisine options: South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan
-Dietary options: "Vegetarian", "Non-Vegetarian"
+Dietary options: "Vegetarian", "Non-Vegetarian", "Eggetarian"
 Occasion values: "Regular Meal", "Festival / Occasion"
 Grocery values: "client_has_everything", "need_grocery_pickup", "cook_brings_ingredients"
 Platform minimum hourly rate: $30 — if a rate below 30 is mentioned, still return the number they said, do not adjust it yourself.
