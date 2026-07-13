@@ -45,7 +45,7 @@ export default async function CooksPage({
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
-        <p className="text-gray-600">Approved cooks who visit your home to prepare healthy meals — serving Fremont, Newark, Union City &amp; Milpitas</p>
+        <p className="text-gray-600">Approved cooks who deliver home-cooked meals or come cook in your home — serving clients across the USA</p>
       </div>
 
       {/* Filters */}

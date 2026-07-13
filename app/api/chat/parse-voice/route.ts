@@ -5,7 +5,7 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const CLIENT_SCHEMA = `{
   "client_name": "string",
-  "city": "string (one of the available cities only)",
+  "city": "string (any city/town — this is a nationwide platform, do not restrict to a fixed list)",
   "requested_date": "YYYY-MM-DD",
   "num_people": number,
   "occasion": "string (one of the occasion values only)",
@@ -18,7 +18,7 @@ const CLIENT_SCHEMA = `{
 
 const COOK_SCHEMA = `{
   "name": "string",
-  "city": "string (one of the available cities only)",
+  "city": "string (any city/town — this is a nationwide platform, do not restrict to a fixed list)",
   "cuisine_types": ["string array — cuisines mentioned, matched to the closest option(s) from the cuisine list"],
   "dietary_specialties": ["string array from dietary options only"],
   "years_experience": number,
@@ -44,14 +44,13 @@ export async function POST(request: Request) {
       content: `Extract ${isCook ? 'a home cook profile' : 'a home cooking job'} from this voice description. The speaker was talking in ${lang}. Return ONLY valid JSON — no prose, no markdown fences. Omit any field you cannot confidently determine.
 
 Today's date: ${today}
-Available cities: Fremont, Newark, Union City, Milpitas
 Cuisine options: South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan
 Dietary options: "Vegetarian", "Non-Vegetarian"
 Occasion values: "Regular Meal", "Festival / Occasion"
 Grocery values: "client_has_everything", "need_grocery_pickup", "cook_brings_ingredients"
 Platform minimum hourly rate: $30 — if a rate below 30 is mentioned, still return the number they said, do not adjust it yourself.
 
-Regardless of what language the transcript is in: city, cuisine_types, dietary_specialties, occasion, and grocery_situation must always be returned using the exact canonical English values listed above. Free-text fields (intro / text_description) must be translated into clear, natural English — never return non-English text in those fields.
+Regardless of what language the transcript is in: cuisine_types, dietary_specialties, occasion, and grocery_situation must always be returned using the exact canonical English values listed above. City should be returned in clear English spelling (transliterated if needed) but is NOT restricted to any fixed list — accept whatever city/town they name. Free-text fields (intro / text_description) must be translated into clear, natural English — never return non-English text in those fields.
 
 Return JSON matching this shape (only the fields you can confidently extract):
 ${isCook ? COOK_SCHEMA : CLIENT_SCHEMA}

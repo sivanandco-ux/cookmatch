@@ -19,7 +19,7 @@ Collect ALL of these fields before submitting:
 - client_name
 - client_email
 - client_phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
-- city: must be one of Fremont, Newark, Union City, Milpitas
+- city: any city/town (this is a nationwide platform — accept whatever city they say, do not restrict to a fixed list)
 - requested_date in YYYY-MM-DD. Today is {{TODAY}}.
 - occasion: "Regular Meal" or "Festival / Occasion"
 - num_people (2–14)
@@ -45,7 +45,7 @@ Collect ALL of these fields before submitting:
 - name
 - email
 - phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
-- city: must be one of Fremont, Newark, Union City, Milpitas
+- city: any city/town (this is a nationwide platform — accept whatever city they say, do not restrict to a fixed list)
 - cuisine_types: array from [South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan]
 - dietary_specialties: array from ["Vegetarian","Non-Vegetarian"]
 - years_experience (number)

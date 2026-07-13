@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import VoiceMemoRecorder from './VoiceMemoRecorder'
+import CityInput from './CityInput'
 import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian']
-const CITIES = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 
 const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: number }[] = [
   { value: 'family_cooking', label: 'Family Cooking', range: '2–5 people', max: 5 },
@@ -243,10 +243,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
 
         <div>
           <label className="text-xs text-gray-500 mb-1 block">City <span className="text-red-500">*</span></label>
-          <select name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-            <option value="">Select city</option>
-            {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
+          <CityInput name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
         </div>
 
         <div className="flex flex-col gap-2">

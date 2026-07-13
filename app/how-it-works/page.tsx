@@ -3,7 +3,7 @@ export default function HowItWorksPage() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
       <p className="text-gray-600 mb-10">
-        Sivan Spices Home Cooks connects you with cooks who visit your home to prepare healthy meals. Currently serving Fremont, Newark, Union City, and Milpitas in Northern California. We will keep you posted as we expand to new cities.
+        Sivan Spices Home Cooks connects you with cooks across the USA who deliver healthy home-cooked meals or come cook them in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
       </p>
 
       <div className="flex flex-col gap-10">
@@ -15,7 +15,7 @@ export default function HowItWorksPage() {
             <div>
               <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you approved cooks in your area who are ready to cook at your home</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you approved cooks in your area who can deliver a meal or come cook at your home</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Let you see their cuisine specialties, ratings, and availability before booking</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Connect you directly with the cook — you get their phone, email, and WhatsApp</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you a feedback link after your session to rate your experience</li>

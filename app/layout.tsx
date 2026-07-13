@@ -5,10 +5,10 @@ import SiteNav from '@/components/SiteNav'
 
 export const metadata: Metadata = {
   title: 'Home Cooks — Sivan Spices',
-  description: 'We connect clients with cooks who can visit your home to prepare healthy meals.',
+  description: 'We connect clients across the USA with cooks who deliver healthy home-cooked meals or come cook them in your kitchen.',
   openGraph: {
     title: 'Home Cooks — Sivan Spices',
-    description: 'We connect clients with cooks who can visit your home to prepare healthy meals.',
+    description: 'We connect clients across the USA with cooks who deliver healthy home-cooked meals or come cook them in your kitchen.',
     url: 'https://cookmatch-flame.vercel.app/cooks',
     siteName: 'Sivan Spices Home Cooks',
     images: [
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
-              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Cooks who visit your home to prepare healthy meals</span>
+              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Home-cooked meals, delivered or cooked in your home</span>
             </div>
           </div>
           <SiteNav />
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="https://sivanspices.com" className="text-orange-600 hover:underline">
               Sivan Spices
             </a>
-            . We connect clients with cooks who can visit your home to prepare healthy meals.
+            . We connect clients across the USA with cooks who deliver healthy home-cooked meals or come cook them in your kitchen.
           </p>
           <a href="/how-it-works" className="inline-block mt-2 text-orange-600 hover:underline">How It Works</a>
         </footer>

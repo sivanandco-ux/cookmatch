@@ -6,12 +6,12 @@ import { isValidUsPhone } from '@/lib/phone'
 import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
 import BecomeCookTimeline from '@/components/BecomeCookTimeline'
+import CityInput from '@/components/CityInput'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
-const CITIES = ['Fremont', 'Newark', 'Union City', 'Milpitas']
 const CUISINES = ['South Indian', 'North Indian', 'Tamil', 'Gujarati', 'Punjabi', 'Bengali', 'Maharashtrian', 'Hyderabadi', 'Rajasthani', 'Goan']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian']
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
@@ -541,10 +541,7 @@ export default function ChatWidget() {
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>City</Label>
-                <select className={ic} value={cook.city} onChange={e => setCook(p => ({ ...p, city: e.target.value }))} required>
-                  <option value="">Select your city</option>
-                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <CityInput className={ic} value={cook.city} onChange={v => setCook(p => ({ ...p, city: v }))} required />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Cuisines you cook</Label>
@@ -659,10 +656,7 @@ export default function ChatWidget() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label>City</Label>
-                  <select className={ic} value={client.city} onChange={e => setClient(p => ({ ...p, city: e.target.value }))} required>
-                    <option value="">Select city</option>
-                    {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <CityInput className={ic} value={client.city} onChange={v => setClient(p => ({ ...p, city: v }))} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <Label>Date needed</Label>

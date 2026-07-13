@@ -153,7 +153,10 @@ export default function ApplyPage() {
       price_max: hourlyRate,
       price_unit: 'hourly',
       min_hours: minHours,
-      service_areas: getChecked('service_areas'),
+      service_areas: [...new Set([
+        ...getChecked('service_areas'),
+        ...String(formData.get('service_areas_other') || '').split(',').map(s => s.trim()).filter(Boolean),
+      ])],
       group_size_min: 2,
       group_size_max: 14,
       signature_dishes: '',
@@ -410,6 +413,14 @@ export default function ApplyPage() {
           </div>
 
           <CheckboxGroup name="service_areas" options={AREAS} label="Areas you serve" />
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">Other areas you serve (optional)</label>
+            <input
+              name="service_areas_other"
+              placeholder="e.g. San Jose, Oakland — comma-separated"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
         </section>
 
         {/* Job Preferences */}
