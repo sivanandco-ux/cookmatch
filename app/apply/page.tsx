@@ -548,52 +548,54 @@ export default function ApplyPage() {
           </div>
         </section>
 
-        {/* Job Preferences */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
-          <h2 className="text-lg font-semibold">Job Preferences</h2>
+        {/* Job Preferences — only relevant when cooking at a client's location */}
+        {cooksAtClientLocation && (
+          <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
+            <h2 className="text-lg font-semibold">Job Preferences</h2>
 
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">Job types you accept</p>
-            <div className="flex flex-col gap-2">
-              {JOB_CATEGORIES.map(cat => (
-                <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" name="job_categories" value={cat.value} className="rounded border-gray-300 text-orange-600" />
-                  <span className="text-sm text-gray-700">{cat.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="does_cleanup" className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I clean up after cooking</span>
-          </label>
-
-          <div>
-            <label className="flex items-center gap-2 cursor-pointer mb-2">
-              <input
-                type="checkbox"
-                name="grocery_pickup"
-                className="rounded border-gray-300 text-orange-600"
-                onChange={e => setGroceryPickup(e.target.checked)}
-              />
-              <span className="text-sm text-gray-700">I can pick up groceries (extra charge applies)</span>
-            </label>
-            {groceryPickup && (
-              <div className="flex items-center gap-2 ml-6">
-                <span className="text-sm text-gray-500">$</span>
-                <input
-                  name="grocery_pickup_charge"
-                  type="number"
-                  min={0}
-                  placeholder="Extra charge"
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
-                />
-                <span className="text-sm text-gray-400">per trip</span>
+            <div>
+              <p className="text-sm font-medium text-gray-700 mb-2">Job types you accept</p>
+              <div className="flex flex-col gap-2">
+                {JOB_CATEGORIES.map(cat => (
+                  <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="job_categories" value={cat.value} className="rounded border-gray-300 text-orange-600" />
+                    <span className="text-sm text-gray-700">{cat.label}</span>
+                  </label>
+                ))}
               </div>
-            )}
-          </div>
-        </section>
+            </div>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="does_cleanup" className="rounded border-gray-300 text-orange-600" />
+              <span className="text-sm text-gray-700">I clean up after cooking</span>
+            </label>
+
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer mb-2">
+                <input
+                  type="checkbox"
+                  name="grocery_pickup"
+                  className="rounded border-gray-300 text-orange-600"
+                  onChange={e => setGroceryPickup(e.target.checked)}
+                />
+                <span className="text-sm text-gray-700">I can pick up groceries (extra charge applies)</span>
+              </label>
+              {groceryPickup && (
+                <div className="flex items-center gap-2 ml-6">
+                  <span className="text-sm text-gray-500">$</span>
+                  <input
+                    name="grocery_pickup_charge"
+                    type="number"
+                    min={0}
+                    placeholder="Extra charge"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-32"
+                  />
+                  <span className="text-sm text-gray-400">per trip</span>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {/* Approval */}
         <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
