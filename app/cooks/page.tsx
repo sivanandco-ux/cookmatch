@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import CookTile from '@/components/CookTile'
 import type { CookWithDetails } from '@/lib/types'
 import { SPECIALTY_SUGGESTIONS } from '@/lib/specialtySuggestions'
+import { US_STATES } from '@/lib/usStates'
 
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const AVAILABILITY = ['Available regularly', 'Made to order', 'Seasonal or festival-only']
@@ -11,7 +12,7 @@ const AVAILABILITY = ['Available regularly', 'Made to order', 'Seasonal or festi
 export default async function CooksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ cuisine?: string; dietary?: string; occasion?: string }>
+  searchParams: Promise<{ cuisine?: string; dietary?: string; occasion?: string; state?: string }>
 }) {
   const filters = await searchParams
   const supabase = await createClient()
@@ -35,6 +36,9 @@ export default async function CooksPage({
   }
   if (filters.occasion) {
     query = query.contains('occasion_types', [filters.occasion])
+  }
+  if (filters.state) {
+    query = query.eq('state', filters.state)
   }
 
   const { data: rawCooks } = await query
@@ -86,6 +90,15 @@ export default async function CooksPage({
           {AVAILABILITY.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
 
+        <select
+          name="state"
+          defaultValue={filters.state || ''}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+        >
+          <option value="">All States</option>
+          {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+
         <button
           type="submit"
           className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700"
@@ -93,7 +106,7 @@ export default async function CooksPage({
           Filter
         </button>
 
-        {(filters.cuisine || filters.dietary || filters.occasion) && (
+        {(filters.cuisine || filters.dietary || filters.occasion || filters.state) && (
           <a href="/cooks" className="text-sm text-gray-500 px-3 py-2 hover:text-orange-600">
             Clear filters
           </a>
