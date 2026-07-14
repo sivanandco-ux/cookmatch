@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
             <a href="https://sivanspices.com" target="_blank" rel="noopener noreferrer" className="shrink-0">
-              <img src="/sivanspices-logo.png" alt="Sivan Spices" className="h-12 sm:h-16 md:h-36 w-auto" />
+              <img src="/sivanchefs-logo.png" alt="Sivan Chefs" className="h-12 sm:h-16 md:h-36 w-auto" />
             </a>
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
