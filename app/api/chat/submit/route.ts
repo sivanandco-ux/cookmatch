@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { sendNewJobNotification } from '@/lib/email'
 import { normalizeUsPhone } from '@/lib/phone'
+import { makeTagline } from '@/lib/tagline'
 
 function getSupabase() {
   return createClient(
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
       }
 
       const bio = String(data.intro || '')
-      const tagline = bio.split(/[.!?]/)[0].trim().substring(0, 120) || `Home Cook in ${data.city}`
+      const tagline = makeTagline(bio, 120, `Home Cook in ${data.city}`)
 
       // Hourly rate only applies to cooks who cook at the client's location —
       // a cook who only cooks from their own setup (or "Other") has

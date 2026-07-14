@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { US_STATES } from '@/lib/usStates'
 import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
+import { makeTagline } from '@/lib/tagline'
 import CityInput from '@/components/CityInput'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other']
@@ -141,8 +142,7 @@ export default function ApplyPage() {
     }
 
     const intro = (formData.get('intro') as string || '').trim()
-    // Auto-generate tagline from first sentence of intro
-    const tagline = intro.split(/[.!?]/)[0].trim().slice(0, 100) || intro.slice(0, 100)
+    const tagline = makeTagline(intro)
 
     // Hourly rate only applies when the cook actually cooks at the client's
     // location — a cook who only cooks from their own setup, or does
