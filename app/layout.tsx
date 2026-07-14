@@ -45,9 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p>
             A service by{' '}
             <a href="https://sivanspices.com" className="text-orange-600 hover:underline">
-              Sivan Spices
+              Sivan Chefs
             </a>
-            . We connect clients across the USA with cooks who deliver healthy home-cooked food or come cook it in your kitchen.
+            . We connect clients across the USA with cooks who deliver healthy home-cooked food, offer pickup, or come cook it in your kitchen.
           </p>
           <a href="/how-it-works" className="inline-block mt-2 text-orange-600 hover:underline">How It Works</a>
         </footer>
