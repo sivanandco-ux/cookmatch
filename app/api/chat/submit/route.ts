@@ -36,6 +36,12 @@ export async function POST(request: Request) {
       const bio = String(data.intro || '')
       const tagline = bio.split(/[.!?]/)[0].trim().substring(0, 120) || `Home Cook in ${data.city}`
 
+      // Hourly rate only applies to cooks who cook at the client's location —
+      // a cook who only cooks from their own setup (or "Other") has
+      // price_min/max of 0, matching the /apply page's behavior.
+      const cooksAtClientLocation = (data.cooking_arrangement || []).includes("Cook at client's location")
+      const rate = cooksAtClientLocation ? Math.max(Number(data.hourly_rate) || 0, 30) : 0
+
       const { data: cook, error } = await supabase
         .from('cooks')
         .insert({
@@ -51,11 +57,13 @@ export async function POST(request: Request) {
           cuisine_types: data.cuisine_types || [],
           dietary_specialties: data.dietary_specialties || [],
           occasion_types: ['Daily Meals / Tiffin', 'Festival / Occasion'],
+          cooking_arrangement: data.cooking_arrangement || [],
           languages: [language || 'English'],
-          price_min: Math.max(Number(data.hourly_rate) || 0, 30),
-          price_max: Math.max(Number(data.hourly_rate) || 0, 30),
+          price_min: rate,
+          price_max: rate,
           price_unit: 'hourly',
           min_hours: null,
+          state: data.state || null,
           service_areas: [data.city],
           group_size_min: 2,
           group_size_max: 14,

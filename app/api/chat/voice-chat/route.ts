@@ -46,10 +46,12 @@ Collect ALL of these fields before submitting:
 - email
 - phone: a US phone number with exactly 10 digits (area code + number). If what you hear doesn't sound like a complete 10-digit US number, say so and ask them to repeat it slowly, digit by digit — do not guess or pad missing digits.
 - city: any city/town (this is a nationwide platform — accept whatever city they say, do not restrict to a fixed list)
+- state: the US state they're in
+- cooking_arrangement: array — one or more of "Cook at client's location", "Cook from my setup", or their own words if neither fits. Ask how they cook (at the client's home, from their own kitchen/setup, or something else) — they can pick more than one.
 - cuisine_types: array from [South Indian, North Indian, Tamil, Gujarati, Punjabi, Bengali, Maharashtrian, Hyderabadi, Rajasthani, Goan]
 - dietary_specialties: array from ["Vegetarian","Non-Vegetarian","Eggetarian"]
 - years_experience (number)
-- hourly_rate: their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
+- hourly_rate: ONLY ask for this if cooking_arrangement includes "Cook at client's location" — a cook who only cooks from their own setup doesn't set an hourly rate, so skip this question entirely for them. When you do ask, it's their rate in dollars per hour (a number). The platform minimum is $30/hour — tell them their rate starts at $30 and ask if they'd like to set it higher. Never submit a value below 30.
 - intro: 2-3 sentence bio about their cooking background and style
 
 Before the final summary: once you have the email and phone, explicitly read each one back on its own and ask the user to confirm — spell out the email address, and read the phone number one digit at a time (e.g. "five, one, zero, five, five, five, ..."). Only move on once they've confirmed both are correct; if either is wrong, ask them to repeat just that one.
@@ -91,13 +93,15 @@ const COOK_TOOL: Anthropic.Tool = {
       email: { type: 'string' },
       phone: { type: 'string', description: 'Exactly 10 digits, US number, confirmed with the caller' },
       city: { type: 'string' },
+      state: { type: 'string' },
+      cooking_arrangement: { type: 'array', items: { type: 'string' }, description: 'One or more of: "Cook at client\'s location", "Cook from my setup", or free text' },
       cuisine_types: { type: 'array', items: { type: 'string' } },
       dietary_specialties: { type: 'array', items: { type: 'string' } },
       years_experience: { type: 'number' },
-      hourly_rate: { type: 'number' },
+      hourly_rate: { type: 'number', description: 'Only include if cooking_arrangement includes "Cook at client\'s location"' },
       intro: { type: 'string' },
     },
-    required: ['name','email','phone','city','cuisine_types','dietary_specialties','years_experience','hourly_rate','intro'],
+    required: ['name','email','phone','city','state','cooking_arrangement','cuisine_types','dietary_specialties','years_experience','intro'],
   },
 }
 

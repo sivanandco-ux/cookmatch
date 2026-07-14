@@ -19,6 +19,8 @@ const CLIENT_SCHEMA = `{
 const COOK_SCHEMA = `{
   "name": "string",
   "city": "string (any city/town — this is a nationwide platform, do not restrict to a fixed list)",
+  "state": "string (the US state name, e.g. California — full name, not abbreviation)",
+  "cooking_arrangement": ["string array — one or more of: \\"Cook at client's location\\", \\"Cook from my setup\\", or their own free-text description if neither fits"],
   "cuisine_types": ["string array — cuisines mentioned, matched to the closest option(s) from the cuisine list"],
   "dietary_specialties": ["string array from dietary options only"],
   "years_experience": number,
@@ -49,8 +51,9 @@ Dietary options: "Vegetarian", "Non-Vegetarian", "Eggetarian"
 Occasion values: "Regular Meal", "Festival / Occasion"
 Grocery values: "client_has_everything", "need_grocery_pickup", "cook_brings_ingredients"
 Platform minimum hourly rate: $30 — if a rate below 30 is mentioned, still return the number they said, do not adjust it yourself.
+Hourly rate only applies if the cook cooks at the client's location — if they only cook from their own setup, do not extract a rate even if one is mentioned.
 
-Regardless of what language the transcript is in: cuisine_types, dietary_specialties, occasion, and grocery_situation must always be returned using the exact canonical English values listed above. City should be returned in clear English spelling (transliterated if needed) but is NOT restricted to any fixed list — accept whatever city/town they name. Free-text fields (intro / text_description) must be translated into clear, natural English — never return non-English text in those fields.
+Regardless of what language the transcript is in: cuisine_types, dietary_specialties, occasion, grocery_situation, and cooking_arrangement (when it matches one of the two known values) must always be returned using the exact canonical English values listed above. City should be returned in clear English spelling (transliterated if needed) but is NOT restricted to any fixed list — accept whatever city/town they name. Free-text fields (intro / text_description) must be translated into clear, natural English — never return non-English text in those fields.
 
 Return JSON matching this shape (only the fields you can confidently extract):
 ${isCook ? COOK_SCHEMA : CLIENT_SCHEMA}

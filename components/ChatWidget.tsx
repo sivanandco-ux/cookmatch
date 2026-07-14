@@ -7,6 +7,7 @@ import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
 import BecomeCookTimeline from '@/components/BecomeCookTimeline'
 import CityInput from '@/components/CityInput'
+import { US_STATES } from '@/lib/usStates'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
@@ -66,7 +67,8 @@ function ModeCard({ icon, title, desc, onClick }: { icon: string; title: string;
 }
 
 const DEFAULT_HOURLY_RATE = 30
-const initCook = { name: '', email: '', phone: '', city: '', cuisine_types: [] as string[], dietary_specialties: [] as string[], years_experience: '', hourly_rate: String(DEFAULT_HOURLY_RATE), intro: '' }
+const COOKING_ARRANGEMENTS = ["Cook at client's location", 'Cook from my setup']
+const initCook = { name: '', email: '', phone: '', city: '', state: '', cooking_arrangement: [] as string[], cooking_arrangement_other: '', cuisine_types: [] as string[], dietary_specialties: [] as string[], years_experience: '', hourly_rate: String(DEFAULT_HOURLY_RATE), intro: '' }
 const initClient = { client_name: '', client_email: '', client_phone: '', city: '', requested_date: '', num_people: '', occasion: '', dietary_restrictions: [] as string[], grocery_situation: '', cleanup_needed: null as boolean | null, num_dishes: '', text_description: '' }
 
 export default function ChatWidget() {
@@ -223,6 +225,8 @@ export default function ChatWidget() {
             ...prev,
             ...(f.name !== undefined ? { name: f.name } : {}),
             ...(f.city !== undefined ? { city: f.city } : {}),
+            ...(f.state !== undefined ? { state: f.state } : {}),
+            ...(f.cooking_arrangement !== undefined ? { cooking_arrangement: f.cooking_arrangement } : {}),
             ...(f.cuisine_types !== undefined ? { cuisine_types: f.cuisine_types } : {}),
             ...(f.dietary_specialties !== undefined ? { dietary_specialties: f.dietary_specialties } : {}),
             ...(f.years_experience !== undefined ? { years_experience: String(f.years_experience) } : {}),
@@ -356,6 +360,9 @@ export default function ChatWidget() {
   function toggleCook(field: 'cuisine_types' | 'dietary_specialties', v: string) {
     setCook(p => ({ ...p, [field]: p[field].includes(v) ? p[field].filter(x => x !== v) : [...p[field], v] }))
   }
+  function toggleCookingArrangement(v: string) {
+    setCook(p => ({ ...p, cooking_arrangement: p.cooking_arrangement.includes(v) ? p.cooking_arrangement.filter(x => x !== v) : [...p.cooking_arrangement, v] }))
+  }
   function toggleClient(v: string) {
     setClient(p => ({ ...p, dietary_restrictions: p.dietary_restrictions.includes(v) ? p.dietary_restrictions.filter(x => x !== v) : [...p.dietary_restrictions, v] }))
   }
@@ -375,6 +382,9 @@ export default function ChatWidget() {
     e.preventDefault(); setError('')
     const phone = path === 'cook' ? cook.phone : client.client_phone
     if (!isValidUsPhone(phone)) { setError('Please enter a valid 10-digit US phone number.'); return }
+    if (path === 'cook' && cook.cooking_arrangement.length === 0 && !cook.cooking_arrangement_other.trim()) {
+      setError('Please select at least one option for how you cook.'); return
+    }
     if (path === 'client' && client.cleanup_needed === null) { setError('Please select Yes or No for cleanup.'); return }
     setView('review')
   }
@@ -382,7 +392,14 @@ export default function ChatWidget() {
   async function submit() {
     setLoading(true); setError('')
     try {
-      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cook : client, language: languageLabel }) })
+      const cookData = {
+        ...cook,
+        cooking_arrangement: [...new Set([
+          ...cook.cooking_arrangement,
+          ...(cook.cooking_arrangement_other.trim() ? [cook.cooking_arrangement_other.trim()] : []),
+        ])],
+      }
+      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cookData : client, language: languageLabel }) })
       const data = await res.json()
       if (!res.ok || data.error) { setError(data.error || 'Something went wrong.'); return }
       if (data.matchingCooks) setMatchingCooks(data.matchingCooks)
@@ -539,9 +556,25 @@ export default function ChatWidget() {
                   <input className={ic} type="tel" value={cook.phone} onChange={e => setCook(p => ({ ...p, phone: e.target.value }))} placeholder="(510) 000-0000" required />
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label>City</Label>
+                  <CityInput className={ic} value={cook.city} onChange={v => setCook(p => ({ ...p, city: v }))} required />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label>State</Label>
+                  <select className={ic} value={cook.state} onChange={e => setCook(p => ({ ...p, state: e.target.value }))} required>
+                    <option value="">Select...</option>
+                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
               <div className="flex flex-col gap-1.5">
-                <Label>City</Label>
-                <CityInput className={ic} value={cook.city} onChange={v => setCook(p => ({ ...p, city: v }))} required />
+                <Label>How do you cook?</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {COOKING_ARRANGEMENTS.map(a => <Chip key={a} label={a} active={cook.cooking_arrangement.includes(a)} onClick={() => toggleCookingArrangement(a)} />)}
+                </div>
+                <input className={ic} value={cook.cooking_arrangement_other} onChange={e => setCook(p => ({ ...p, cooking_arrangement_other: e.target.value }))} placeholder="Other (describe how you cook)" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Cuisines you cook</Label>
@@ -559,11 +592,13 @@ export default function ChatWidget() {
                 <Label>Years of experience</Label>
                 <input className={ic} type="number" min="1" value={cook.years_experience} onChange={e => setCook(p => ({ ...p, years_experience: e.target.value }))} placeholder="e.g. 5" required />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label>Your hourly rate ($)</Label>
-                <input className={ic} type="number" min={DEFAULT_HOURLY_RATE} value={cook.hourly_rate} onChange={e => setCook(p => ({ ...p, hourly_rate: e.target.value }))} placeholder="e.g. 35" required />
-                <p className="text-xs text-gray-400">Starts at the platform minimum of {`$${DEFAULT_HOURLY_RATE}`}/hr — raise it if you'd like</p>
-              </div>
+              {cook.cooking_arrangement.includes("Cook at client's location") && (
+                <div className="flex flex-col gap-1.5">
+                  <Label>Your hourly rate ($)</Label>
+                  <input className={ic} type="number" min={DEFAULT_HOURLY_RATE} value={cook.hourly_rate} onChange={e => setCook(p => ({ ...p, hourly_rate: e.target.value }))} placeholder="e.g. 35" required />
+                  <p className="text-xs text-gray-400">Starts at the platform minimum of {`$${DEFAULT_HOURLY_RATE}`}/hr — raise it if you'd like</p>
+                </div>
+              )}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <Label>About you</Label>
@@ -793,10 +828,14 @@ export default function ChatWidget() {
                     <Row label="Email" value={cook.email} />
                     <Row label="Phone" value={cook.phone} />
                     <Row label="City" value={cook.city} />
+                    <Row label="State" value={cook.state} />
+                    <Row label="How" value={[...cook.cooking_arrangement, cook.cooking_arrangement_other.trim()].filter(Boolean).join(', ')} />
                     <Row label="Cuisines" value={cook.cuisine_types.join(', ')} />
                     <Row label="Dietary" value={cook.dietary_specialties.join(', ') || 'None'} />
                     <Row label="Exp." value={cook.years_experience ? `${cook.years_experience} years` : ''} />
-                    <Row label="Rate" value={cook.hourly_rate ? `$${cook.hourly_rate}/hr` : ''} />
+                    {cook.cooking_arrangement.includes("Cook at client's location") && (
+                      <Row label="Rate" value={cook.hourly_rate ? `$${cook.hourly_rate}/hr` : ''} />
+                    )}
                     <Row label="About" value={cook.intro} />
                   </>
                 ) : (
