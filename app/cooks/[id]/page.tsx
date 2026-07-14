@@ -52,6 +52,15 @@ export default async function CookProfilePage({
     : c.price_unit === 'per_session' ? '/session'
     : c.price_unit ? ` / ${c.price_unit}` : '/session'
 
+  // The session-booking form (date, headcount, grocery situation, cleanup...)
+  // only makes sense for a cook who cooks at the client's home or from their
+  // own setup. A cook whose only arrangement is a custom "Other" description
+  // doesn't fit that shape — an empty/missing arrangement (cooks created
+  // before this field existed) defaults to showing the normal form.
+  const KNOWN_ARRANGEMENTS = ["Cook at client's location", "Cook from my setup"]
+  const arrangement = c.cooking_arrangement || []
+  const isOtherOnly = arrangement.length > 0 && !arrangement.some(a => KNOWN_ARRANGEMENTS.includes(a))
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       <a href="/cooks" className="text-sm text-orange-600 hover:underline mb-6 inline-block">
@@ -219,7 +228,33 @@ export default async function CookProfilePage({
                     <p className="text-xs text-green-600 mt-1">Available for recurring bookings</p>
                   )}
                 </div>
-                <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} cookDietarySpecialties={c.dietary_specialties} />
+                {isOtherOnly ? (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-gray-600">
+                      This cook has a custom arrangement — reach out directly to discuss what they offer.
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <a href={`tel:${c.phone}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                        📞 {c.phone}
+                      </a>
+                      {c.whatsapp && (
+                        <a
+                          href={`https://wa.me/${c.whatsapp.replace(/\D/g, '').replace(/^([^1])/, '1$1')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-green-400 hover:text-green-600 transition-colors"
+                        >
+                          💬 WhatsApp
+                        </a>
+                      )}
+                      <a href={`mailto:${c.email}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                        ✉️ {c.email}
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} cookDietarySpecialties={c.dietary_specialties} />
+                )}
               </>
             )}
           </div>
