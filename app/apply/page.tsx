@@ -5,11 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { US_STATES } from '@/lib/usStates'
 import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
 import { makeTagline } from '@/lib/tagline'
+import { SPECIALTY_SUGGESTIONS } from '@/lib/specialtySuggestions'
 import CityInput from '@/components/CityInput'
+import SpecialtyTagInput from '@/components/SpecialtyTagInput'
 
-const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
-const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
+const AVAILABILITY = ['Available regularly', 'Made to order', 'Seasonal or festival-only']
 const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 const JOB_CATEGORIES = [
   { value: 'family_cooking', label: 'Family Cooking (2–5 people)' },
@@ -43,6 +44,7 @@ export default function ApplyPage() {
   const [minHours, setMinHours] = useState(2)
   const [state, setState] = useState('')
   const [otherCities, setOtherCities] = useState('')
+  const [specialties, setSpecialties] = useState<string[]>([])
   const [cooksAtClientLocation, setCooksAtClientLocation] = useState(false)
   const [arrangementOtherChecked, setArrangementOtherChecked] = useState(false)
   const [occasionOtherChecked, setOccasionOtherChecked] = useState(false)
@@ -129,14 +131,8 @@ export default function ApplyPage() {
     const formData = new FormData(e.currentTarget)
     const getChecked = (name: string) => formData.getAll(name).map(String)
 
-    // "Other" itself isn't a real cuisine — it's just the checkbox that
-    // points at the free-text field below it, so it must never be stored as
-    // if it were an actual cuisine type (that field's validated text is what
-    // actually gets saved, below).
-    const cuisineTypes = getChecked('cuisine_types').filter(c => c !== 'Other')
-    const otherCuisines = (formData.get('other_cuisines') as string || '').trim()
-    if (cuisineTypes.length === 0 && !otherCuisines) {
-      setError('Please select at least one cuisine you cook.')
+    if (specialties.length === 0) {
+      setError('Please add at least one thing you make.')
       setLoading(false)
       return
     }
@@ -181,8 +177,7 @@ export default function ApplyPage() {
       bio: intro,
       tagline,
       video_url: formData.get('video_url') || null,
-      cuisine_types: cuisineTypes,
-      other_cuisines: otherCuisines || null,
+      cuisine_types: specialties,
       photo_url: null as string | null,
       dietary_specialties: getChecked('dietary_specialties'),
       occasion_types: occasionTypes,
@@ -393,21 +388,17 @@ export default function ApplyPage() {
         {/* Cooking Details */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
           <h2 className="text-lg font-semibold">Cooking Details</h2>
-          <CheckboxGroup name="cuisine_types" options={CUISINES} label="Cuisines you cook (select all that apply)" />
-          <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">Other cuisines or specialties not listed above</p>
-            <input
-              name="other_cuisines"
-              type="text"
-              placeholder="e.g. Chettinad, Baking, Jams & Jellies, Dhokla"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
+          <SpecialtyTagInput
+            value={specialties}
+            onChange={setSpecialties}
+            suggestions={SPECIALTY_SUGGESTIONS}
+            label="What do you make?"
+          />
           <CheckboxGroup name="dietary_specialties" options={DIETARY} label="Dietary specialties" />
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-2">Occasions you cook for</p>
+            <p className="text-sm font-medium text-gray-700 mb-2">When can clients get this from you?</p>
             <div className="flex flex-wrap gap-2">
-              {OCCASIONS.map(opt => (
+              {AVAILABILITY.map(opt => (
                 <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
                   <input type="checkbox" name="occasion_types" value={opt} className="rounded border-gray-300 text-orange-600" />
                   <span className="text-sm text-gray-700">{opt}</span>
@@ -427,7 +418,7 @@ export default function ApplyPage() {
               <input
                 name="occasion_types_other"
                 type="text"
-                placeholder="Describe the occasion"
+                placeholder="Describe your availability"
                 className="mt-2 w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
               />
             )}

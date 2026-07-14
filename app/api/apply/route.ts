@@ -1,33 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyCook } from '@/lib/agents/cookVerificationAgent'
-import Anthropic from '@anthropic-ai/sdk'
-
-async function validateCustomCuisines(input: string): Promise<string[]> {
-  const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  const response = await anthropic.messages.create({
-    model: 'claude-opus-4-8',
-    max_tokens: 256,
-    messages: [{
-      role: 'user',
-      content: `You are validating specialty types for a home cook platform. Cooks on this platform aren't limited to cuisines — some make baked goods, preserves, snacks, or other edible items. A cook applicant entered these as their specialties: "${input}"
-
-Return ONLY a JSON array of valid specialty names from this input. Rules:
-- Include only real, recognizable food specialties: cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions), food categories (e.g. "Baking", "Jams & Jellies", "Snacks"), or specific edible dishes/items (e.g. "Dhokla", "Pickles")
-- Correct obvious misspellings (e.g. "tamilian" → "Tamil", "soth indian" → "South Indian")
-- Exclude anything that isn't a real, edible food specialty (non-food items/crafts, gibberish, offensive words, unrelated text, emojis, numbers)
-- Return an empty array [] if nothing valid is found
-- No explanation, just the JSON array`,
-    }],
-  })
-  const text = response.content.find(b => b.type === 'text')?.text || '[]'
-  try {
-    const parsed = JSON.parse(text)
-    return Array.isArray(parsed) ? parsed.filter((s): s is string => typeof s === 'string') : []
-  } catch {
-    return []
-  }
-}
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -43,25 +16,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
   }
 
-  // Validate and merge custom cuisines
-  let cuisineTypes: string[] = body.cuisine_types || []
-  if (body.other_cuisines?.trim()) {
-    const validated = await validateCustomCuisines(body.other_cuisines.trim())
-    console.log('[Cuisine validation] Input:', body.other_cuisines, '→ Valid:', validated)
-    if (validated.length === 0 && cuisineTypes.length === 0) {
-      return NextResponse.json(
-        { error: 'What you entered could not be recognised. Please enter a valid cuisine or food specialty, e.g. Chettinad, Baking, Jams & Jellies.' },
-        { status: 400 }
-      )
-    }
-    if (validated.length === 0 && body.other_cuisines.trim()) {
-      return NextResponse.json(
-        { error: `"${body.other_cuisines}" doesn't appear to be a recognised specialty. Please check your spelling or leave the field blank.` },
-        { status: 400 }
-      )
-    }
-    cuisineTypes = [...cuisineTypes, ...validated]
-  }
+  // Each specialty tag is already validated client-side as it's added (see
+  // /api/validate-specialty), so there's nothing left to reject here.
+  const cuisineTypes: string[] = body.cuisine_types || []
 
   // Hourly rate only applies to cooks who cook at the client's location — a
   // cook who only cooks from their own setup (or "Other") has price_min/max

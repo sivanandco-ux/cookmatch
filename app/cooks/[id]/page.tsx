@@ -134,7 +134,7 @@ export default async function CookProfilePage({
           {/* Details grid */}
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-500 mb-1">Cuisines</p>
+              <p className="text-gray-500 mb-1">Specialties</p>
               <p className="font-medium">{c.cuisine_types.join(', ')}</p>
             </div>
             <div>
@@ -142,7 +142,7 @@ export default async function CookProfilePage({
               <p className="font-medium">{c.dietary_specialties.join(', ')}</p>
             </div>
             <div>
-              <p className="text-gray-500 mb-1">Occasions</p>
+              <p className="text-gray-500 mb-1">Availability</p>
               <p className="font-medium">{c.occasion_types.join(', ')}</p>
             </div>
             <div>

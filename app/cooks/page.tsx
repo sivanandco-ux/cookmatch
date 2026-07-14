@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import CookTile from '@/components/CookTile'
 import type { CookWithDetails } from '@/lib/types'
+import { SPECIALTY_SUGGESTIONS } from '@/lib/specialtySuggestions'
 
-const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
-const OCCASIONS = ['Daily Meals / Tiffin', 'Festival / Occasion']
+const AVAILABILITY = ['Available regularly', 'Made to order', 'Seasonal or festival-only']
 
 export default async function CooksPage({
   searchParams,
@@ -22,10 +22,10 @@ export default async function CooksPage({
     .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
 
-  // "Other" isn't a real stored cuisine value — cooks describe their own
-  // food specialty as free text (e.g. "Baking", "Jams & Jellies") instead of
-  // picking one literal tag, so filtering for it means matching anything
-  // outside the known cuisine list rather than an exact .contains() match.
+  // "Other" isn't a real stored specialty value — cooks can type anything
+  // (validated inline as they add it) rather than picking from the
+  // suggestion list, so filtering for it means matching anything outside
+  // the known suggestions rather than an exact .contains() match.
   const isOtherCuisine = filters.cuisine === 'Other'
   if (filters.cuisine && !isOtherCuisine) {
     query = query.contains('cuisine_types', [filters.cuisine])
@@ -40,7 +40,7 @@ export default async function CooksPage({
   const { data: rawCooks } = await query
 
   const filteredCooks = isOtherCuisine
-    ? (rawCooks || []).filter(c => (c.cuisine_types || []).some((ct: string) => !CUISINES.includes(ct)))
+    ? (rawCooks || []).filter(c => (c.cuisine_types || []).some((ct: string) => !SPECIALTY_SUGGESTIONS.includes(ct)))
     : (rawCooks || [])
 
   // Sort by trust score descending — highest trust shown first
@@ -63,8 +63,8 @@ export default async function CooksPage({
           defaultValue={filters.cuisine || ''}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
         >
-          <option value="">All Cuisines</option>
-          {CUISINES.map((c) => <option key={c} value={c}>{c}</option>)}
+          <option value="">All Specialties</option>
+          {SPECIALTY_SUGGESTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
           <option value="Other">Other</option>
         </select>
 
@@ -82,8 +82,8 @@ export default async function CooksPage({
           defaultValue={filters.occasion || ''}
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
         >
-          <option value="">All Occasions</option>
-          {OCCASIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+          <option value="">All Availability</option>
+          {AVAILABILITY.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
 
         <button
