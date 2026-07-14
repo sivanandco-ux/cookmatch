@@ -249,7 +249,6 @@ export interface SessionBriefFormData {
   cleanup_needed: boolean
   kitchen_access_time: string
   city: string
-  parking_available: boolean
   language_preferred: string
   recurring: boolean
   text_description: string

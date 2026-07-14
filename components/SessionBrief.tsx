@@ -87,7 +87,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       cleanup_needed: (form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false,
       kitchen_access_time: '',
       city: get('city'),
-      parking_available: (form.elements.namedItem('parking_available') as HTMLInputElement)?.checked ?? false,
       language_preferred: '',
       recurring: false,
       text_description: textDescription,
@@ -254,10 +253,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-orange-600" />
             <span className="text-sm text-gray-700">I need the cook to clean up after cooking</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="parking_available" className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">Parking is available</span>
           </label>
         </div>
       </div>
