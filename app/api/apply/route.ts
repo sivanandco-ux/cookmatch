@@ -10,12 +10,12 @@ async function validateCustomCuisines(input: string): Promise<string[]> {
     max_tokens: 256,
     messages: [{
       role: 'user',
-      content: `You are validating specialty types for a home cook platform. Cooks on this platform aren't limited to cuisines — some make baked goods, snacks, crafts, or other homemade items. A cook applicant entered these as their specialties: "${input}"
+      content: `You are validating specialty types for a home cook platform. Cooks on this platform aren't limited to cuisines — some make baked goods, preserves, snacks, or other edible items. A cook applicant entered these as their specialties: "${input}"
 
 Return ONLY a JSON array of valid specialty names from this input. Rules:
-- Include real, recognizable specialties: cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions), food categories (e.g. "Baking", "Desserts", "Snacks"), or other legitimate homemade items/crafts (e.g. "Pottery", "Candles")
+- Include only real, recognizable food specialties: cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions), food categories (e.g. "Baking", "Jams & Jellies", "Snacks"), or specific edible dishes/items (e.g. "Dhokla", "Pickles")
 - Correct obvious misspellings (e.g. "tamilian" → "Tamil", "soth indian" → "South Indian")
-- Exclude anything that isn't a real specialty (gibberish, offensive words, unrelated text, emojis, numbers)
+- Exclude anything that isn't a real, edible food specialty (non-food items/crafts, gibberish, offensive words, unrelated text, emojis, numbers)
 - Return an empty array [] if nothing valid is found
 - No explanation, just the JSON array`,
     }],
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     console.log('[Cuisine validation] Input:', body.other_cuisines, '→ Valid:', validated)
     if (validated.length === 0 && cuisineTypes.length === 0) {
       return NextResponse.json(
-        { error: 'What you entered could not be recognised. Please enter a valid cuisine, food specialty, or item, e.g. Chettinad, Baking, Pottery.' },
+        { error: 'What you entered could not be recognised. Please enter a valid cuisine or food specialty, e.g. Chettinad, Baking, Jams & Jellies.' },
         { status: 400 }
       )
     }

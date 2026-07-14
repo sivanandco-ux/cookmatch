@@ -23,9 +23,9 @@ export default async function CooksPage({
     .order('created_at', { ascending: false })
 
   // "Other" isn't a real stored cuisine value — cooks describe their own
-  // specialty as free text (e.g. "Baking", "Pottery") instead of picking one
-  // literal tag, so filtering for it means matching anything outside the
-  // known cuisine list rather than an exact .contains() match.
+  // food specialty as free text (e.g. "Baking", "Jams & Jellies") instead of
+  // picking one literal tag, so filtering for it means matching anything
+  // outside the known cuisine list rather than an exact .contains() match.
   const isOtherCuisine = filters.cuisine === 'Other'
   if (filters.cuisine && !isOtherCuisine) {
     query = query.contains('cuisine_types', [filters.cuisine])

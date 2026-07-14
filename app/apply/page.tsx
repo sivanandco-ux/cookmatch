@@ -396,7 +396,7 @@ export default function ApplyPage() {
             <input
               name="other_cuisines"
               type="text"
-              placeholder="e.g. Chettinad, Baking, Pottery"
+              placeholder="e.g. Chettinad, Baking, Jams & Jellies, Dhokla"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
           </div>
