@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { US_STATES } from '@/lib/usStates'
+import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
 import CityInput from '@/components/CityInput'
 
 const CUISINES = ['South Indian', 'North Indian', 'Bengali', 'Gujarati', 'Maharashtrian', 'Hyderabadi', 'Other']
@@ -39,6 +40,8 @@ export default function ApplyPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [minHours, setMinHours] = useState(2)
+  const [state, setState] = useState('')
+  const [otherCities, setOtherCities] = useState('')
   const [cooksAtClientLocation, setCooksAtClientLocation] = useState(false)
   const [arrangementOtherChecked, setArrangementOtherChecked] = useState(false)
   const [occasionOtherChecked, setOccasionOtherChecked] = useState(false)
@@ -189,10 +192,10 @@ export default function ApplyPage() {
       price_max: priceValue,
       price_unit: 'hourly',
       min_hours: cooksAtClientLocation ? minHours : null,
-      state: formData.get('state') || null,
+      state: state || null,
       service_areas: [...new Set([
         primaryCity,
-        ...String(formData.get('service_areas_other') || '').split(',').map(s => s.trim()).filter(Boolean),
+        ...otherCities.split(',').map(s => s.trim()).filter(Boolean),
       ])],
       group_size_min: 2,
       group_size_max: 14,
@@ -477,10 +480,10 @@ export default function ApplyPage() {
           </div>
         </section>
 
-        {/* Pricing */}
+        {/* Pricing / Location */}
         <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
           <div>
-            <h2 className="text-lg font-semibold">Pricing</h2>
+            <h2 className="text-lg font-semibold">{cooksAtClientLocation ? 'Pricing' : 'Location'}</h2>
             <p className="text-sm text-gray-500 mt-1">
               {cooksAtClientLocation
                 ? 'Sessions cooking at a client\'s location are billed hourly with a minimum of 2 hours.'
@@ -532,7 +535,13 @@ export default function ApplyPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">State</label>
-              <select name="state" required defaultValue="" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+              <select
+                name="state"
+                required
+                value={state}
+                onChange={e => setState(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+              >
                 <option value="" disabled>Select your state</option>
                 {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -546,9 +555,33 @@ export default function ApplyPage() {
             <label className="text-sm font-medium text-gray-700 mb-2 block">Other cities you serve (optional)</label>
             <input
               name="service_areas_other"
+              value={otherCities}
+              onChange={e => setOtherCities(e.target.value)}
               placeholder="e.g. San Jose, Oakland — comma-separated"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
+            {state && US_CITIES_BY_STATE[state] && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <span className="text-xs text-gray-400 mt-1">Suggestions:</span>
+                {US_CITIES_BY_STATE[state].map(city => {
+                  const already = otherCities.split(',').map(s => s.trim().toLowerCase()).includes(city.toLowerCase())
+                  return (
+                    <button
+                      key={city}
+                      type="button"
+                      disabled={already}
+                      onClick={() => setOtherCities(prev => {
+                        const parts = prev.split(',').map(s => s.trim()).filter(Boolean)
+                        return [...parts, city].join(', ')
+                      })}
+                      className={`text-xs rounded-full px-2.5 py-1 border transition-colors ${already ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-default' : 'border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-600'}`}
+                    >
+                      + {city}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </section>
 

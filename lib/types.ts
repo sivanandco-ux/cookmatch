@@ -22,6 +22,8 @@ export interface Cook {
   tagline: string
   video_url: string | null
   photo_url: string | null
+  instagram_url: string | null
+  youtube_url: string | null
   cuisine_types: string[]
   dietary_specialties: string[]
   occasion_types: string[]

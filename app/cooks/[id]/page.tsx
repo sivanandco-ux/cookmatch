@@ -113,6 +113,24 @@ export default async function CookProfilePage({
             </div>
           )}
 
+          {/* Social links */}
+          {(c.instagram_url || c.youtube_url) && (
+            <div className="flex flex-wrap gap-3">
+              {c.instagram_url && (
+                <a href={c.instagram_url} target="_blank" rel="noopener noreferrer"
+                  className="text-orange-600 hover:underline text-sm">
+                  📸 Instagram →
+                </a>
+              )}
+              {c.youtube_url && (
+                <a href={c.youtube_url} target="_blank" rel="noopener noreferrer"
+                  className="text-orange-600 hover:underline text-sm">
+                  ▶️ YouTube →
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Details grid */}
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>

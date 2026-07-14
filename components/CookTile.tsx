@@ -101,6 +101,25 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           {/* Dietary */}
           <p className="text-xs text-gray-500">{cook.dietary_specialties.join(' · ')}</p>
 
+          {/* Dish photos */}
+          {cook.cook_dishes && cook.cook_dishes.length > 0 && (
+            <div className="flex gap-1.5">
+              {cook.cook_dishes.slice(0, 3).map(dish => (
+                <img
+                  key={dish.id}
+                  src={dish.photo_url}
+                  alt={dish.description || 'Dish photo'}
+                  className="w-12 h-12 rounded-lg object-cover border border-gray-100"
+                />
+              ))}
+              {cook.cook_dishes.length > 3 && (
+                <div className="w-12 h-12 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-xs text-gray-400 font-medium">
+                  +{cook.cook_dishes.length - 3}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Price */}
           {cook.price_min > 0 ? (
             <p className="text-sm font-medium text-gray-900">

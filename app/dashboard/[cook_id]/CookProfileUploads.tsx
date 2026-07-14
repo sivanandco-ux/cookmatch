@@ -9,10 +9,16 @@ export default function CookProfileUploads({
   cookId,
   idUploaded,
   initialDishes,
+  initialBio,
+  initialInstagramUrl,
+  initialYoutubeUrl,
 }: {
   cookId: string
   idUploaded: boolean
   initialDishes: CookDish[]
+  initialBio: string
+  initialInstagramUrl: string | null
+  initialYoutubeUrl: string | null
 }) {
   const [hasId, setHasId] = useState(idUploaded)
   const [dishes, setDishes] = useState(initialDishes)
@@ -27,8 +33,23 @@ export default function CookProfileUploads({
   const [dishError, setDishError] = useState('')
   const [dishSavedNotice, setDishSavedNotice] = useState(false)
 
+  const [editingDishId, setEditingDishId] = useState<string | null>(null)
+  const [editDishFile, setEditDishFile] = useState<File | null>(null)
+  const [editDishDescription, setEditDishDescription] = useState('')
+  const [editDishSaving, setEditDishSaving] = useState(false)
+  const [editDishError, setEditDishError] = useState('')
+
+  const [bio, setBio] = useState(initialBio)
+  const [instagramUrl, setInstagramUrl] = useState(initialInstagramUrl || '')
+  const [youtubeUrl, setYoutubeUrl] = useState(initialYoutubeUrl || '')
+  const [polishing, setPolishing] = useState(false)
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileError, setProfileError] = useState('')
+  const [profileSavedNotice, setProfileSavedNotice] = useState(false)
+
   const idInputRef = useRef<HTMLInputElement>(null)
   const dishInputRef = useRef<HTMLInputElement>(null)
+  const editDishInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!idSavedNotice) return
@@ -41,6 +62,12 @@ export default function CookProfileUploads({
     const t = setTimeout(() => setDishSavedNotice(false), 3000)
     return () => clearTimeout(t)
   }, [dishSavedNotice])
+
+  useEffect(() => {
+    if (!profileSavedNotice) return
+    const t = setTimeout(() => setProfileSavedNotice(false), 3000)
+    return () => clearTimeout(t)
+  }, [profileSavedNotice])
 
   async function handleIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -97,6 +124,69 @@ export default function CookProfileUploads({
     }
   }
 
+  function startEditDish(dish: CookDish) {
+    setEditingDishId(dish.id)
+    setEditDishFile(null)
+    setEditDishDescription(dish.description || '')
+    setEditDishError('')
+  }
+
+  function cancelEditDish() {
+    setEditingDishId(null)
+    setEditDishFile(null)
+    setEditDishDescription('')
+    setEditDishError('')
+    if (editDishInputRef.current) editDishInputRef.current.value = ''
+  }
+
+  async function handleSaveEditDish(dishId: string) {
+    setEditDishSaving(true)
+    setEditDishError('')
+    const formData = new FormData()
+    formData.append('cook_id', cookId)
+    formData.append('description', editDishDescription)
+    if (editDishFile) formData.append('photo', editDishFile)
+    const res = await fetch(`/api/dishes/${dishId}`, { method: 'PATCH', body: formData })
+    setEditDishSaving(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setEditDishError(data.error || 'Update failed. Please try again.')
+      return
+    }
+    const data = await res.json()
+    setDishes(prev => prev.map(d => (d.id === dishId ? data.dish : d)))
+    cancelEditDish()
+  }
+
+  async function handlePolish() {
+    if (!bio.trim()) return
+    setPolishing(true)
+    try {
+      const res = await fetch('/api/polish-intro', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: bio }) })
+      const data = await res.json()
+      if (data.polished) setBio(data.polished)
+    } finally {
+      setPolishing(false)
+    }
+  }
+
+  async function handleSaveProfile() {
+    setProfileSaving(true)
+    setProfileError('')
+    const res = await fetch('/api/update-cook-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cook_id: cookId, bio, instagram_url: instagramUrl, youtube_url: youtubeUrl }),
+    })
+    setProfileSaving(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setProfileError(data.error || 'Update failed. Please try again.')
+      return
+    }
+    setProfileSavedNotice(true)
+  }
+
   const profileComplete = hasId && dishes.length > 0
 
   return (
@@ -107,7 +197,63 @@ export default function CookProfileUploads({
           <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">✓ Complete</span>
         )}
       </div>
-      <p className="text-sm text-gray-400 mb-4">Everything here saves automatically as soon as you upload it — there's nothing else to submit.</p>
+      <p className="text-sm text-gray-400 mb-4">ID and dish photos save automatically. Your introduction and links need a Save.</p>
+
+      {/* About you */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+        <p className="text-sm font-medium text-gray-700 mb-2">About you</p>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-xs text-gray-500">Introduction</label>
+          <button
+            type="button"
+            onClick={handlePolish}
+            disabled={polishing || !bio.trim()}
+            className="text-xs text-orange-600 hover:text-orange-700 disabled:opacity-40 transition-opacity"
+          >
+            {polishing ? 'Polishing...' : '✨ Polish'}
+          </button>
+        </div>
+        <textarea
+          value={bio}
+          onChange={e => setBio(e.target.value)}
+          rows={3}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none mb-3"
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">Instagram link</label>
+            <input
+              type="url"
+              value={instagramUrl}
+              onChange={e => setInstagramUrl(e.target.value)}
+              placeholder="https://instagram.com/yourhandle"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 block mb-1">YouTube link</label>
+            <input
+              type="url"
+              value={youtubeUrl}
+              onChange={e => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/@yourchannel"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
+        {profileError && <p className="text-xs text-red-600 mb-2">{profileError}</p>}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleSaveProfile}
+            disabled={profileSaving || !bio.trim()}
+            className="text-xs text-white bg-orange-600 rounded-lg px-3 py-1.5 hover:bg-orange-700 disabled:opacity-40"
+          >
+            {profileSaving ? 'Saving...' : 'Save'}
+          </button>
+          {profileSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
+        </div>
+      </div>
 
       {/* ID document */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
@@ -154,18 +300,78 @@ export default function CookProfileUploads({
         {dishes.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
             {dishes.map(dish => (
-              <div key={dish.id} className="relative group">
-                <img src={dish.photo_url} alt={dish.description || 'Dish photo'} className="w-full aspect-square object-cover rounded-lg" />
-                {dish.description && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{dish.description}</p>}
-                <button
-                  type="button"
-                  onClick={() => handleDeleteDish(dish.id)}
-                  className="absolute top-1 right-1 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                  aria-label="Remove dish photo"
-                >
-                  ×
-                </button>
-              </div>
+              editingDishId === dish.id ? (
+                <div key={dish.id} className="col-span-2 sm:col-span-3 border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <img src={dish.photo_url} alt={dish.description || 'Dish photo'} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                    <input
+                      ref={editDishInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={e => setEditDishFile(e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => editDishInputRef.current?.click()}
+                        className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 w-fit"
+                      >
+                        Replace photo
+                      </button>
+                      <span className="text-xs text-gray-500">{editDishFile ? editDishFile.name : 'Keep current photo'}</span>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    value={editDishDescription}
+                    onChange={e => setEditDishDescription(e.target.value)}
+                    placeholder="e.g. Chettinad chicken curry"
+                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  />
+                  {editDishError && <p className="text-xs text-red-600">{editDishError}</p>}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={cancelEditDish}
+                      className="flex-1 border border-gray-300 text-gray-600 py-1.5 rounded-lg text-xs"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSaveEditDish(dish.id)}
+                      disabled={editDishSaving}
+                      className="flex-1 bg-orange-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+                    >
+                      {editDishSaving ? 'Saving...' : 'Save changes'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div key={dish.id} className="relative group">
+                  <img src={dish.photo_url} alt={dish.description || 'Dish photo'} className="w-full aspect-square object-cover rounded-lg" />
+                  {dish.description && <p className="text-xs text-gray-600 mt-1 line-clamp-2">{dish.description}</p>}
+                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={() => startEditDish(dish)}
+                      className="bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      aria-label="Edit dish photo"
+                    >
+                      ✎
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteDish(dish.id)}
+                      className="bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      aria-label="Remove dish photo"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )
             ))}
           </div>
         )}

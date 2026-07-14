@@ -18,7 +18,7 @@ export default async function CooksPage({
 
   let query = supabase
     .from('cooks')
-    .select('*, cook_verifications(*), cook_scores(*), cook_ratings(*)')
+    .select('*, cook_verifications(*), cook_scores(*), cook_ratings(*), cook_dishes(*)')
     .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
 
