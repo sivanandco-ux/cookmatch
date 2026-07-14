@@ -22,7 +22,12 @@ export default async function CooksPage({
     .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
 
-  if (filters.cuisine) {
+  // "Other" isn't a real stored cuisine value — cooks describe their own
+  // specialty as free text (e.g. "Baking", "Pottery") instead of picking one
+  // literal tag, so filtering for it means matching anything outside the
+  // known cuisine list rather than an exact .contains() match.
+  const isOtherCuisine = filters.cuisine === 'Other'
+  if (filters.cuisine && !isOtherCuisine) {
     query = query.contains('cuisine_types', [filters.cuisine])
   }
   if (filters.dietary) {
@@ -34,8 +39,12 @@ export default async function CooksPage({
 
   const { data: rawCooks } = await query
 
+  const filteredCooks = isOtherCuisine
+    ? (rawCooks || []).filter(c => (c.cuisine_types || []).some((ct: string) => !CUISINES.includes(ct)))
+    : (rawCooks || [])
+
   // Sort by trust score descending — highest trust shown first
-  const cooks = [...(rawCooks || [])].sort((a, b) => {
+  const cooks = [...filteredCooks].sort((a, b) => {
     const scoreA = (a as CookWithDetails).cook_scores?.trust_score ?? 0
     const scoreB = (b as CookWithDetails).cook_scores?.trust_score ?? 0
     return scoreB - scoreA
@@ -56,6 +65,7 @@ export default async function CooksPage({
         >
           <option value="">All Cuisines</option>
           {CUISINES.map((c) => <option key={c} value={c}>{c}</option>)}
+          <option value="Other">Other</option>
         </select>
 
         <select

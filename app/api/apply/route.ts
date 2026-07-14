@@ -10,12 +10,12 @@ async function validateCustomCuisines(input: string): Promise<string[]> {
     max_tokens: 256,
     messages: [{
       role: 'user',
-      content: `You are validating cuisine types for a home cook platform in the San Francisco Bay Area. A cook applicant entered these as their cuisine specialties: "${input}"
+      content: `You are validating specialty types for a home cook platform. Cooks on this platform aren't limited to cuisines — some make baked goods, snacks, crafts, or other homemade items. A cook applicant entered these as their specialties: "${input}"
 
-Return ONLY a JSON array of valid cuisine type names from this input. Rules:
-- Include only real, recognized cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions)
+Return ONLY a JSON array of valid specialty names from this input. Rules:
+- Include real, recognizable specialties: cuisine traditions (regional Indian cuisines, national cuisines, cultural food traditions), food categories (e.g. "Baking", "Desserts", "Snacks"), or other legitimate homemade items/crafts (e.g. "Pottery", "Candles")
 - Correct obvious misspellings (e.g. "tamilian" → "Tamil", "soth indian" → "South Indian")
-- Exclude anything that is not a cuisine name (gibberish, offensive words, unrelated text, emojis, numbers)
+- Exclude anything that isn't a real specialty (gibberish, offensive words, unrelated text, emojis, numbers)
 - Return an empty array [] if nothing valid is found
 - No explanation, just the JSON array`,
     }],
@@ -50,13 +50,13 @@ export async function POST(request: Request) {
     console.log('[Cuisine validation] Input:', body.other_cuisines, '→ Valid:', validated)
     if (validated.length === 0 && cuisineTypes.length === 0) {
       return NextResponse.json(
-        { error: 'The cuisines you entered could not be recognised. Please enter valid cuisine names, e.g. Chettinad, Kongunadu, Malabar.' },
+        { error: 'What you entered could not be recognised. Please enter a valid cuisine, food specialty, or item, e.g. Chettinad, Baking, Pottery.' },
         { status: 400 }
       )
     }
     if (validated.length === 0 && body.other_cuisines.trim()) {
       return NextResponse.json(
-        { error: `"${body.other_cuisines}" doesn't appear to be a recognised cuisine. Please check your spelling or leave the field blank.` },
+        { error: `"${body.other_cuisines}" doesn't appear to be a recognised specialty. Please check your spelling or leave the field blank.` },
         { status: 400 }
       )
     }

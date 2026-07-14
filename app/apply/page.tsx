@@ -392,11 +392,11 @@ export default function ApplyPage() {
           <h2 className="text-lg font-semibold">Cooking Details</h2>
           <CheckboxGroup name="cuisine_types" options={CUISINES} label="Cuisines you cook (select all that apply)" />
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">Other cuisines not listed above</p>
+            <p className="text-sm font-medium text-gray-700 mb-1">Other cuisines or specialties not listed above</p>
             <input
               name="other_cuisines"
               type="text"
-              placeholder="e.g. Chettinad, Kongunadu, Malabar"
+              placeholder="e.g. Chettinad, Baking, Pottery"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
           </div>
