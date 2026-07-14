@@ -76,6 +76,11 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           <div>
             <h3 className="font-semibold text-gray-900">{formatName(cook.name)}</h3>
             <p className="text-xs text-gray-500">{cook.tagline}</p>
+            {(cook.service_areas[0] || cook.state) && (
+              <p className="text-xs text-gray-400 mt-0.5">
+                📍 {[cook.service_areas[0], cook.state].filter(Boolean).join(', ')}
+              </p>
+            )}
           </div>
 
           {/* Rating */}
