@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import VoiceMemoRecorder from './VoiceMemoRecorder'
 import CityInput from './CityInput'
-import type { SessionBriefFormData, JobCategory, GrocerySituation } from '@/lib/types'
+import type { SessionBriefFormData, JobCategory, GrocerySituation, RequestType } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
@@ -31,6 +31,7 @@ interface Props {
 }
 
 export default function SessionBrief({ mode, availableDates = [], cookName, cookDietarySpecialties, onSubmit, submitLabel }: Props) {
+  const [requestType, setRequestType] = useState<RequestType>('session')
   const [jobCategory, setJobCategory] = useState<JobCategory | ''>('')
   const [selectedDate, setSelectedDate] = useState('')
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([])
@@ -54,7 +55,9 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     e.preventDefault()
     setError('')
 
-    if (!jobCategory) { setError('Please select a job type.'); return }
+    const isItem = requestType === 'item'
+
+    if (!isItem && !jobCategory) { setError('Please select a job type.'); return }
     if (!selectedDate) { setError('Please select a date.'); return }
     if (!voiceMemoUrl && !textDescription.trim()) {
       setError('Please provide at least one description — a voice memo, a written description, or both.')
@@ -64,8 +67,11 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     const form = e.currentTarget
     const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
-    const numPeople = Number(get('num_people'))
-    if (categoryConfig && (numPeople < 2 || numPeople > categoryConfig.max)) {
+    // Item orders don't have a party size — sizing/people fields don't apply
+    // to buying a jar of pickles, so a placeholder value is stored instead
+    // of asking the client something irrelevant.
+    const numPeople = isItem ? 2 : Number(get('num_people'))
+    if (!isItem && categoryConfig && (numPeople < 2 || numPeople > categoryConfig.max)) {
       setError(`For ${categoryConfig.label}, party size must be between 2 and ${categoryConfig.max}.`)
       return
     }
@@ -74,7 +80,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       client_name: get('client_name'),
       client_email: get('client_email'),
       client_phone: get('client_phone'),
-      job_category: jobCategory as JobCategory,
+      job_category: (isItem ? 'family_cooking' : jobCategory) as JobCategory,
+      request_type: requestType,
       occasion: get('occasion'),
       specific_dishes: '',
       num_dishes: Number(get('num_dishes')),
@@ -83,8 +90,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       expected_duration_hours: 2,
       num_people: numPeople,
       dietary_restrictions: dietaryRestrictions,
-      grocery_situation: ((form.elements.namedItem('grocery_pickup') as HTMLInputElement)?.checked ? 'need_grocery_pickup' : 'client_has_everything') as GrocerySituation,
-      cleanup_needed: (form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false,
+      grocery_situation: (isItem ? 'client_has_everything' : (form.elements.namedItem('grocery_pickup') as HTMLInputElement)?.checked ? 'need_grocery_pickup' : 'client_has_everything') as GrocerySituation,
+      cleanup_needed: isItem ? false : ((form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false),
       kitchen_access_time: '',
       city: get('city'),
       language_preferred: '',
@@ -106,34 +113,61 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
+      {/* Section 0: What do you need? */}
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-semibold text-gray-900">What do you need? <span className="text-red-500">*</span></p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <label
+            className={`flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+              requestType === 'session' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
+            }`}
+          >
+            <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-orange-600" />
+            <span className="text-sm font-medium text-gray-900">A cook for a session</span>
+          </label>
+          <label
+            className={`flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+              requestType === 'item' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
+            }`}
+          >
+            <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-orange-600" />
+            <span className="text-sm font-medium text-gray-900">A specific item (like pickles or baked goods)</span>
+          </label>
+        </div>
+      </div>
+
       {/* Section 1: Job type */}
       <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-gray-900">What kind of help do you need? <span className="text-red-500">*</span></p>
-        <div className="grid grid-cols-1 gap-2">
-          {JOB_CATEGORIES.map(cat => (
-            <label
-              key={cat.value}
-              className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-                jobCategory === cat.value
-                  ? 'border-orange-600 bg-orange-50'
-                  : 'border-gray-200 bg-white hover:border-orange-300'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="job_category_radio"
-                  value={cat.value}
-                  checked={jobCategory === cat.value}
-                  onChange={() => setJobCategory(cat.value)}
-                  className="text-orange-600"
-                />
-                <span className="text-sm font-medium text-gray-900">{cat.label}</span>
-              </div>
-              <span className="text-xs text-gray-400">{cat.range}</span>
-            </label>
-          ))}
-        </div>
+        {requestType === 'session' && (
+          <>
+            <p className="text-sm font-semibold text-gray-900">What kind of help do you need? <span className="text-red-500">*</span></p>
+            <div className="grid grid-cols-1 gap-2">
+              {JOB_CATEGORIES.map(cat => (
+                <label
+                  key={cat.value}
+                  className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                    jobCategory === cat.value
+                      ? 'border-orange-600 bg-orange-50'
+                      : 'border-gray-200 bg-white hover:border-orange-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="job_category_radio"
+                      value={cat.value}
+                      checked={jobCategory === cat.value}
+                      onChange={() => setJobCategory(cat.value)}
+                      className="text-orange-600"
+                    />
+                    <span className="text-sm font-medium text-gray-900">{cat.label}</span>
+                  </div>
+                  <span className="text-xs text-gray-400">{cat.range}</span>
+                </label>
+              ))}
+            </div>
+          </>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -144,8 +178,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
             </select>
           </div>
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">Number of dishes <span className="text-red-500">*</span></label>
-            <input name="num_dishes" type="number" required min={1} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+            <label className="text-xs text-gray-500 mb-1 block">{requestType === 'item' ? 'Quantity' : 'Number of dishes'} <span className="text-red-500">*</span></label>
+            <input name="num_dishes" type="number" required min={1} placeholder={requestType === 'item' ? 'e.g. 2' : 'e.g. 3'} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
           </div>
         </div>
       </div>
@@ -197,21 +231,23 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       {/* Section 3: Who */}
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-gray-900">Who?</p>
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">
-            Number of people <span className="text-red-500">*</span>
-            {categoryConfig && <span className="text-gray-400"> (max {categoryConfig.max} for {categoryConfig.label})</span>}
-          </label>
-          <input
-            name="num_people"
-            type="number"
-            required
-            min={2}
-            max={categoryConfig?.max ?? 14}
-            placeholder="e.g. 6"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-          />
-        </div>
+        {requestType === 'session' && (
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Number of people <span className="text-red-500">*</span>
+              {categoryConfig && <span className="text-gray-400"> (max {categoryConfig.max} for {categoryConfig.label})</span>}
+            </label>
+            <input
+              name="num_people"
+              type="number"
+              required
+              min={2}
+              max={categoryConfig?.max ?? 14}
+              placeholder="e.g. 6"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+        )}
 
         <div>
           <label className="text-xs text-gray-500 mb-2 block">Dietary restrictions (select all that apply)</label>
@@ -245,16 +281,18 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
           <CityInput name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="grocery_pickup" className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I need the cook to pick up groceries</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-orange-600" />
-            <span className="text-sm text-gray-700">I need the cook to clean up after cooking</span>
-          </label>
-        </div>
+        {requestType === 'session' && (
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="grocery_pickup" className="rounded border-gray-300 text-orange-600" />
+              <span className="text-sm text-gray-700">I need the cook to pick up groceries</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-orange-600" />
+              <span className="text-sm text-gray-700">I need the cook to clean up after cooking</span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Section 5: Tell the cook */}
@@ -277,7 +315,9 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
           <textarea
             value={textDescription}
             onChange={e => setTextDescription(e.target.value)}
-            placeholder="Describe what you need — dishes, number of courses, how you like things cooked, anything that helps the cook prepare"
+            placeholder={requestType === 'item'
+              ? 'Describe what you want — flavor, size, any preferences that help the cook prepare it'
+              : 'Describe what you need — dishes, number of courses, how you like things cooked, anything that helps the cook prepare'}
             rows={4}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"
           />

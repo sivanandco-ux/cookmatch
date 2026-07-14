@@ -7,6 +7,7 @@ import JobInterestActions from './JobInterestActions'
 import CookProfileUploads from './CookProfileUploads'
 import LogoutButton from './LogoutButton'
 import StartJobActions from './StartJobActions'
+import { getRequestLabel } from '@/lib/jobLabels'
 
 interface DashboardBooking {
   id: string
@@ -17,7 +18,9 @@ interface DashboardBooking {
   preferred_date: string
   preferred_time: string | null
   job_category: string | null
+  request_type: string | null
   occasion_type: string | null
+  num_dishes: number | null
   num_people: number | null
   expected_duration_hours: number | null
   city: string | null
@@ -36,12 +39,6 @@ function getSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  family_cooking: 'Family Cooking',
-  small_event: 'Small Event',
-  medium_event: 'Medium Event',
 }
 
 const GROCERY_LABELS: Record<string, string> = {
@@ -86,14 +83,14 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, occasion, requested_date, num_people, city, client_name, grocery_situation, cleanup_needed, created_at, status')
+      .select('id, job_category, request_type, occasion, requested_date, num_people, num_dishes, city, client_name, grocery_situation, cleanup_needed, created_at, status')
       .in('status', ['open', 'taken'])
       .gte('requested_date', today)
       .order('created_at', { ascending: false })
       .limit(8),
     supabase
       .from('job_interests')
-      .select('id, cook_confirmed, client_confirmed, created_at, job_posts(id, job_category, occasion, requested_date, num_people, city, client_name, client_phone, client_email)')
+      .select('id, cook_confirmed, client_confirmed, created_at, job_posts(id, job_category, request_type, occasion, requested_date, num_people, num_dishes, city, client_name, client_phone, client_email)')
       .eq('cook_id', cook_id)
       .eq('status', 'pending'),
     supabase
@@ -118,9 +115,11 @@ export default async function CookDashboardPage({
     job_posts: {
       id: string
       job_category: string
+      request_type: string
       occasion: string
       requested_date: string
       num_people: number
+      num_dishes: number | null
       city: string
       client_name: string
       client_phone: string
@@ -265,13 +264,14 @@ export default async function CookDashboardPage({
             {activeInterests.map(interest => {
               const job = interest.job_posts!
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-              const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
+              const categoryLabel = getRequestLabel(job.job_category, job.request_type)
+              const isItem = job.request_type === 'item'
               return (
                 <div key={interest.id} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="font-semibold text-gray-900">{categoryLabel}</p>
-                      <p className="text-sm text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people · {job.city}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{requestedDate}{isItem ? (job.num_dishes ? ` · Qty ${job.num_dishes}` : '') : ` · ${job.num_people} people`} · {job.city}</p>
                     </div>
                     <span className="text-xs bg-orange-100 text-orange-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Applied</span>
                   </div>
@@ -307,9 +307,10 @@ export default async function CookDashboardPage({
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; occasion: string; requested_date: string; num_people: number; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
+            {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-              const categoryLabel = job.job_category === 'family_cooking' ? 'Family Cooking' : job.job_category === 'small_event' ? 'Small Event' : 'Medium Event'
+              const categoryLabel = getRequestLabel(job.job_category, job.request_type)
+              const isItem = job.request_type === 'item'
               const isTaken = job.status === 'taken'
               const postedAt = new Date(job.created_at)
               const postedLabel = postedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) +
@@ -325,7 +326,7 @@ export default async function CookDashboardPage({
                       <p className={`text-sm font-medium ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
                         {job.client_name ? `Posted by ${getInitials(job.client_name)} for ${categoryLabel}` : categoryLabel}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{requestedDate} · {job.num_people} people</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{requestedDate}{isItem ? (job.num_dishes ? ` · Qty ${job.num_dishes}` : '') : ` · ${job.num_people} people`}</p>
                       <p className="text-xs text-gray-400 mt-0.5">Posted {postedLabel}</p>
                     </div>
                     <div className="flex-shrink-0">
@@ -374,17 +375,16 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-semibold text-gray-900">
-            {CATEGORY_LABELS[booking.job_category ?? ''] ?? booking.job_category}
+            {getRequestLabel(booking.job_category, booking.request_type)}
             {' · '}
             {booking.occasion_type}
           </p>
           <p className="text-sm text-gray-600 mt-0.5">
             {formatDate(booking.preferred_date)}
             {booking.preferred_time ? ` at ${booking.preferred_time}` : ''}
-            {' · '}
-            {booking.num_people} people
-            {' · '}
-            {booking.expected_duration_hours}+ hrs
+            {booking.request_type === 'item'
+              ? (booking.num_dishes ? ` · Qty ${booking.num_dishes}` : '')
+              : <>{' · '}{booking.num_people} people{' · '}{booking.expected_duration_hours}+ hrs</>}
           </p>
           <p className="text-sm text-gray-500 mt-0.5">
             {booking.city}

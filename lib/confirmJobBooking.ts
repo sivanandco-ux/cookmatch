@@ -55,6 +55,7 @@ export async function confirmJobBooking(jobId: string, interestId: string) {
     dietary_needs: (job.dietary_restrictions || []).join(', '),
     notes: job.additional_notes || '',
     job_category: job.job_category,
+    request_type: job.request_type || 'session',
     specific_dishes: job.specific_dishes || null,
     num_dishes: job.num_dishes || null,
     expected_duration_hours: job.expected_duration_hours,

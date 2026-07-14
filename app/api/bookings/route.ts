@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       notes: body.additional_notes || '',
       // Session brief fields
       job_category: body.job_category,
+      request_type: body.request_type || 'session',
       specific_dishes: body.specific_dishes || null,
       num_dishes: body.num_dishes,
       expected_duration_hours: body.expected_duration_hours,

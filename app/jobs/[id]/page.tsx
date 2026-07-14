@@ -5,18 +5,13 @@ import { notFound, redirect } from 'next/navigation'
 import JobInterestButton from './JobInterestButton'
 import ReportButton from './ReportButton'
 import { createClient as createSessionClient } from '@/lib/supabase/server'
+import { getRequestLabel } from '@/lib/jobLabels'
 
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  family_cooking: 'Family Cooking',
-  small_event: 'Small Event',
-  medium_event: 'Medium Event',
 }
 
 const GROCERY_LABELS: Record<string, string> = {
@@ -101,7 +96,7 @@ export default async function JobDetailPage({
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {CATEGORY_LABELS[job.job_category] ?? job.job_category}
+            {getRequestLabel(job.job_category, job.request_type)}
           </h1>
           {job.client_name && <p className="text-gray-600 mt-1">Posted by {job.client_name}</p>}
           <p className="text-gray-500 mt-1">{job.city}</p>
@@ -127,17 +122,21 @@ export default async function JobDetailPage({
               <p className="font-medium">{job.requested_time}</p>
             </div>
           )}
-          <div>
-            <p className="text-gray-500">People</p>
-            <p className="font-medium">{job.num_people}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Duration</p>
-            <p className="font-medium">{job.expected_duration_hours}+ hours</p>
-          </div>
+          {job.request_type !== 'item' && (
+            <>
+              <div>
+                <p className="text-gray-500">People</p>
+                <p className="font-medium">{job.num_people}</p>
+              </div>
+              <div>
+                <p className="text-gray-500">Duration</p>
+                <p className="font-medium">{job.expected_duration_hours}+ hours</p>
+              </div>
+            </>
+          )}
           {job.num_dishes && (
             <div>
-              <p className="text-gray-500">Dishes</p>
+              <p className="text-gray-500">{job.request_type === 'item' ? 'Quantity' : 'Dishes'}</p>
               <p className="font-medium">{job.num_dishes}</p>
             </div>
           )}

@@ -7,6 +7,10 @@ export type PriceUnit = 'hourly' | 'per_session' | 'per_item' | (string & {})
 export type SessionType = 'one_time' | 'recurring'
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly'
 export type JobCategory = 'family_cooking' | 'small_event' | 'medium_event'
+// 'session' is the original meaning of a job/booking — hiring a cook to
+// prepare a meal. 'item' is a request to buy a specific ready-made item
+// (a jar of pickles, a batch of cookies) — no session-sizing fields apply.
+export type RequestType = 'session' | 'item'
 export type GrocerySituation = 'client_has_everything' | 'need_grocery_pickup' | 'cook_brings_ingredients'
 export type JobPostStatus = 'open' | 'taken' | 'done' | 'expired'
 export type BookingStatus = 'legacy' | 'pending' | 'cook_interested' | 'confirmed' | 'in_progress' | 'cancelled' | 'completed'
@@ -98,6 +102,7 @@ export interface Booking {
   cook_notified: boolean
   // V0 session brief additions
   job_category: JobCategory | null
+  request_type: RequestType
   occasion: string | null
   specific_dishes: string | null
   num_dishes: number | null
@@ -128,6 +133,7 @@ export interface JobPost {
   client_email: string
   client_phone: string
   job_category: JobCategory
+  request_type: RequestType
   occasion: string
   specific_dishes: string | null
   num_dishes: number
@@ -157,6 +163,7 @@ export interface JobPost {
 export interface JobPostPublic {
   id: string
   job_category: JobCategory
+  request_type: RequestType
   occasion: string
   num_dishes: number
   requested_date: string
@@ -239,6 +246,7 @@ export interface SessionBriefFormData {
   client_email: string
   client_phone: string
   job_category: JobCategory
+  request_type: RequestType
   occasion: string
   specific_dishes: string
   num_dishes: number

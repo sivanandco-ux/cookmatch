@@ -5,6 +5,7 @@ import { useState } from 'react'
 interface Job {
   id: string
   job_category: string
+  request_type: string
   occasion: string
   city: string
   requested_date: string
@@ -27,6 +28,10 @@ const CATEGORY: Record<string, string> = {
   family_cooking: 'Family',
   small_event: 'Small Event',
   medium_event: 'Medium Event',
+}
+
+function jobLabel(job: Job) {
+  return job.request_type === 'item' ? 'Item Order' : (CATEGORY[job.job_category] ?? job.job_category)
 }
 
 function fmtDate(d: string) {
@@ -238,7 +243,7 @@ export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, adm
               <p className="font-medium text-gray-900">{job.client_name}</p>
               <p className="text-xs text-gray-400">{job.client_email}</p>
             </td>
-            <td className="px-4 py-3 text-gray-700">{CATEGORY[job.job_category] ?? job.job_category} · {job.occasion}</td>
+            <td className="px-4 py-3 text-gray-700">{jobLabel(job)} · {job.occasion}</td>
             <td className="px-4 py-3 text-gray-700">{job.city}</td>
             <td className="px-4 py-3 text-gray-700">{fmtDate(job.requested_date)}</td>
             <td className="px-4 py-3">{statusBadge(job.status)}</td>
@@ -262,7 +267,7 @@ export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, adm
               <p className="font-medium text-gray-900">{job.client_name}</p>
               <p className="text-xs text-gray-400">{job.client_email}</p>
             </td>
-            <td className="px-4 py-3 text-gray-700">{CATEGORY[job.job_category] ?? job.job_category} · {job.occasion}</td>
+            <td className="px-4 py-3 text-gray-700">{jobLabel(job)} · {job.occasion}</td>
             <td className="px-4 py-3 text-gray-700">{job.city}</td>
             <td className="px-4 py-3 text-gray-700">{fmtDate(job.requested_date)}</td>
             <td className="px-4 py-3">{statusBadge(job.status)}</td>

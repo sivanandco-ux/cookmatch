@@ -3,18 +3,13 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { createClient as createSessionClient } from '@/lib/supabase/server'
+import { getRequestLabel } from '@/lib/jobLabels'
 
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  family_cooking: 'Family Cooking',
-  small_event: 'Small Event',
-  medium_event: 'Medium Event',
 }
 
 const GROCERY_LABELS: Record<string, string> = {
@@ -35,6 +30,7 @@ function getInitials(name: string): string {
 interface JobTile {
   id: string
   job_category: string
+  request_type: string
   occasion: string
   client_name?: string
   requested_date: string
@@ -88,7 +84,7 @@ export default async function JobBoardPage() {
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
+    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -151,7 +147,8 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
     ' at ' + postedAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' }) + ' PST'
   const needsGrocery = job.grocery_situation === 'need_grocery_pickup'
   const isTaken = job.status === 'taken'
-  const categoryLabel = CATEGORY_LABELS[job.job_category] ?? job.job_category
+  const isItem = job.request_type === 'item'
+  const categoryLabel = getRequestLabel(job.job_category, job.request_type)
 
   return (
     <div className={`border rounded-xl p-5 flex flex-col gap-3 ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200'}`}>
@@ -162,7 +159,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
             {job.client_name ? `Posted by ${getInitials(job.client_name)} for ${categoryLabel}` : categoryLabel}
           </p>
           <p className="text-sm text-gray-500 mt-0.5">
-            {formatDate(job.requested_date)} · {job.num_people} people
+            {formatDate(job.requested_date)}{isItem ? (job.num_dishes ? ` · Qty ${job.num_dishes}` : '') : ` · ${job.num_people} people`}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 flex-shrink-0">

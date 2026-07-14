@@ -3,18 +3,13 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import ConfirmActions from './ConfirmActions'
+import { getRequestLabel } from '@/lib/jobLabels'
 
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  family_cooking: 'Family Cooking',
-  small_event: 'Small Event',
-  medium_event: 'Medium Event',
 }
 
 function formatDate(dateStr: string) {
@@ -85,7 +80,7 @@ export default async function ConfirmBookingPage({
           </div>
           <div className="flex justify-between">
             <span>Job type</span>
-            <span className="font-medium text-gray-900">{CATEGORY_LABELS[booking.job_category] ?? booking.job_category}</span>
+            <span className="font-medium text-gray-900">{getRequestLabel(booking.job_category, booking.request_type)}</span>
           </div>
           <div className="flex justify-between">
             <span>Date</span>
@@ -97,14 +92,23 @@ export default async function ConfirmBookingPage({
               <span className="font-medium text-gray-900">{booking.preferred_time}</span>
             </div>
           )}
-          <div className="flex justify-between">
-            <span>People</span>
-            <span className="font-medium text-gray-900">{booking.num_people}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Duration</span>
-            <span className="font-medium text-gray-900">{booking.expected_duration_hours}+ hours</span>
-          </div>
+          {booking.request_type === 'item' ? (
+            <div className="flex justify-between">
+              <span>Quantity</span>
+              <span className="font-medium text-gray-900">{booking.num_dishes}</span>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between">
+                <span>People</span>
+                <span className="font-medium text-gray-900">{booking.num_people}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Duration</span>
+                <span className="font-medium text-gray-900">{booking.expected_duration_hours}+ hours</span>
+              </div>
+            </>
+          )}
           <div className="flex justify-between">
             <span>Location</span>
             <span className="font-medium text-gray-900">{booking.city}</span>

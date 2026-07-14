@@ -3,18 +3,13 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import ConfirmJobActions from './ConfirmJobActions'
+import { getRequestLabel } from '@/lib/jobLabels'
 
 function getSupabase() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
-}
-
-const CATEGORY_LABELS: Record<string, string> = {
-  family_cooking: 'Family Cooking',
-  small_event: 'Small Event',
-  medium_event: 'Medium Event',
 }
 
 function formatDate(dateStr: string) {
@@ -157,16 +152,23 @@ export default async function ConfirmJobPage({
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex justify-between">
             <span>Type</span>
-            <span className="font-medium text-gray-900">{CATEGORY_LABELS[job.job_category] ?? job.job_category}</span>
+            <span className="font-medium text-gray-900">{getRequestLabel(job.job_category, job.request_type)}</span>
           </div>
           <div className="flex justify-between">
             <span>Date</span>
             <span className="font-medium text-gray-900">{formatDate(job.requested_date)}</span>
           </div>
-          <div className="flex justify-between">
-            <span>People</span>
-            <span className="font-medium text-gray-900">{job.num_people}</span>
-          </div>
+          {job.request_type === 'item' ? (
+            <div className="flex justify-between">
+              <span>Quantity</span>
+              <span className="font-medium text-gray-900">{job.num_dishes}</span>
+            </div>
+          ) : (
+            <div className="flex justify-between">
+              <span>People</span>
+              <span className="font-medium text-gray-900">{job.num_people}</span>
+            </div>
+          )}
           <div className="flex justify-between">
             <span>Location</span>
             <span className="font-medium text-gray-900">{job.city}</span>
