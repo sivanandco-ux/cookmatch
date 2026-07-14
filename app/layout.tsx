@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
-              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Home-cooked food delivered, for pick up or cooked in your home</span>
+              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Home-cooked food — delivered, for pickup, or cooked in your home</span>
             </div>
           </div>
           <SiteNav />
