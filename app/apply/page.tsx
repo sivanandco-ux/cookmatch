@@ -305,7 +305,7 @@ export default function ApplyPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
         {/* Personal Info */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Personal Information</h2>
 
           {/* Photo upload */}
@@ -341,7 +341,7 @@ export default function ApplyPage() {
         </section>
 
         {/* Profile */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-4">
           <div>
             <h2 className="text-lg font-semibold">Introduce Yourself</h2>
             <p className="text-sm text-gray-500 mt-1">This is the first thing clients read on your profile.</p>
@@ -386,7 +386,7 @@ export default function ApplyPage() {
         </section>
 
         {/* Cooking Details */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-5">
           <h2 className="text-lg font-semibold">Cooking Details</h2>
           <SpecialtyTagInput
             value={specialties}
@@ -427,7 +427,7 @@ export default function ApplyPage() {
         </section>
 
         {/* Cooking Arrangement */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-4">
           <div>
             <h2 className="text-lg font-semibold">How Do You Cook?</h2>
             <p className="text-sm text-gray-500 mt-1">Select all that apply — you can cook at a client's home and prepare something else too.</p>
@@ -472,7 +472,7 @@ export default function ApplyPage() {
         </section>
 
         {/* Pricing / Location */}
-        <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-4">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-4">
           <div>
             <h2 className="text-lg font-semibold">{cooksAtClientLocation ? 'Pricing' : 'Location'}</h2>
             <p className="text-sm text-gray-500 mt-1">
@@ -578,7 +578,7 @@ export default function ApplyPage() {
 
         {/* Job Preferences — only relevant when cooking at a client's location */}
         {cooksAtClientLocation && (
-          <section className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-5">
+          <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-5">
             <h2 className="text-lg font-semibold">Job Preferences</h2>
 
             <div>

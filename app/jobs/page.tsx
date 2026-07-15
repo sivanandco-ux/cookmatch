@@ -99,7 +99,7 @@ export default async function JobBoardPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Cravings</h1>
           <p className="text-gray-600">
@@ -110,7 +110,7 @@ export default async function JobBoardPage() {
         </div>
         <Link
           href="/jobs/post"
-          className="bg-copper-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-copper-700 whitespace-nowrap"
+          className="bg-copper-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-copper-700 whitespace-nowrap self-start"
         >
           Post Your Craving
         </Link>
@@ -151,11 +151,11 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
   const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
 
   return (
-    <div className={`border rounded-xl p-5 flex flex-col gap-3 ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200'}`}>
+    <div className={`bg-panel rounded-sm border-l-4 p-5 flex flex-col gap-3 ${isTaken ? 'border-l-amber-400 opacity-80' : 'border-l-copper-600'}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className={`font-semibold ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
+          <p className={`font-display font-bold ${isTaken ? 'text-gray-500' : 'text-gray-900'}`}>
             {job.client_name ? `Posted by ${getInitials(job.client_name)} for ${categoryLabel}` : categoryLabel}
           </p>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -173,7 +173,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
 
       {/* Key highlights */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">📍 {job.city}</span>
+        <span className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">📍 {job.city}</span>
         {job.voice_memo_url && (
           <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
         )}
@@ -184,7 +184,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
           <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">🧹 Cleanup needed</span>
         )}
         {job.parking_available && (
-          <span className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">🅿️ Parking available</span>
+          <span className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">🅿️ Parking available</span>
         )}
         {job.dietary_restrictions?.length > 0 && (
           <span className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full">{job.dietary_restrictions.join(', ')}</span>
@@ -195,13 +195,13 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       {isCook && (
         <>
           {job.text_description && (
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div className="bg-paper rounded-sm p-3 border border-copper-100">
               <p className="text-xs text-gray-500 mb-1">Written description</p>
               <p className="text-sm text-gray-800">{job.text_description}</p>
             </div>
           )}
           {job.voice_memo_url && (
-            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+            <div className="bg-paper rounded-sm p-3 border border-copper-100">
               <p className="text-xs text-gray-500 mb-2">Voice memo</p>
               <audio src={job.voice_memo_url} controls className="w-full h-10" />
             </div>

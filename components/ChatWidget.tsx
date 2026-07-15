@@ -427,7 +427,7 @@ export default function ChatWidget() {
   const showBack = view !== 'home' && view !== 'done'
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 flex flex-col items-end gap-3">
       {open && (
         <div className="w-80 sm:w-96 bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           style={{ height: 'min(600px, calc(100vh - 96px))' }}>
@@ -930,7 +930,7 @@ export default function ChatWidget() {
 
       {/* Bubble */}
       <button onClick={() => setOpen(o => !o)}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-copper-600 hover:bg-copper-700'}`}
+        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-copper-600 hover:bg-copper-700'}`}
         aria-label={open ? 'Close' : 'Chat with us'}>
         {open ? (
           <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white" stroke="currentColor" strokeWidth={2.5}>
