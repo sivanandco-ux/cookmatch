@@ -57,6 +57,7 @@ export default async function CooksPage({
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
+        <p className="text-sm font-medium text-orange-600 mb-1">Sivan Chefs: Connecting Local Culinary Artisans</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
       </div>
 
