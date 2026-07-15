@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <img src="/sivanchefs-logo.png" alt="Sivan Chefs" className="h-12 sm:h-16 md:h-36 w-auto shrink-0" />
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
-              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Delivered, picked up, or cooked in your own kitchen — meals, baking, pickles, preserves, sweets & snacks, and more, from cooks near you</span>
+              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Your Directory for Local Culinary Artisans</span>
             </div>
           </div>
           <SiteNav />
