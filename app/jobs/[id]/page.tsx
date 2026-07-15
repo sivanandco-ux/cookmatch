@@ -89,7 +89,7 @@ export default async function JobDetailPage({
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <a href={`/jobs${cook_id ? `?cook_id=${cook_id}` : ''}`} className="text-sm text-orange-600 hover:underline mb-6 inline-block">
+      <a href={`/jobs${cook_id ? `?cook_id=${cook_id}` : ''}`} className="text-sm text-copper-600 hover:underline mb-6 inline-block">
         ← Back to job board
       </a>
 

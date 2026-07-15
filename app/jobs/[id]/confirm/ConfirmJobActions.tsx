@@ -54,7 +54,7 @@ export default function ConfirmJobActions({
       <button
         onClick={handleConfirm}
         disabled={loading}
-        className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Confirming...' : 'Confirm this cook'}
       </button>

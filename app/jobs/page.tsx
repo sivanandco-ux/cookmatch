@@ -110,7 +110,7 @@ export default async function JobBoardPage() {
         </div>
         <Link
           href="/jobs/post"
-          className="bg-orange-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-orange-700 whitespace-nowrap"
+          className="bg-copper-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-copper-700 whitespace-nowrap"
         >
           Post Your Craving
         </Link>
@@ -126,7 +126,7 @@ export default async function JobBoardPage() {
       {jobList.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-500 text-lg mb-4">No open cravings right now.</p>
-          <Link href="/jobs/post" className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 inline-block">
+          <Link href="/jobs/post" className="bg-copper-600 text-white px-6 py-3 rounded-lg hover:bg-copper-700 inline-block">
             Post Your Craving
           </Link>
         </div>
@@ -175,7 +175,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       <div className="flex flex-wrap gap-2">
         <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">📍 {job.city}</span>
         {job.voice_memo_url && (
-          <span className="text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
+          <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
         )}
         {needsGrocery && (
           <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2.5 py-1 rounded-full">🛒 Grocery pickup needed</span>
@@ -219,14 +219,14 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       <div className="flex gap-3 pt-1">
         <Link
           href={`/jobs/${job.id}${cookId ? `?cook_id=${cookId}` : ''}`}
-          className="text-sm text-orange-600 hover:underline"
+          className="text-sm text-copper-600 hover:underline"
         >
           View details →
         </Link>
         {isCook && cookId && !isTaken && (
           <Link
             href={`/jobs/${job.id}?cook_id=${cookId}#interest`}
-            className="ml-auto text-sm bg-orange-600 text-white px-4 py-1.5 rounded-lg hover:bg-orange-700"
+            className="ml-auto text-sm bg-copper-600 text-white px-4 py-1.5 rounded-lg hover:bg-copper-700"
           >
             I want this job
           </Link>

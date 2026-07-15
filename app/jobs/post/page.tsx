@@ -33,10 +33,10 @@ export default function PostJobPage() {
           You will receive an email when a cook wants the job. You then confirm the cook before contact details are shared.
         </p>
         <div className="flex flex-col gap-3">
-          <a href="/jobs" className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 inline-block">
+          <a href="/jobs" className="bg-copper-600 text-white px-6 py-3 rounded-lg hover:bg-copper-700 inline-block">
             View Community Cravings
           </a>
-          <a href="/cooks" className="text-orange-600 hover:underline text-sm">
+          <a href="/cooks" className="text-copper-600 hover:underline text-sm">
             Or browse cooks directly →
           </a>
         </div>
@@ -46,7 +46,7 @@ export default function PostJobPage() {
 
   return (
     <div className="max-w-lg mx-auto px-6 py-10">
-      <a href="/jobs" className="text-sm text-orange-600 hover:underline mb-6 inline-block">
+      <a href="/jobs" className="text-sm text-copper-600 hover:underline mb-6 inline-block">
         ← Back to Community Cravings
       </a>
       <h1 className="text-2xl font-bold text-gray-900 mb-2">Post Your Craving</h1>

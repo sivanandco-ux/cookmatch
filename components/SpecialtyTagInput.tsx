@@ -66,12 +66,12 @@ export default function SpecialtyTagInput({
       {value.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2">
           {value.map(tag => (
-            <span key={tag} className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-700 rounded-full pl-2.5 pr-1.5 py-1">
+            <span key={tag} className="inline-flex items-center gap-1 text-xs bg-copper-50 text-copper-700 rounded-full pl-2.5 pr-1.5 py-1">
               {tag}
               <button
                 type="button"
                 onClick={() => removeTag(tag)}
-                className="text-orange-400 hover:text-orange-600 leading-none"
+                className="text-copper-400 hover:text-copper-600 leading-none"
                 aria-label={`Remove ${tag}`}
               >
                 ×
@@ -95,7 +95,7 @@ export default function SpecialtyTagInput({
           type="button"
           onClick={() => addTyped(text)}
           disabled={checking || !text.trim()}
-          className="text-sm text-orange-600 border border-orange-300 rounded-lg px-3 py-2 hover:bg-orange-50 disabled:opacity-40 shrink-0"
+          className="text-sm text-copper-600 border border-copper-300 rounded-lg px-3 py-2 hover:bg-copper-50 disabled:opacity-40 shrink-0"
         >
           {checking ? 'Checking…' : 'Add'}
         </button>
@@ -111,7 +111,7 @@ export default function SpecialtyTagInput({
               key={s}
               type="button"
               onClick={() => addSuggestion(s)}
-              className="text-xs rounded-full px-2.5 py-1 border border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-600 transition-colors"
+              className="text-xs rounded-full px-2.5 py-1 border border-gray-200 text-gray-600 hover:border-copper-400 hover:text-copper-600 transition-colors"
             >
               + {s}
             </button>

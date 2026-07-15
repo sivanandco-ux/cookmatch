@@ -72,14 +72,14 @@ export default function JobInterestButton({
   if (state === 'client_confirmed') {
     return (
       <div className="flex flex-col gap-3">
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-          <p className="text-sm font-semibold text-orange-900 mb-1">The client has confirmed you</p>
-          <p className="text-sm text-orange-800">Contact the client, agree on the details, then confirm your availability below to lock in the booking.</p>
+        <div className="bg-copper-50 border border-copper-200 rounded-xl p-4">
+          <p className="text-sm font-semibold text-copper-900 mb-1">The client has confirmed you</p>
+          <p className="text-sm text-copper-800">Contact the client, agree on the details, then confirm your availability below to lock in the booking.</p>
         </div>
         <button
           onClick={handleCookConfirm}
           disabled={loading}
-          className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+          className="w-full bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
         >
           {loading ? 'Confirming...' : 'Confirm I am available'}
         </button>
@@ -111,7 +111,7 @@ export default function JobInterestButton({
       <button
         onClick={handleInterest}
         disabled={loading}
-        className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Sending...' : 'I want this job'}
       </button>

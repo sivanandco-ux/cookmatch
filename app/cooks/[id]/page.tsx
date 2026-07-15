@@ -63,7 +63,7 @@ export default async function CookProfilePage({
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      <a href="/cooks" className="text-sm text-orange-600 hover:underline mb-6 inline-block">
+      <a href="/cooks" className="text-sm text-copper-600 hover:underline mb-6 inline-block">
         ← Back to all cooks
       </a>
 
@@ -77,7 +77,7 @@ export default async function CookProfilePage({
             {c.photo_url ? (
               <img src={c.photo_url} alt={c.name} className="w-20 h-20 rounded-full object-cover" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-3xl font-bold">
+              <div className="w-20 h-20 rounded-full bg-copper-100 flex items-center justify-center text-copper-600 text-3xl font-bold">
                 {c.name.charAt(0)}
               </div>
             )}
@@ -107,7 +107,7 @@ export default async function CookProfilePage({
             <div>
               <h2 className="text-lg font-semibold mb-2">Introduction Video</h2>
               <a href={c.video_url} target="_blank" rel="noopener noreferrer"
-                className="text-orange-600 hover:underline text-sm">
+                className="text-copper-600 hover:underline text-sm">
                 Watch {c.name}'s introduction video →
               </a>
             </div>
@@ -118,13 +118,13 @@ export default async function CookProfilePage({
             <div className="flex flex-wrap gap-3">
               {c.instagram_url && (
                 <a href={c.instagram_url} target="_blank" rel="noopener noreferrer"
-                  className="text-orange-600 hover:underline text-sm">
+                  className="text-copper-600 hover:underline text-sm">
                   📸 Instagram →
                 </a>
               )}
               {c.youtube_url && (
                 <a href={c.youtube_url} target="_blank" rel="noopener noreferrer"
-                  className="text-orange-600 hover:underline text-sm">
+                  className="text-copper-600 hover:underline text-sm">
                   ▶️ YouTube →
                 </a>
               )}
@@ -208,7 +208,7 @@ export default async function CookProfilePage({
                     <span className="w-36 text-gray-500">{label as string}</span>
                     <div className="flex-1 bg-gray-100 rounded-full h-2">
                       <div
-                        className="bg-orange-400 h-2 rounded-full"
+                        className="bg-copper-400 h-2 rounded-full"
                         style={{ width: `${((val as number) / 5) * 100}%` }}
                       />
                     </div>
@@ -252,7 +252,7 @@ export default async function CookProfilePage({
                       This cook has a custom arrangement — reach out directly to discuss what they offer.
                     </p>
                     <div className="flex flex-col gap-2">
-                      <a href={`tel:${c.phone}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                      <a href={`tel:${c.phone}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-copper-400 hover:text-copper-600 transition-colors">
                         📞 {c.phone}
                       </a>
                       {c.whatsapp && (
@@ -265,7 +265,7 @@ export default async function CookProfilePage({
                           💬 WhatsApp
                         </a>
                       )}
-                      <a href={`mailto:${c.email}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                      <a href={`mailto:${c.email}`} className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-copper-400 hover:text-copper-600 transition-colors">
                         ✉️ {c.email}
                       </a>
                     </div>

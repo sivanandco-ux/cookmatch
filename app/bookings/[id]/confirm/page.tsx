@@ -50,7 +50,7 @@ export default async function ConfirmBookingPage({
       <div className="max-w-lg mx-auto px-6 py-20 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">This booking was cancelled</h1>
         <p className="text-gray-600 mb-6">Browse other cooks to find a new match.</p>
-        <a href="/cooks" className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 inline-block">
+        <a href="/cooks" className="bg-copper-600 text-white px-6 py-3 rounded-lg hover:bg-copper-700 inline-block">
           Browse Cooks
         </a>
       </div>
@@ -156,13 +156,13 @@ export default async function ConfirmBookingPage({
       </div>
 
       {/* Step 2 — Confirm */}
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6">
-        <p className="text-sm font-semibold text-orange-900 mb-2">Step 2 — Confirm once you have spoken</p>
-        <p className="text-sm text-orange-800">
+      <div className="bg-copper-50 border border-copper-200 rounded-xl p-5 mb-6">
+        <p className="text-sm font-semibold text-copper-900 mb-2">Step 2 — Confirm once you have spoken</p>
+        <p className="text-sm text-copper-800">
           Once you are happy with the session plan, confirm below.
           {cook?.name} is reserving time specifically for you — please only confirm if you are fully committed.
         </p>
-        <p className="text-xs text-orange-700 mt-2">
+        <p className="text-xs text-copper-700 mt-2">
           Free cancellation is available up to 48 hours before the session. Cancellations after that will be logged on your profile.
         </p>
       </div>

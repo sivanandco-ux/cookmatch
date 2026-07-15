@@ -43,7 +43,7 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
 
   return (
     <Link href={`/cooks/${cook.id}`} className="block">
-      <div className={`bg-white rounded-xl border hover:shadow-md transition-all overflow-hidden h-full flex flex-col ${isPending ? 'border-amber-300 opacity-80' : 'border-gray-200 hover:border-orange-300'}`}>
+      <div className={`bg-white rounded-xl border hover:shadow-md transition-all overflow-hidden h-full flex flex-col ${isPending ? 'border-amber-300 opacity-80' : 'border-gray-200 hover:border-copper-300'}`}>
 
         {/* Pending banner */}
         {isPending && (
@@ -53,7 +53,7 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
         )}
 
         {/* Hero gradient + overlapping photo */}
-        <div className="relative h-24 bg-gradient-to-br from-amber-100 via-orange-100 to-orange-200 flex-shrink-0">
+        <div className="relative h-24 bg-gradient-to-br from-amber-100 via-copper-100 to-copper-200 flex-shrink-0">
           <div className="absolute -bottom-7 left-4">
             {cook.photo_url ? (
               <img
@@ -62,7 +62,7 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
                 className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-md"
               />
             ) : (
-              <div className="w-14 h-14 rounded-full bg-orange-600 flex items-center justify-center text-white text-xl font-bold border-2 border-white shadow-md">
+              <div className="w-14 h-14 rounded-full bg-copper-600 flex items-center justify-center text-white text-xl font-bold border-2 border-white shadow-md">
                 {cook.name.charAt(0)}
               </div>
             )}
@@ -97,7 +97,7 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           {/* Cuisine tags */}
           <div className="flex flex-wrap gap-1">
             {cook.cuisine_types.slice(0, 3).map((c) => (
-              <span key={c} className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">
+              <span key={c} className="text-xs bg-copper-50 text-copper-700 rounded-full px-2 py-0.5">
                 {c}
               </span>
             ))}

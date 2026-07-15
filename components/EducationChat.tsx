@@ -89,7 +89,7 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
             <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold">Pick a topic to start</p>
             {TOPICS.map(t => (
               <button key={t.label} onClick={() => pickTopic(t)}
-                className="text-left border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                className="text-left border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 hover:border-copper-400 hover:bg-copper-50 transition-colors">
                 {t.label}
               </button>
             ))}
@@ -98,15 +98,15 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
         {messages.length === 0 && pendingTopic && (
           <div className="flex flex-col gap-3">
             <p className="text-sm text-gray-700">{pendingTopic.label} — which state are you in? The requirements depend on where you live.</p>
-            <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 bg-white"
+            <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-copper-400 bg-white"
               value={selectedState} onChange={e => setSelectedState(e.target.value)}>
               <option value="">Select your state</option>
               {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
             <div className="flex gap-2">
-              <button onClick={() => setPendingTopic(null)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:border-orange-400 hover:text-orange-600 transition-colors">Back</button>
+              <button onClick={() => setPendingTopic(null)} className="flex-1 border border-gray-300 text-gray-600 py-2 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">Back</button>
               <button onClick={confirmState} disabled={!selectedState}
-                className="flex-1 bg-orange-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">
+                className="flex-1 bg-copper-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50">
                 Continue
               </button>
             </div>
@@ -114,7 +114,7 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
         )}
         {messages.map((m, i) => (
           <div key={i} className={`max-w-[85%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
-            m.role === 'user' ? 'self-end bg-orange-600 text-white' : 'self-start bg-gray-100 text-gray-800'
+            m.role === 'user' ? 'self-end bg-copper-600 text-white' : 'self-start bg-gray-100 text-gray-800'
           }`}>
             {m.role === 'assistant' ? renderMarkdown(m.content) : m.content}
           </div>
@@ -127,13 +127,13 @@ export default function EducationChat({ compact = false }: { compact?: boolean }
       <div className={compact ? 'px-4 pb-3' : ''}>
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
-            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400"
+            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-copper-400"
             value={input}
             onChange={e => setInput(e.target.value)}
             placeholder="Ask a question..."
           />
           <button type="submit" disabled={loading || !input.trim()}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">
+            className="bg-copper-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50">
             Send
           </button>
         </form>

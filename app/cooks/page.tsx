@@ -57,7 +57,7 @@ export default async function CooksPage({
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
-        <p className="text-sm font-medium text-orange-600 mb-1">Sivan Chefs: Connecting Local Culinary Artisans</p>
+        <p className="text-sm font-medium text-copper-600 mb-1">Sivan Chefs: Connecting Local Culinary Artisans</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
       </div>
 
@@ -102,13 +102,13 @@ export default async function CooksPage({
 
         <button
           type="submit"
-          className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700"
+          className="bg-copper-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-copper-700"
         >
           Filter
         </button>
 
         {(filters.cuisine || filters.dietary || filters.occasion || filters.state) && (
-          <a href="/cooks" className="text-sm text-gray-500 px-3 py-2 hover:text-orange-600">
+          <a href="/cooks" className="text-sm text-gray-500 px-3 py-2 hover:text-copper-600">
             Clear filters
           </a>
         )}
@@ -118,7 +118,7 @@ export default async function CooksPage({
       {!cooks || cooks.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-500 text-lg">No cooks found. Check back soon — we are onboarding cooks now.</p>
-          <a href="/apply" className="mt-4 inline-block bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700">
+          <a href="/apply" className="mt-4 inline-block bg-copper-600 text-white px-6 py-3 rounded-lg hover:bg-copper-700">
             Are you a cook? Apply here
           </a>
         </div>

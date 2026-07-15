@@ -69,7 +69,7 @@ export default async function ConfirmJobPage({
     return (
       <div className="max-w-lg mx-auto px-6 py-20 text-center">
         <p className="text-gray-500">This confirmation link is no longer active.</p>
-        <a href="/jobs" className="mt-4 inline-block text-orange-600 hover:underline text-sm">View job board →</a>
+        <a href="/jobs" className="mt-4 inline-block text-copper-600 hover:underline text-sm">View job board →</a>
       </div>
     )
   }
@@ -102,7 +102,7 @@ export default async function ConfirmJobPage({
           {cook.photo_url ? (
             <img src={cook.photo_url} alt={cook.name} className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-2xl font-bold flex-shrink-0">
+            <div className="w-16 h-16 rounded-full bg-copper-100 flex items-center justify-center text-copper-600 text-2xl font-bold flex-shrink-0">
               {cook.name.charAt(0)}
             </div>
           )}
@@ -177,13 +177,13 @@ export default async function ConfirmJobPage({
       </div>
 
       {/* Commitment statement */}
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-5 mb-6">
-        <p className="text-sm font-semibold text-orange-900 mb-2">Step 2 — Confirm once you have spoken</p>
-        <p className="text-sm text-orange-800">
+      <div className="bg-copper-50 border border-copper-200 rounded-xl p-5 mb-6">
+        <p className="text-sm font-semibold text-copper-900 mb-2">Step 2 — Confirm once you have spoken</p>
+        <p className="text-sm text-copper-800">
           Once you have agreed on the details with {cook?.name}, confirm below to lock in the booking.
           By confirming, you commit to be home and ready at the agreed time. Last-minute cancellations affect the cook&apos;s livelihood.
         </p>
-        <p className="text-xs text-orange-700 mt-2">
+        <p className="text-xs text-copper-700 mt-2">
           Free cancellation up to 48 hours before. Cancellations within 48 hours are logged on your profile.
         </p>
       </div>

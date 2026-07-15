@@ -58,7 +58,7 @@ export default function StartJobActions({
       <div className="flex flex-col gap-2">
         <p className="text-xs text-gray-500">Ask the client for the code we just texted them, then enter it below.</p>
         <input
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full bg-white tracking-widest text-center"
+          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-copper-400 w-full bg-white tracking-widest text-center"
           value={code}
           onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
           placeholder="000000"
@@ -68,7 +68,7 @@ export default function StartJobActions({
         <button
           onClick={handleVerify}
           disabled={loading || code.trim().length < 6}
-          className="w-full bg-orange-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-60"
+          className="w-full bg-copper-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-copper-700 disabled:opacity-60"
         >
           {loading ? 'Verifying...' : 'Verify & Start Job'}
         </button>
@@ -85,7 +85,7 @@ export default function StartJobActions({
       <button
         onClick={handleRequestOtp}
         disabled={loading}
-        className="w-full bg-orange-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Sending code...' : 'Start Job'}
       </button>

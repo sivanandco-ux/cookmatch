@@ -124,22 +124,22 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <label
             className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-              requestType === 'session' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
+              requestType === 'session' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
             }`}
           >
             <span className="flex items-center gap-3">
-              <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-orange-600" />
+              <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-copper-600" />
               <span className="text-sm font-medium text-gray-900">A home-cooked meal</span>
             </span>
             <span className="text-xs text-gray-500 pl-6">Cooked in your home, delivered, or picked up</span>
           </label>
           <label
             className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-              requestType === 'item' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
+              requestType === 'item' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
             }`}
           >
             <span className="flex items-center gap-3">
-              <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-orange-600" />
+              <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-copper-600" />
               <span className="text-sm font-medium text-gray-900">A specific item</span>
             </span>
             <span className="text-xs text-gray-500 pl-6">Like pickles or baked goods</span>
@@ -158,8 +158,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
                   key={cat.value}
                   className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
                     jobCategory === cat.value
-                      ? 'border-orange-600 bg-orange-50'
-                      : 'border-gray-200 bg-white hover:border-orange-300'
+                      ? 'border-copper-600 bg-copper-50'
+                      : 'border-gray-200 bg-white hover:border-copper-300'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
                       value={cat.value}
                       checked={jobCategory === cat.value}
                       onChange={() => setJobCategory(cat.value)}
-                      className="text-orange-600"
+                      className="text-copper-600"
                     />
                     <span className="text-sm font-medium text-gray-900">{cat.label}</span>
                   </div>
@@ -229,8 +229,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
                     onClick={() => setSelectedDate(date)}
                     className={`rounded-lg px-2 py-2 text-xs font-medium border transition-colors ${
                       selectedDate === date
-                        ? 'bg-orange-600 text-white border-orange-600'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
+                        ? 'bg-copper-600 text-white border-copper-600'
+                        : 'bg-white text-gray-700 border-gray-200 hover:border-copper-300'
                     }`}
                   >
                     {formatDate(date)}
@@ -288,7 +288,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
                   type="checkbox"
                   checked={dietaryRestrictions.includes(item)}
                   onChange={() => toggleDietary(item)}
-                  className="rounded border-gray-300 text-orange-600"
+                  className="rounded border-gray-300 text-copper-600"
                 />
                 <span className="text-sm text-gray-700">{item}</span>
               </label>
@@ -309,11 +309,11 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
         {requestType === 'session' && (
           <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="grocery_pickup" className="rounded border-gray-300 text-orange-600" />
+              <input type="checkbox" name="grocery_pickup" className="rounded border-gray-300 text-copper-600" />
               <span className="text-sm text-gray-700">I need the cook to pick up groceries</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-orange-600" />
+              <input type="checkbox" name="cleanup_needed" className="rounded border-gray-300 text-copper-600" />
               <span className="text-sm text-gray-700">I need the cook to clean up after cooking</span>
             </label>
           </div>
@@ -367,7 +367,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       <button
         type="submit"
         disabled={loading || (mode === 'browse' && availableDates.length === 0)}
-        className="bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Submitting...' : (submitLabel ?? 'Submit Session Brief')}
       </button>

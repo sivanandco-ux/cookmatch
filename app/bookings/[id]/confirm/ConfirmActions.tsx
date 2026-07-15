@@ -39,7 +39,7 @@ export default function ConfirmActions({ bookingId }: { bookingId: string }) {
     return (
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-center">
         <p className="text-gray-600 mb-4">Your booking has been cancelled.</p>
-        <a href="/cooks" className="text-orange-600 hover:underline text-sm">Browse other cooks →</a>
+        <a href="/cooks" className="text-copper-600 hover:underline text-sm">Browse other cooks →</a>
       </div>
     )
   }
@@ -49,7 +49,7 @@ export default function ConfirmActions({ bookingId }: { bookingId: string }) {
       <button
         onClick={handleConfirm}
         disabled={loading !== null}
-        className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading === 'confirm' ? 'Confirming...' : 'Yes, confirm this booking'}
       </button>

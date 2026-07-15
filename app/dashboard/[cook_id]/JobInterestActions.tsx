@@ -53,7 +53,7 @@ export default function JobInterestActions({
       <button
         onClick={handleConfirm}
         disabled={loading}
-        className="w-full bg-orange-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Confirming...' : 'Confirm I am available'}
       </button>

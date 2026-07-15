@@ -70,7 +70,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={sending}
-            className="bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50"
+            className="bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50"
           >
             {sending ? 'Sending...' : 'Send login link'}
           </button>

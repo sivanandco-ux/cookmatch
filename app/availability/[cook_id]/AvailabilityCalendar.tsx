@@ -73,13 +73,13 @@ export default function AvailabilityCalendar({
               onClick={() => toggle(date)}
               className={`rounded-lg px-3 py-2 text-sm font-medium border transition-colors flex flex-col items-center gap-0.5 ${
                 selected.has(date)
-                  ? 'bg-orange-600 text-white border-orange-600'
-                  : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
+                  ? 'bg-copper-600 text-white border-copper-600'
+                  : 'bg-white text-gray-700 border-gray-200 hover:border-copper-300'
               }`}
             >
               <span>{formatDate(date)}</span>
               {within48hrs && (
-                <span className={`text-xs font-normal ${selected.has(date) ? 'text-orange-100' : 'text-amber-500'}`}>
+                <span className={`text-xs font-normal ${selected.has(date) ? 'text-copper-100' : 'text-amber-500'}`}>
                   closed to clients
                 </span>
               )}
@@ -92,7 +92,7 @@ export default function AvailabilityCalendar({
       <button
         onClick={handleSave}
         disabled={loading}
-        className="w-full bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="w-full bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Saving...' : 'Save Availability'}
       </button>

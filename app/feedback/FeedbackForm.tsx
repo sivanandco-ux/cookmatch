@@ -79,7 +79,7 @@ export default function FeedbackForm({
         <div className="text-5xl mb-4">⭐</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Thank you for your feedback!</h1>
         <p className="text-gray-600">Your review helps {cookName} grow and helps other clients find the right cook.</p>
-        <a href="/cooks" className="mt-8 inline-block text-orange-600 hover:underline">Browse cooks →</a>
+        <a href="/cooks" className="mt-8 inline-block text-copper-600 hover:underline">Browse cooks →</a>
       </div>
     )
   }
@@ -115,7 +115,7 @@ export default function FeedbackForm({
         <button
           type="submit"
           disabled={loading}
-          className="bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+          className="bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
         >
           {loading ? 'Submitting...' : 'Submit Feedback'}
         </button>

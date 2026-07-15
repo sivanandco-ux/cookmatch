@@ -208,7 +208,7 @@ export default function CookProfileUploads({
             type="button"
             onClick={handlePolish}
             disabled={polishing || !bio.trim()}
-            className="text-xs text-orange-600 hover:text-orange-700 disabled:opacity-40 transition-opacity"
+            className="text-xs text-copper-600 hover:text-copper-700 disabled:opacity-40 transition-opacity"
           >
             {polishing ? 'Polishing...' : '✨ Polish'}
           </button>
@@ -247,7 +247,7 @@ export default function CookProfileUploads({
             type="button"
             onClick={handleSaveProfile}
             disabled={profileSaving || !bio.trim()}
-            className="text-xs text-white bg-orange-600 rounded-lg px-3 py-1.5 hover:bg-orange-700 disabled:opacity-40"
+            className="text-xs text-white bg-copper-600 rounded-lg px-3 py-1.5 hover:bg-copper-700 disabled:opacity-40"
           >
             {profileSaving ? 'Saving...' : 'Save'}
           </button>
@@ -269,7 +269,7 @@ export default function CookProfileUploads({
             type="button"
             onClick={() => idInputRef.current?.click()}
             disabled={idUploading}
-            className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 disabled:opacity-40"
+            className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
           >
             {idUploading ? 'Uploading...' : hasId ? 'Replace ID' : 'Upload ID'}
           </button>
@@ -286,7 +286,7 @@ export default function CookProfileUploads({
             <button
               type="button"
               onClick={() => setShowAddDish(true)}
-              className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50"
+              className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50"
             >
               + Add a dish
             </button>
@@ -315,7 +315,7 @@ export default function CookProfileUploads({
                       <button
                         type="button"
                         onClick={() => editDishInputRef.current?.click()}
-                        className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 w-fit"
+                        className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 w-fit"
                       >
                         Replace photo
                       </button>
@@ -342,7 +342,7 @@ export default function CookProfileUploads({
                       type="button"
                       onClick={() => handleSaveEditDish(dish.id)}
                       disabled={editDishSaving}
-                      className="flex-1 bg-orange-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+                      className="flex-1 bg-copper-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-copper-700 disabled:opacity-50"
                     >
                       {editDishSaving ? 'Saving...' : 'Save changes'}
                     </button>
@@ -389,7 +389,7 @@ export default function CookProfileUploads({
               <button
                 type="button"
                 onClick={() => dishInputRef.current?.click()}
-                className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 shrink-0"
+                className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 shrink-0"
               >
                 Choose photo
               </button>
@@ -415,7 +415,7 @@ export default function CookProfileUploads({
                 type="button"
                 onClick={handleAddDish}
                 disabled={!dishFile || dishUploading}
-                className="flex-1 bg-orange-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+                className="flex-1 bg-copper-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-copper-700 disabled:opacity-50"
               >
                 {dishUploading ? 'Uploading...' : 'Save dish'}
               </button>

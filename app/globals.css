@@ -8,8 +8,36 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+
+  /* Banana Leaf & Copper brand palette */
+  --color-copper-50: #F9F6F3;
+  --color-copper-100: #F2E9E3;
+  --color-copper-200: #E5D1C3;
+  --color-copper-300: #D5AF95;
+  --color-copper-400: #C88C62;
+  --color-copper-500: #C1743E;
+  --color-copper-600: #B5652D;
+  --color-copper-700: #8E5127;
+  --color-copper-800: #714222;
+  --color-copper-900: #5A361D;
+
+  --color-leaf-50: #F6F7F5;
+  --color-leaf-100: #EAEDE8;
+  --color-leaf-200: #D1D9CE;
+  --color-leaf-300: #B1C0AA;
+  --color-leaf-400: #8EA783;
+  --color-leaf-500: #5F7953;
+  --color-leaf-600: #425839;
+  --color-leaf-700: #3B4F32;
+  --color-leaf-800: #2D3C26;
+  --color-leaf-900: #24301E;
+
+  --color-brass: #A98A3F;
+  --color-brass-light: #DCC27A;
+  --color-paper: #F4F1E4;
+  --color-panel: #EAE4CF;
 }
 
 /* Dark mode intentionally disabled — app is light mode only */
@@ -17,5 +45,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+h1, h2 {
+  font-family: var(--font-display), Georgia, serif;
 }

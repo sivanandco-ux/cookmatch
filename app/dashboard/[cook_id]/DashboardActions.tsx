@@ -45,7 +45,7 @@ export default function DashboardActions({ bookingId, cookId }: { bookingId: str
       <button
         onClick={handleAccept}
         disabled={loading !== null}
-        className="flex-1 bg-orange-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-orange-700 disabled:opacity-60"
+        className="flex-1 bg-copper-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading === 'accept' ? 'Accepting...' : 'I want this job'}
       </button>

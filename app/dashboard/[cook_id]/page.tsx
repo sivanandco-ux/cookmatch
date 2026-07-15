@@ -180,7 +180,7 @@ export default async function CookDashboardPage({
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           New Session Briefs
           {pending.length > 0 && (
-            <span className="ml-2 text-sm font-normal bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+            <span className="ml-2 text-sm font-normal bg-copper-100 text-copper-700 px-2 py-0.5 rounded-full">
               {pending.length} pending
             </span>
           )}
@@ -274,7 +274,7 @@ export default async function CookDashboardPage({
                       <p className="font-semibold text-gray-900">{categoryLabel}</p>
                       <p className="text-sm text-gray-500 mt-0.5">{requestedDate}{isItem ? (job.num_dishes ? ` · Qty ${job.num_dishes}` : '') : ` · ${job.num_people} people`} · {job.city}</p>
                     </div>
-                    <span className="text-xs bg-orange-100 text-orange-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Applied</span>
+                    <span className="text-xs bg-copper-100 text-copper-700 font-medium px-2 py-1 rounded-full whitespace-nowrap">Applied</span>
                   </div>
 
                   {/* Client contact */}
@@ -305,7 +305,7 @@ export default async function CookDashboardPage({
         <section className="mt-10 pt-8 border-t border-gray-100">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-900">Community Cravings</h2>
-            <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
+            <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-copper-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
             {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; specific_dishes: string | null; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
@@ -320,7 +320,7 @@ export default async function CookDashboardPage({
                 <a
                   key={job.id}
                   href={`/jobs/${job.id}?cook_id=${cook_id}`}
-                  className={`border rounded-xl p-4 flex flex-col gap-2 transition-colors ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200 hover:border-orange-300'}`}
+                  className={`border rounded-xl p-4 flex flex-col gap-2 transition-colors ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200 hover:border-copper-300'}`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -333,7 +333,7 @@ export default async function CookDashboardPage({
                     <div className="flex-shrink-0">
                       {isTaken
                         ? <span className="text-xs bg-blue-100 text-blue-700 font-medium px-2 py-0.5 rounded-full">Cook assigned</span>
-                        : <span className="text-xs text-orange-600 font-medium">View →</span>
+                        : <span className="text-xs text-copper-600 font-medium">View →</span>
                       }
                     </div>
                   </div>
@@ -354,7 +354,7 @@ export default async function CookDashboardPage({
       )}
 
       <div className="mt-8 pt-6 border-t border-gray-100">
-        <a href={`/availability/${cook_id}`} className="text-sm text-orange-600 hover:underline">
+        <a href={`/availability/${cook_id}`} className="text-sm text-copper-600 hover:underline">
           Update your availability →
         </a>
       </div>
@@ -367,7 +367,7 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
     pending: 'bg-amber-50 border-amber-200',
     accepted: 'bg-blue-50 border-blue-200',
     confirmed: 'bg-green-50 border-green-200',
-    in_progress: 'bg-orange-50 border-orange-200',
+    in_progress: 'bg-copper-50 border-copper-200',
   }
 
   return (
@@ -396,7 +396,7 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
         <span className={`text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap ${
           mode === 'pending' ? 'bg-amber-100 text-amber-700' :
           mode === 'accepted' ? 'bg-blue-100 text-blue-700' :
-          mode === 'in_progress' ? 'bg-orange-100 text-orange-700' :
+          mode === 'in_progress' ? 'bg-copper-100 text-copper-700' :
           'bg-green-100 text-green-700'
         }`}>
           {mode === 'pending' ? 'Needs response' : mode === 'accepted' ? 'Awaiting client' : mode === 'in_progress' ? 'In progress' : 'Confirmed'}

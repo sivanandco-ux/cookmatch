@@ -21,10 +21,10 @@ const COLORS = {
     header: 'bg-blue-50 border-blue-200 text-blue-700',
   },
   orange: {
-    dot: 'bg-orange-600',
-    line: 'bg-orange-200',
-    chip: 'text-orange-700 bg-orange-50 border-orange-200',
-    header: 'bg-orange-50 border-orange-200 text-orange-700',
+    dot: 'bg-copper-600',
+    line: 'bg-copper-200',
+    chip: 'text-copper-700 bg-copper-50 border-copper-200',
+    header: 'bg-copper-50 border-copper-200 text-copper-700',
   },
   green: {
     dot: 'bg-emerald-600',

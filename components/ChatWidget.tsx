@@ -31,12 +31,12 @@ const VOICE_LANGUAGES = [
   { code: 'ml-IN', label: 'Malayalam' },
 ]
 
-const ic = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-400 w-full bg-white'
+const ic = 'border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-copper-400 w-full bg-white'
 
 function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${active ? 'bg-orange-600 text-white border-orange-600' : 'border-gray-200 text-gray-600 hover:border-orange-400'}`}>
+      className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${active ? 'bg-copper-600 text-white border-copper-600' : 'border-gray-200 text-gray-600 hover:border-copper-400'}`}>
       {label}
     </button>
   )
@@ -59,7 +59,7 @@ function Label({ children }: { children: React.ReactNode }) {
 function ModeCard({ icon, title, desc, onClick }: { icon: string; title: string; desc: string; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className="border border-gray-200 rounded-xl px-4 py-3.5 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors w-full">
+      className="border border-gray-200 rounded-xl px-4 py-3.5 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors w-full">
       <p className="font-semibold text-gray-800 text-sm">{icon} {title}</p>
       <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
     </button>
@@ -433,15 +433,15 @@ export default function ChatWidget() {
           style={{ height: 'min(600px, calc(100vh - 96px))' }}>
 
           {/* Header */}
-          <div className="bg-orange-600 px-4 py-3 flex items-center gap-2 shrink-0">
+          <div className="bg-copper-600 px-4 py-3 flex items-center gap-2 shrink-0">
             {showBack && (
-              <button onClick={handleBack} className="text-orange-200 hover:text-white text-sm shrink-0">←</button>
+              <button onClick={handleBack} className="text-copper-200 hover:text-white text-sm shrink-0">←</button>
             )}
             <div className="flex-1 min-w-0">
               <p className="text-white font-semibold text-sm leading-tight truncate">{headerTitle}</p>
-              {view === 'home' && <p className="text-orange-200 text-xs mt-0.5">Sign up as a cook or post a job</p>}
+              {view === 'home' && <p className="text-copper-200 text-xs mt-0.5">Sign up as a cook or post a job</p>}
             </div>
-            <button onClick={() => { stopAll(); setOpen(false) }} className="text-orange-200 hover:text-white text-base leading-none shrink-0 ml-1">✕</button>
+            <button onClick={() => { stopAll(); setOpen(false) }} className="text-copper-200 hover:text-white text-base leading-none shrink-0 ml-1">✕</button>
           </div>
 
           {/* Home */}
@@ -449,7 +449,7 @@ export default function ChatWidget() {
             <div className="flex-1 flex flex-col justify-center px-6 gap-4">
               <p className="text-sm text-gray-500 text-center">What brings you here today?</p>
               <button onClick={() => { setPath('client'); setView('mode') }}
-                className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
                 <p className="font-semibold text-gray-800 text-sm">🏠 Hire a Cook</p>
                 <p className="text-xs text-gray-500 mt-1">Post a job and connect with home cooks in your area</p>
               </button>
@@ -458,12 +458,12 @@ export default function ChatWidget() {
                   if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); setView('mode') }
                   else { setLinkSent(false); setAuthError(''); setView('cook-verify') }
                 }}
-                className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
                 <p className="font-semibold text-gray-800 text-sm">👨‍🍳 Sign Up as a Cook</p>
                 <p className="text-xs text-gray-500 mt-1">Create your cook profile and start getting hired</p>
               </button>
               <button onClick={() => setView('learn')}
-                className="border-2 border-orange-200 rounded-xl px-4 py-4 text-left hover:border-orange-400 hover:bg-orange-50 transition-colors">
+                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
                 <p className="font-semibold text-gray-800 text-sm">📚 Learn How to Cook & Sell Food</p>
                 <p className="text-xs text-gray-500 mt-1">Certification, selling food from home, and getting paid</p>
               </button>
@@ -498,7 +498,7 @@ export default function ChatWidget() {
                 onClick={startConversation} />
               <div className="flex items-center gap-2 justify-center mt-1">
                 <label className="text-xs text-gray-400">🌐 Voice language:</label>
-                <select className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-orange-400"
+                <select className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-copper-400"
                   value={language} onChange={e => setLanguage(e.target.value)}>
                   {VOICE_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
                 </select>
@@ -519,7 +519,7 @@ export default function ChatWidget() {
                   <input type="email" required value={signupEmail} onChange={e => setSignupEmail(e.target.value)} placeholder="you@email.com" className={ic} />
                   {authError && <p className="text-xs text-red-600 text-center">{authError}</p>}
                   <button type="submit" disabled={sendingLink}
-                    className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50">
+                    className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50">
                     {sendingLink ? 'Sending...' : 'Send verification link'}
                   </button>
                 </form>
@@ -538,7 +538,7 @@ export default function ChatWidget() {
                 </div>
               ) : (
                 <button type="button" onClick={() => { setVoiceActive(true); setVoiceTranscript(''); setRecording(false) }}
-                  className="w-full border-2 border-dashed border-orange-200 rounded-xl py-3 px-4 text-sm text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-colors flex items-center justify-center gap-2 font-medium">
+                  className="w-full border-2 border-dashed border-copper-200 rounded-xl py-3 px-4 text-sm text-copper-600 hover:bg-copper-50 hover:border-copper-300 transition-colors flex items-center justify-center gap-2 font-medium">
                   🎤 Describe yourself by voice instead
                 </button>
               )}
@@ -603,14 +603,14 @@ export default function ChatWidget() {
                 <div className="flex items-center justify-between">
                   <Label>About you</Label>
                   <button type="button" onClick={() => polish('cook')} disabled={polishingCook || !cook.intro.trim()}
-                    className="text-xs text-orange-600 hover:text-orange-700 disabled:opacity-40 transition-opacity">
+                    className="text-xs text-copper-600 hover:text-copper-700 disabled:opacity-40 transition-opacity">
                     {polishingCook ? 'Polishing...' : '✨ Polish'}
                   </button>
                 </div>
                 <textarea className={`${ic} resize-none`} rows={3} value={cook.intro} onChange={e => setCook(p => ({ ...p, intro: e.target.value }))} placeholder="e.g. I am a cook from East India and have 10 years of cooking experience. I grew up in Kolkata and learned to cook from my mother, and I love making food that tastes like home." required />
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
-              <button type="submit" className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 mt-1">
+              <button type="submit" className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 mt-1">
                 Review Application →
               </button>
             </form>
@@ -628,7 +628,7 @@ export default function ChatWidget() {
               {hasSpeech() ? (
                 <div className="flex flex-col items-center gap-3">
                   <button type="button" onClick={recording ? stopRecording : startRecording} disabled={parsing}
-                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-50 ${recording ? 'bg-red-500 shadow-lg shadow-red-200 scale-105 ring-4 ring-red-200 animate-pulse' : 'bg-orange-600 hover:bg-orange-700 shadow-md shadow-orange-200 hover:scale-105'}`}>
+                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-50 ${recording ? 'bg-red-500 shadow-lg shadow-red-200 scale-105 ring-4 ring-red-200 animate-pulse' : 'bg-copper-600 hover:bg-copper-700 shadow-md shadow-copper-200 hover:scale-105'}`}>
                     <svg viewBox="0 0 24 24" fill="currentColor" className="w-8 h-8 text-white">
                       <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3zM19 10v2a7 7 0 01-14 0v-2H3v2a9 9 0 008 8.94V23h2v-2.06A9 9 0 0021 12v-2h-2z" />
                     </svg>
@@ -649,7 +649,7 @@ export default function ChatWidget() {
               )}
               {voiceTranscript.length > 10 && (
                 <button type="button" onClick={parseVoice} disabled={parsing}
-                  className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50 transition-opacity">
+                  className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50 transition-opacity">
                   {parsing ? 'Filling form...' : 'Fill form from my voice →'}
                 </button>
               )}
@@ -670,7 +670,7 @@ export default function ChatWidget() {
                 </div>
               ) : (
                 <button type="button" onClick={() => { setVoiceActive(true); setVoiceTranscript(''); setRecording(false) }}
-                  className="w-full border-2 border-dashed border-orange-200 rounded-xl py-3 px-4 text-sm text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-colors flex items-center justify-center gap-2 font-medium">
+                  className="w-full border-2 border-dashed border-copper-200 rounded-xl py-3 px-4 text-sm text-copper-600 hover:bg-copper-50 hover:border-copper-300 transition-colors flex items-center justify-center gap-2 font-medium">
                   🎤 Describe what you need by voice instead
                 </button>
               )}
@@ -740,14 +740,14 @@ export default function ChatWidget() {
                 <div className="flex items-center justify-between">
                   <Label>What should the cook prepare? (optional)</Label>
                   <button type="button" onClick={() => polish('client')} disabled={polishingClient || !client.text_description.trim()}
-                    className="text-xs text-orange-600 hover:text-orange-700 disabled:opacity-40 transition-opacity">
+                    className="text-xs text-copper-600 hover:text-copper-700 disabled:opacity-40 transition-opacity">
                     {polishingClient ? 'Polishing...' : '✨ Polish'}
                   </button>
                 </div>
                 <textarea className={`${ic} resize-none`} rows={3} value={client.text_description} onChange={e => setClient(p => ({ ...p, text_description: e.target.value }))} placeholder="Describe dishes, cuisine style, any preferences..." />
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
-              <button type="submit" className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 mt-1">
+              <button type="submit" className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 mt-1">
                 Review Job Post →
               </button>
             </form>
@@ -761,7 +761,7 @@ export default function ChatWidget() {
               <div className="flex flex-col items-center gap-3 flex-1 justify-center">
                 <div className={`w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500 ${
                   chatPhase === 'listening' ? 'bg-green-500 shadow-xl shadow-green-200 scale-110 ring-8 ring-green-100 animate-pulse'
-                  : chatPhase === 'speaking' ? 'bg-orange-500 shadow-xl shadow-orange-200 ring-8 ring-orange-100 animate-pulse'
+                  : chatPhase === 'speaking' ? 'bg-copper-500 shadow-xl shadow-copper-200 ring-8 ring-copper-100 animate-pulse'
                   : chatPhase === 'thinking' ? 'bg-blue-500 shadow-lg shadow-blue-200 animate-pulse'
                   : 'bg-gray-200 shadow-md'
                 }`}>
@@ -788,7 +788,7 @@ export default function ChatWidget() {
 
               {/* Last assistant message */}
               {chatMessages.length > 0 && chatMessages[chatMessages.length - 1].role === 'assistant' && (
-                <div className="bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5 text-sm text-gray-700 leading-relaxed">
+                <div className="bg-copper-50 border border-copper-100 rounded-xl px-3 py-2.5 text-sm text-gray-700 leading-relaxed">
                   {renderMarkdown(chatMessages[chatMessages.length - 1].content)}
                 </div>
               )}
@@ -803,7 +803,7 @@ export default function ChatWidget() {
               {/* Manual tap when idle */}
               {chatPhase === 'idle' && (
                 <button onClick={startConvListening}
-                  className="w-full bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 transition-colors">
+                  className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 transition-colors">
                   Tap to speak
                 </button>
               )}
@@ -857,8 +857,8 @@ export default function ChatWidget() {
               </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2 mt-auto">
-                <button onClick={() => setView(path as View)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-lg text-sm hover:border-orange-400 hover:text-orange-600 transition-colors">Edit</button>
-                <button onClick={submit} disabled={loading} className="flex-1 bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50 transition-opacity">
+                <button onClick={() => setView(path as View)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">Edit</button>
+                <button onClick={submit} disabled={loading} className="flex-1 bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50 transition-opacity">
                   {loading ? 'Submitting...' : 'Confirm & Submit'}
                 </button>
               </div>
@@ -895,10 +895,10 @@ export default function ChatWidget() {
                         <div>
                           <p className="font-semibold text-gray-800 text-sm">{c.name}</p>
                           <p className="text-xs text-gray-500">{c.cuisine_types.slice(0, 3).join(' · ')}</p>
-                          {c.dietary_specialties.length > 0 && <p className="text-xs text-orange-600 mt-0.5">{c.dietary_specialties.join(' · ')}</p>}
+                          {c.dietary_specialties.length > 0 && <p className="text-xs text-copper-600 mt-0.5">{c.dietary_specialties.join(' · ')}</p>}
                         </div>
                         <div className="flex gap-2">
-                          <a href={`tel:${c.phone}`} className="flex-1 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-1 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors truncate">
+                          <a href={`tel:${c.phone}`} className="flex-1 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-1 text-gray-700 hover:border-copper-400 hover:text-copper-600 transition-colors truncate">
                             📞 {c.phone}
                           </a>
                           <a href={`https://wa.me/${(c.whatsapp || c.phone).replace(/\D/g, '').replace(/^([^1])/, '1$1')}`}
@@ -906,7 +906,7 @@ export default function ChatWidget() {
                             className="shrink-0 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 hover:border-green-400 hover:text-green-600 transition-colors">
                             💬 WhatsApp
                           </a>
-                          <a href={`/cooks/${c.id}`} className="shrink-0 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 hover:border-orange-400 hover:text-orange-600 transition-colors">
+                          <a href={`/cooks/${c.id}`} className="shrink-0 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 hover:border-copper-400 hover:text-copper-600 transition-colors">
                             Profile →
                           </a>
                         </div>
@@ -922,7 +922,7 @@ export default function ChatWidget() {
                 </p>
               )}
 
-              <button onClick={() => { reset(); setOpen(false) }} className="text-sm text-orange-600 hover:underline text-center mt-auto pt-2">Close</button>
+              <button onClick={() => { reset(); setOpen(false) }} className="text-sm text-copper-600 hover:underline text-center mt-auto pt-2">Close</button>
             </div>
           )}
         </div>
@@ -930,7 +930,7 @@ export default function ChatWidget() {
 
       {/* Bubble */}
       <button onClick={() => setOpen(o => !o)}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-orange-600 hover:bg-orange-700'}`}
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${open ? 'bg-gray-700 hover:bg-gray-800' : 'bg-copper-600 hover:bg-copper-700'}`}
         aria-label={open ? 'Close' : 'Chat with us'}>
         {open ? (
           <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 text-white" stroke="currentColor" strokeWidth={2.5}>

@@ -57,11 +57,11 @@ export default function HowItWorksPage() {
         </section>
 
         {/* Feedback */}
-        <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-orange-900 mb-2">This is a new service and we want to hear from you</h2>
-          <p className="text-sm text-orange-800">
+        <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-copper-900 mb-2">This is a new service and we want to hear from you</h2>
+          <p className="text-sm text-copper-800">
             We are actively improving based on your experience. If you have feedback, suggestions, or questions, please write to us at{' '}
-            <a href="mailto:contact@sivanspices.com" className="font-medium underline hover:text-orange-600">
+            <a href="mailto:contact@sivanspices.com" className="font-medium underline hover:text-copper-600">
               contact@sivanspices.com
             </a>
             .

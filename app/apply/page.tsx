@@ -25,7 +25,7 @@ function CheckboxGroup({ name, options, label }: { name: string; options: string
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
-            <input type="checkbox" name={name} value={opt} className="rounded border-gray-300 text-orange-600" />
+            <input type="checkbox" name={name} value={opt} className="rounded border-gray-300 text-copper-600" />
             <span className="text-sm text-gray-700">{opt}</span>
           </label>
         ))}
@@ -264,7 +264,7 @@ export default function ApplyPage() {
             <button
               type="submit"
               disabled={sendingLink}
-              className="bg-orange-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-orange-700 disabled:opacity-50"
+              className="bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50"
             >
               {sendingLink ? 'Sending...' : 'Send verification link'}
             </button>
@@ -281,7 +281,7 @@ export default function ApplyPage() {
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received!</h1>
         <p className="text-gray-600 mb-2">Thank you for applying to Sivan Spices Home Cooks. We will review your application and reach out within 2–3 business days.</p>
         <p className="text-gray-500 text-sm">You will be notified via email once your profile is verified and live.</p>
-        <a href="/cooks" className="mt-8 inline-block text-orange-600 hover:underline">Browse other cooks →</a>
+        <a href="/cooks" className="mt-8 inline-block text-copper-600 hover:underline">Browse other cooks →</a>
       </div>
     )
   }
@@ -292,9 +292,9 @@ export default function ApplyPage() {
       <p className="text-gray-600 mb-8">Share your love of cooking and get discovered by families in your area.</p>
 
       {/* Platform benefits */}
-      <div className="bg-orange-50 border border-orange-200 rounded-xl p-6 mb-8">
-        <h2 className="text-base font-semibold text-orange-900 mb-3">Why join Sivan Spices?</h2>
-        <ul className="space-y-2 text-sm text-orange-800">
+      <div className="bg-copper-50 border border-copper-200 rounded-xl p-6 mb-8">
+        <h2 className="text-base font-semibold text-copper-900 mb-3">Why join Sivan Spices?</h2>
+        <ul className="space-y-2 text-sm text-copper-800">
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Clients come to you with a clear brief — no guessing what they need</li>
@@ -312,7 +312,7 @@ export default function ApplyPage() {
           <div className="flex items-center gap-4">
             <div
               onClick={() => photoInputRef.current?.click()}
-              className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-orange-400 overflow-hidden flex-shrink-0"
+              className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-copper-400 overflow-hidden flex-shrink-0"
             >
               {photoPreview ? (
                 <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
@@ -326,7 +326,7 @@ export default function ApplyPage() {
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
-                className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50"
+                className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50"
               >
                 {photoPreview ? 'Change photo' : 'Upload photo'}
               </button>
@@ -368,7 +368,7 @@ export default function ApplyPage() {
                 type="button"
                 onClick={handlePolish}
                 disabled={polishing || intro.trim().length < 10}
-                className="text-xs text-orange-600 border border-orange-300 rounded-lg px-3 py-1.5 hover:bg-orange-50 disabled:opacity-40"
+                className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
               >
                 {polishing ? 'Polishing...' : '✦ Polish my intro'}
               </button>
@@ -400,7 +400,7 @@ export default function ApplyPage() {
             <div className="flex flex-wrap gap-2">
               {AVAILABILITY.map(opt => (
                 <label key={opt} className="flex items-center gap-1.5 cursor-pointer">
-                  <input type="checkbox" name="occasion_types" value={opt} className="rounded border-gray-300 text-orange-600" />
+                  <input type="checkbox" name="occasion_types" value={opt} className="rounded border-gray-300 text-copper-600" />
                   <span className="text-sm text-gray-700">{opt}</span>
                 </label>
               ))}
@@ -409,7 +409,7 @@ export default function ApplyPage() {
                   type="checkbox"
                   checked={occasionOtherChecked}
                   onChange={e => setOccasionOtherChecked(e.target.checked)}
-                  className="rounded border-gray-300 text-orange-600"
+                  className="rounded border-gray-300 text-copper-600"
                 />
                 <span className="text-sm text-gray-700">Other</span>
               </label>
@@ -442,12 +442,12 @@ export default function ApplyPage() {
                   value="Cook at client's location"
                   checked={cooksAtClientLocation}
                   onChange={e => setCooksAtClientLocation(e.target.checked)}
-                  className="rounded border-gray-300 text-orange-600"
+                  className="rounded border-gray-300 text-copper-600"
                 />
                 <span className="text-sm text-gray-700">Cook at client&apos;s location</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" name="cooking_arrangement" value="Cook from my setup" className="rounded border-gray-300 text-orange-600" />
+                <input type="checkbox" name="cooking_arrangement" value="Cook from my setup" className="rounded border-gray-300 text-copper-600" />
                 <span className="text-sm text-gray-700">Cook from my setup</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -455,7 +455,7 @@ export default function ApplyPage() {
                   type="checkbox"
                   checked={arrangementOtherChecked}
                   onChange={e => setArrangementOtherChecked(e.target.checked)}
-                  className="rounded border-gray-300 text-orange-600"
+                  className="rounded border-gray-300 text-copper-600"
                 />
                 <span className="text-sm text-gray-700">Other</span>
               </label>
@@ -504,7 +504,7 @@ export default function ApplyPage() {
 
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">
-                  Minimum hours per visit: <span className="text-orange-600 font-semibold">{minHours} hours</span>
+                  Minimum hours per visit: <span className="text-copper-600 font-semibold">{minHours} hours</span>
                 </label>
                 <input
                   type="range"
@@ -512,7 +512,7 @@ export default function ApplyPage() {
                   max={6}
                   value={minHours}
                   onChange={e => setMinHours(Number(e.target.value))}
-                  className="w-full accent-orange-600"
+                  className="w-full accent-copper-600"
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-0.5">
                   <span>2 hrs (minimum)</span>
@@ -565,7 +565,7 @@ export default function ApplyPage() {
                         const parts = prev.split(',').map(s => s.trim()).filter(Boolean)
                         return [...parts, city].join(', ')
                       })}
-                      className={`text-xs rounded-full px-2.5 py-1 border transition-colors ${already ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-default' : 'border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-600'}`}
+                      className={`text-xs rounded-full px-2.5 py-1 border transition-colors ${already ? 'bg-gray-50 text-gray-300 border-gray-100 cursor-default' : 'border-gray-200 text-gray-600 hover:border-copper-400 hover:text-copper-600'}`}
                     >
                       + {city}
                     </button>
@@ -586,7 +586,7 @@ export default function ApplyPage() {
               <div className="flex flex-col gap-2">
                 {JOB_CATEGORIES.map(cat => (
                   <label key={cat.value} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="job_categories" value={cat.value} className="rounded border-gray-300 text-orange-600" />
+                    <input type="checkbox" name="job_categories" value={cat.value} className="rounded border-gray-300 text-copper-600" />
                     <span className="text-sm text-gray-700">{cat.label}</span>
                   </label>
                 ))}
@@ -594,7 +594,7 @@ export default function ApplyPage() {
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" name="does_cleanup" className="rounded border-gray-300 text-orange-600" />
+              <input type="checkbox" name="does_cleanup" className="rounded border-gray-300 text-copper-600" />
               <span className="text-sm text-gray-700">I clean up after cooking</span>
             </label>
 
@@ -603,7 +603,7 @@ export default function ApplyPage() {
                 <input
                   type="checkbox"
                   name="grocery_pickup"
-                  className="rounded border-gray-300 text-orange-600"
+                  className="rounded border-gray-300 text-copper-600"
                   onChange={e => setGroceryPickup(e.target.checked)}
                 />
                 <span className="text-sm text-gray-700">I can pick up groceries (extra charge applies)</span>
@@ -626,11 +626,11 @@ export default function ApplyPage() {
         )}
 
         {/* Approval */}
-        <section className="bg-orange-50 border border-orange-200 rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-orange-900 mb-2">Approval</h2>
+        <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
+          <h2 className="text-lg font-semibold text-copper-900 mb-2">Approval</h2>
           <p className="text-sm text-gray-700 mb-3">At this time, Sivan Spices approves cooks by checking references. We may follow up with you after you apply.</p>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" required className="rounded border-gray-300 text-orange-600" />
+            <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
             <span className="text-sm text-gray-700">I accept the Sivan Spices Terms of Service</span>
           </label>
         </section>
@@ -640,7 +640,7 @@ export default function ApplyPage() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-orange-600 text-white py-3 rounded-lg font-medium hover:bg-orange-700 disabled:opacity-60"
+          className="bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
         >
           {loading ? 'Submitting...' : 'Submit Application'}
         </button>

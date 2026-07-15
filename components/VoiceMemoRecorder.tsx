@@ -105,7 +105,7 @@ export default function VoiceMemoRecorder({ onUploaded }: Props) {
         <button
           type="button"
           onClick={startRecording}
-          className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700"
+          className="flex items-center gap-2 bg-copper-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-copper-700"
         >
           <span className="w-2 h-2 rounded-full bg-white inline-block" />
           Start Recording
@@ -135,7 +135,7 @@ export default function VoiceMemoRecorder({ onUploaded }: Props) {
             <button
               type="button"
               onClick={upload}
-              className="bg-orange-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-700"
+              className="bg-copper-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-copper-700"
             >
               Use this recording
             </button>
