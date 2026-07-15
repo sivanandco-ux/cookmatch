@@ -93,7 +93,7 @@ export default async function JobBoardPage() {
     .select(selectFields)
     .in('status', ['open', 'taken'])
     .gte('requested_date', today)
-    .order('requested_date', { ascending: true })
+    .order('created_at', { ascending: false })
 
   const jobList = (jobs || []) as unknown as JobTile[]
 
