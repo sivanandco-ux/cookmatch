@@ -304,7 +304,7 @@ export default async function CookDashboardPage({
       {openJobs && openJobs.length > 0 && (
         <section className="mt-10 pt-8 border-t border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Community Job Board</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Community Cravings</h2>
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">

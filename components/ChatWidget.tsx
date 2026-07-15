@@ -418,8 +418,8 @@ export default function ChatWidget() {
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
     : view === 'cook-verify' ? 'Verify Your Email'
     : view === 'cook' ? 'Cook Sign Up'
-    : view === 'client' ? 'Post a Job'
-    : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post a Job')
+    : view === 'client' ? 'Post Your Craving'
+    : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post Your Craving')
     : view === 'review' ? 'Review & Confirm'
     : view === 'learn' ? 'Cook & Sell Food'
     : 'All Done!'

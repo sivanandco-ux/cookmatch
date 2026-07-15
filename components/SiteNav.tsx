@@ -4,7 +4,7 @@ import { useState } from 'react'
 
 const LINKS = [
   { href: '/cooks', label: 'Hire a Cook' },
-  { href: '/jobs', label: 'Job Board' },
+  { href: '/jobs', label: 'Community Cravings' },
   { href: '/become-a-cook', label: 'Cook & Sell Food' },
 ]
 

@@ -101,33 +101,33 @@ export default async function JobBoardPage() {
     <div className="max-w-4xl mx-auto px-6 py-10">
       <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Job Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Cravings</h1>
           <p className="text-gray-600">
             {isCook
-              ? `Welcome ${cookName} — these clients are looking for a cook. Express interest in jobs that match your skills.`
-              : 'Clients looking for a home cook. Post your own job or browse available cooks.'}
+              ? `Welcome ${cookName} — these clients are looking for a cook. Express interest in cravings that match your skills.`
+              : 'Clients looking for a home cook. Post your own craving or browse available cooks.'}
           </p>
         </div>
         <Link
           href="/jobs/post"
           className="bg-orange-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-orange-700 whitespace-nowrap"
         >
-          Post a Job
+          Post Your Craving
         </Link>
       </div>
 
       {!isCook && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 text-sm text-blue-800">
-          Are you an approved cook? Access the full job brief and express interest from your{' '}
+          Are you an approved cook? Access the full craving details and express interest from your{' '}
           <span className="font-medium">cook dashboard</span>.
         </div>
       )}
 
       {jobList.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-gray-500 text-lg mb-4">No open jobs right now.</p>
+          <p className="text-gray-500 text-lg mb-4">No open cravings right now.</p>
           <Link href="/jobs/post" className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 inline-block">
-            Post a Job
+            Post Your Craving
           </Link>
         </div>
       ) : (
