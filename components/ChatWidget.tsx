@@ -414,7 +414,7 @@ export default function ChatWidget() {
   const dateLabel = client.requested_date ? new Date(client.requested_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''
 
   const headerTitle = voiceActive ? 'Voice Description'
-    : view === 'home' ? 'Sivan Spices Home Cooks'
+    : view === 'home' ? 'Sivan Chefs Home Cooks'
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
     : view === 'cook-verify' ? 'Verify Your Email'
     : view === 'cook' ? 'Cook Sign Up'

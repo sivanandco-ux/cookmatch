@@ -279,7 +279,7 @@ export default function ApplyPage() {
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received!</h1>
-        <p className="text-gray-600 mb-2">Thank you for applying to Sivan Spices Home Cooks. We will review your application and reach out within 2–3 business days.</p>
+        <p className="text-gray-600 mb-2">Thank you for applying to Sivan Chefs. We will review your application and reach out within 2–3 business days.</p>
         <p className="text-gray-500 text-sm">You will be notified via email once your profile is verified and live.</p>
         <a href="/cooks" className="mt-8 inline-block text-copper-600 hover:underline">Browse other cooks →</a>
       </div>
@@ -288,12 +288,12 @@ export default function ApplyPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Sivan Spices as a Cook</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Sivan Chefs as a Cook</h1>
       <p className="text-gray-600 mb-8">Share your love of cooking and get discovered by families in your area.</p>
 
       {/* Platform benefits */}
       <div className="bg-copper-50 border border-copper-200 rounded-xl p-6 mb-8">
-        <h2 className="text-base font-semibold text-copper-900 mb-3">Why join Sivan Spices?</h2>
+        <h2 className="text-base font-semibold text-copper-900 mb-3">Why join Sivan Chefs?</h2>
         <ul className="space-y-2 text-sm text-copper-800">
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
@@ -628,10 +628,10 @@ export default function ApplyPage() {
         {/* Approval */}
         <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-copper-900 mb-2">Approval</h2>
-          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Spices approves cooks by checking references. We may follow up with you after you apply.</p>
+          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Chefs approves cooks by checking references. We may follow up with you after you apply.</p>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
-            <span className="text-sm text-gray-700">I accept the Sivan Spices Terms of Service</span>
+            <span className="text-sm text-gray-700">I accept the Sivan Chefs Terms of Service</span>
           </label>
         </section>
 

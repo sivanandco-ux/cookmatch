@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_link: 'That link is invalid or has expired. Please request a new one below.',
   missing_code: 'That link is invalid or has expired. Please request a new one below.',
-  no_application: "We couldn't find a Sivan Spices application for that email.",
+  no_application: "We couldn't find a Sivan Chefs application for that email.",
   no_user: 'Something went wrong signing you in. Please try again.',
   email_mismatch: 'This email is linked to a different account. Contact support if this seems wrong.',
   not_authorized: 'Please log in to view that page.',
