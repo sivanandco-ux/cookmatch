@@ -8,19 +8,19 @@ const domine = Domine({ subsets: ['latin'], weight: ['400', '700'], variable: '-
 const workSans = Work_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-body' })
 
 export const metadata: Metadata = {
-  title: 'Home Cooks — Sivan Spices',
+  title: 'Home Cooks — Sivan Chefs',
   description: 'We connect clients across the USA with cooks who deliver healthy home-cooked food or come cook it in your kitchen.',
   openGraph: {
-    title: 'Home Cooks — Sivan Spices',
+    title: 'Home Cooks — Sivan Chefs',
     description: 'We connect clients across the USA with cooks who deliver healthy home-cooked food or come cook it in your kitchen.',
     url: 'https://cookmatch-flame.vercel.app/cooks',
-    siteName: 'Sivan Spices Home Cooks',
+    siteName: 'Sivan Chefs Home Cooks',
     images: [
       {
         url: 'https://cookmatch-flame.vercel.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Sivan Spices Home Cooks',
+        alt: 'Sivan Chefs Home Cooks',
       },
     ],
     type: 'website',
