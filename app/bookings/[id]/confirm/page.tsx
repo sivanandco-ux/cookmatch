@@ -80,7 +80,7 @@ export default async function ConfirmBookingPage({
           </div>
           <div className="flex justify-between">
             <span>Job type</span>
-            <span className="font-medium text-gray-900">{getRequestLabel(booking.job_category, booking.request_type)}</span>
+            <span className="font-medium text-gray-900">{getRequestLabel(booking.job_category, booking.request_type, booking.specific_dishes)}</span>
           </div>
           <div className="flex justify-between">
             <span>Date</span>
@@ -95,7 +95,7 @@ export default async function ConfirmBookingPage({
           {booking.request_type === 'item' ? (
             <div className="flex justify-between">
               <span>Quantity</span>
-              <span className="font-medium text-gray-900">{booking.num_dishes}</span>
+              <span className="font-medium text-gray-900">Set by cook</span>
             </div>
           ) : (
             <>

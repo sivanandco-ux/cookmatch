@@ -84,7 +84,7 @@ export default async function JobBoardPage() {
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
+    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, specific_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -148,7 +148,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
   const needsGrocery = job.grocery_situation === 'need_grocery_pickup'
   const isTaken = job.status === 'taken'
   const isItem = job.request_type === 'item'
-  const categoryLabel = getRequestLabel(job.job_category, job.request_type)
+  const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
 
   return (
     <div className={`border rounded-xl p-5 flex flex-col gap-3 ${isTaken ? 'bg-gray-50 border-gray-200 opacity-80' : 'bg-white border-gray-200'}`}>
@@ -206,7 +206,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
               <audio src={job.voice_memo_url} controls className="w-full h-10" />
             </div>
           )}
-          {job.specific_dishes && (
+          {job.request_type !== 'item' && job.specific_dishes && (
             <p className="text-sm text-gray-600"><span className="font-medium">Dishes: </span>{job.specific_dishes}</p>
           )}
           {job.language_preferred && (

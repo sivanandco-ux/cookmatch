@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <img src="/sivanchefs-logo.png" alt="Sivan Chefs" className="h-12 sm:h-16 md:h-36 w-auto shrink-0" />
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-orange-600 leading-tight">Home Cooks</a>
-              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Home-cooked food — delivered, for pickup, or cooked in your home</span>
+              <span className="hidden sm:block text-xs text-gray-600 leading-tight">Delivered, picked up, or cooked in your own kitchen — meals, baking, pickles, preserves, sweets & snacks, and more, from cooks near you</span>
             </div>
           </div>
           <SiteNav />
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ChatWidget />
         <footer className="mt-20 border-t border-gray-200 px-6 py-8 text-center text-sm text-gray-500">
           <p>
-            A service by Sivan Chefs. We connect clients across the USA with cooks who deliver healthy home-cooked food, offer pickup, or come cook it in your kitchen.
+            A service by Sivan Chefs — delivered, picked up, or cooked in your own kitchen. Meals, baking, pickles, preserves, sweets & snacks, and more, from cooks near you.
           </p>
           <a href="/how-it-works" className="inline-block mt-2 text-orange-600 hover:underline">How It Works</a>
         </footer>

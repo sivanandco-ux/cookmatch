@@ -83,14 +83,14 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, request_type, occasion, requested_date, num_people, num_dishes, city, client_name, grocery_situation, cleanup_needed, created_at, status')
+      .select('id, job_category, request_type, occasion, requested_date, num_people, num_dishes, specific_dishes, city, client_name, grocery_situation, cleanup_needed, created_at, status')
       .in('status', ['open', 'taken'])
       .gte('requested_date', today)
       .order('created_at', { ascending: false })
       .limit(8),
     supabase
       .from('job_interests')
-      .select('id, cook_confirmed, client_confirmed, created_at, job_posts(id, job_category, request_type, occasion, requested_date, num_people, num_dishes, city, client_name, client_phone, client_email)')
+      .select('id, cook_confirmed, client_confirmed, created_at, job_posts(id, job_category, request_type, occasion, requested_date, num_people, num_dishes, specific_dishes, city, client_name, client_phone, client_email)')
       .eq('cook_id', cook_id)
       .eq('status', 'pending'),
     supabase
@@ -120,6 +120,7 @@ export default async function CookDashboardPage({
       requested_date: string
       num_people: number
       num_dishes: number | null
+      specific_dishes: string | null
       city: string
       client_name: string
       client_phone: string
@@ -264,7 +265,7 @@ export default async function CookDashboardPage({
             {activeInterests.map(interest => {
               const job = interest.job_posts!
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-              const categoryLabel = getRequestLabel(job.job_category, job.request_type)
+              const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
               const isItem = job.request_type === 'item'
               return (
                 <div key={interest.id} className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-4">
@@ -307,9 +308,9 @@ export default async function CookDashboardPage({
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-orange-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
+            {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; specific_dishes: string | null; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-              const categoryLabel = getRequestLabel(job.job_category, job.request_type)
+              const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
               const isItem = job.request_type === 'item'
               const isTaken = job.status === 'taken'
               const postedAt = new Date(job.created_at)
@@ -375,7 +376,7 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="font-semibold text-gray-900">
-            {getRequestLabel(booking.job_category, booking.request_type)}
+            {getRequestLabel(booking.job_category, booking.request_type, booking.specific_dishes)}
             {' · '}
             {booking.occasion_type}
           </p>
@@ -426,8 +427,9 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
         </div>
       )}
 
-      {/* Specific dishes */}
-      {booking.specific_dishes && (
+      {/* Specific dishes — for an item order this is already the header
+          title, so showing it again here would be redundant */}
+      {booking.request_type !== 'item' && booking.specific_dishes && (
         <p className="text-sm text-gray-600">
           <span className="font-medium">Dishes: </span>{booking.specific_dishes}
         </p>

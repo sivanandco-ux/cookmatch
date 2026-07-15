@@ -30,7 +30,7 @@ export default async function AdminPage({
   const [{ data: jobs }, { data: cooks }] = await Promise.all([
     supabase
       .from('job_posts')
-      .select('id, job_category, request_type, occasion, city, requested_date, status, created_at, client_name, client_email')
+      .select('id, job_category, request_type, specific_dishes, occasion, city, requested_date, status, created_at, client_name, client_email')
       .order('created_at', { ascending: false }),
     supabase
       .from('cooks')

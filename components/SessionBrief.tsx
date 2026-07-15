@@ -56,16 +56,19 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     setError('')
 
     const isItem = requestType === 'item'
+    const form = e.currentTarget
+    const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
     if (!isItem && !jobCategory) { setError('Please select a job type.'); return }
+    if (isItem && !get('specific_dishes').trim()) {
+      setError('Please tell us what item you need.')
+      return
+    }
     if (!selectedDate) { setError('Please select a date.'); return }
     if (!voiceMemoUrl && !textDescription.trim()) {
       setError('Please provide at least one description — a voice memo, a written description, or both.')
       return
     }
-
-    const form = e.currentTarget
-    const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
     // Item orders don't have a party size — sizing/people fields don't apply
     // to buying a jar of pickles, so a placeholder value is stored instead
@@ -83,8 +86,10 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       job_category: (isItem ? 'family_cooking' : jobCategory) as JobCategory,
       request_type: requestType,
       occasion: get('occasion'),
-      specific_dishes: '',
-      num_dishes: Number(get('num_dishes')),
+      specific_dishes: isItem ? get('specific_dishes').trim() : '',
+      // Quantity for an item order isn't the client's call — the cook sets
+      // it once they've seen the request, so there's no field to read here.
+      num_dishes: isItem ? 0 : Number(get('num_dishes')),
       preferred_date: selectedDate,
       preferred_time: '',
       expected_duration_hours: 2,
@@ -169,7 +174,19 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
           </>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        {requestType === 'item' && (
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">What item? <span className="text-red-500">*</span></label>
+            <input
+              name="specific_dishes"
+              required
+              placeholder="e.g. Nut-free laddus"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+          </div>
+        )}
+
+        <div className={requestType === 'item' ? '' : 'grid grid-cols-2 gap-3'}>
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Occasion <span className="text-red-500">*</span></label>
             <select name="occasion" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
@@ -177,10 +194,12 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
               {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
           </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">{requestType === 'item' ? 'Quantity' : 'Number of dishes'} <span className="text-red-500">*</span></label>
-            <input name="num_dishes" type="number" required min={1} placeholder={requestType === 'item' ? 'e.g. 2' : 'e.g. 3'} className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-          </div>
+          {requestType !== 'item' && (
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Number of dishes <span className="text-red-500">*</span></label>
+              <input name="num_dishes" type="number" required min={1} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+            </div>
+          )}
         </div>
       </div>
 

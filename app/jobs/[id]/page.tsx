@@ -96,7 +96,7 @@ export default async function JobDetailPage({
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {getRequestLabel(job.job_category, job.request_type)}
+            {getRequestLabel(job.job_category, job.request_type, job.specific_dishes)}
           </h1>
           {job.client_name && <p className="text-gray-600 mt-1">Posted by {job.client_name}</p>}
           <p className="text-gray-500 mt-1">{job.city}</p>
@@ -134,10 +134,16 @@ export default async function JobDetailPage({
               </div>
             </>
           )}
-          {job.num_dishes && (
+          {job.request_type !== 'item' && !!job.num_dishes && (
             <div>
-              <p className="text-gray-500">{job.request_type === 'item' ? 'Quantity' : 'Dishes'}</p>
+              <p className="text-gray-500">Dishes</p>
               <p className="font-medium">{job.num_dishes}</p>
+            </div>
+          )}
+          {job.request_type === 'item' && (
+            <div>
+              <p className="text-gray-500">Quantity</p>
+              <p className="font-medium">Set by cook</p>
             </div>
           )}
           <div>
@@ -178,7 +184,7 @@ export default async function JobDetailPage({
               <audio src={job.voice_memo_url} controls className="w-full" />
             </div>
           )}
-          {job.specific_dishes && (
+          {job.request_type !== 'item' && job.specific_dishes && (
             <div className="bg-white border border-gray-200 rounded-xl p-5">
               <p className="text-xs text-gray-500 mb-1">Specific dishes requested</p>
               <p className="text-sm text-gray-800">{job.specific_dishes}</p>

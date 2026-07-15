@@ -152,7 +152,7 @@ export default async function ConfirmJobPage({
         <div className="space-y-2 text-sm text-gray-600">
           <div className="flex justify-between">
             <span>Type</span>
-            <span className="font-medium text-gray-900">{getRequestLabel(job.job_category, job.request_type)}</span>
+            <span className="font-medium text-gray-900">{getRequestLabel(job.job_category, job.request_type, job.specific_dishes)}</span>
           </div>
           <div className="flex justify-between">
             <span>Date</span>
@@ -161,7 +161,7 @@ export default async function ConfirmJobPage({
           {job.request_type === 'item' ? (
             <div className="flex justify-between">
               <span>Quantity</span>
-              <span className="font-medium text-gray-900">{job.num_dishes}</span>
+              <span className="font-medium text-gray-900">Set by cook</span>
             </div>
           ) : (
             <div className="flex justify-between">

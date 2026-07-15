@@ -6,6 +6,7 @@ interface Job {
   id: string
   job_category: string
   request_type: string
+  specific_dishes: string | null
   occasion: string
   city: string
   requested_date: string
@@ -31,7 +32,8 @@ const CATEGORY: Record<string, string> = {
 }
 
 function jobLabel(job: Job) {
-  return job.request_type === 'item' ? 'Item Order' : (CATEGORY[job.job_category] ?? job.job_category)
+  if (job.request_type === 'item') return job.specific_dishes?.trim() || 'Item Order'
+  return CATEGORY[job.job_category] ?? job.job_category
 }
 
 function fmtDate(d: string) {
