@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-paper text-gray-900">
         <header className="bg-leaf-700 px-4 sm:px-6 py-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <img src="/sivanchefs-logo-leaf.png" alt="Sivan Chefs" className="h-12 sm:h-16 md:h-36 w-auto shrink-0" />
+            <img src="/sivanchefs-logo-full.jpeg" alt="Sivan Chefs" className="h-12 sm:h-16 md:h-36 w-auto shrink-0" />
             <div className="flex flex-col min-w-0">
               <a href="/cooks" className="text-lg font-bold text-brass-light leading-tight">Home Cooks</a>
               <span className="hidden sm:block text-xs text-paper/70 leading-tight">Your Directory for Local Culinary Artisans</span>
