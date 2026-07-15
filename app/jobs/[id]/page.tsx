@@ -153,7 +153,9 @@ export default async function JobDetailPage({
           </div>
         )}
 
-        <p className="text-sm text-gray-600">{GROCERY_LABELS[job.grocery_situation] ?? job.grocery_situation}</p>
+        {job.request_type !== 'item' && (
+          <p className="text-sm text-gray-600">{GROCERY_LABELS[job.grocery_situation] ?? job.grocery_situation}</p>
+        )}
 
         <div className="flex gap-4 text-sm text-gray-500">
           {job.cleanup_needed && <span>Cleanup needed</span>}

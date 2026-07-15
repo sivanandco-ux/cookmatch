@@ -402,10 +402,13 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
         </span>
       </div>
 
-      {/* Grocery situation */}
-      <p className="text-sm text-gray-600">
-        {GROCERY_LABELS[booking.grocery_situation ?? ''] ?? booking.grocery_situation}
-      </p>
+      {/* Grocery situation — not meaningful for a specific-item order, only
+          for a cooking session where ingredients need to come from somewhere */}
+      {booking.request_type !== 'item' && (
+        <p className="text-sm text-gray-600">
+          {GROCERY_LABELS[booking.grocery_situation ?? ''] ?? booking.grocery_situation}
+        </p>
+      )}
 
       {/* Written description */}
       {booking.text_description && (
