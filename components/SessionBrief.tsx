@@ -123,20 +123,26 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
         <p className="text-sm font-semibold text-gray-900">What do you need? <span className="text-red-500">*</span></p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <label
-            className={`flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+            className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
               requestType === 'session' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
             }`}
           >
-            <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-orange-600" />
-            <span className="text-sm font-medium text-gray-900">A cook for a session</span>
+            <span className="flex items-center gap-3">
+              <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-orange-600" />
+              <span className="text-sm font-medium text-gray-900">A home-cooked meal</span>
+            </span>
+            <span className="text-xs text-gray-500 pl-6">Cooked in your home, delivered, or picked up</span>
           </label>
           <label
-            className={`flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+            className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
               requestType === 'item' ? 'border-orange-600 bg-orange-50' : 'border-gray-200 bg-white hover:border-orange-300'
             }`}
           >
-            <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-orange-600" />
-            <span className="text-sm font-medium text-gray-900">A specific item (like pickles or baked goods)</span>
+            <span className="flex items-center gap-3">
+              <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-orange-600" />
+              <span className="text-sm font-medium text-gray-900">A specific item</span>
+            </span>
+            <span className="text-xs text-gray-500 pl-6">Like pickles or baked goods</span>
           </label>
         </div>
       </div>
