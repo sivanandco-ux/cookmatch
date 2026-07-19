@@ -59,6 +59,16 @@ export async function GET(request: Request) {
 
   if (existingByUserId) {
     cookId = existingByUserId.id
+    // Already-registered cook, but they arrived via the /apply "sign up"
+    // Google button (e.g. clicked Cook Sign Up while already logged in) —
+    // send them to their real dashboard instead of honoring redirectTo,
+    // which would otherwise drop them back onto a blank application form
+    // and risk a duplicate profile. Normal returning-cook logins (no
+    // signup intent) still honor redirectTo as usual, e.g. deep links from
+    // a job notification email.
+    if (intent === 'signup') {
+      return NextResponse.redirect(`${origin}/dashboard/${cookId}`)
+    }
   } else {
     const { data: cookByEmail } = await service
       .from('cooks')

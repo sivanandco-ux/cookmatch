@@ -7,6 +7,7 @@ import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
 import { makeTagline } from '@/lib/tagline'
 import CityInput from '@/components/CityInput'
 import SpecialtyTagInput from '@/components/SpecialtyTagInput'
+import GoogleIcon from '@/components/GoogleIcon'
 import { useFileDrop } from '@/lib/hooks/useFileDrop'
 
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
@@ -60,9 +61,7 @@ export default function ApplyPage() {
   // email is confirmed via magic link, so identity is proven up front.
   const [authState, setAuthState] = useState<'checking' | 'unverified' | 'verified'>('checking')
   const [verifiedEmail, setVerifiedEmail] = useState('')
-  const [signupEmail, setSignupEmail] = useState('')
-  const [sendingLink, setSendingLink] = useState(false)
-  const [linkSent, setLinkSent] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
 
   useEffect(() => {
@@ -114,28 +113,26 @@ export default function ApplyPage() {
     return () => clearTimeout(timeout)
   }, [])
 
-  async function handleSendLink(e: React.FormEvent) {
-    e.preventDefault()
-    setSendingLink(true)
+  async function handleGoogleSignIn() {
+    setSigningIn(true)
     setAuthError('')
     try {
       const supabase = createClient()
       const callbackUrl = new URL('/auth/callback', window.location.origin)
       callbackUrl.searchParams.set('intent', 'signup')
       callbackUrl.searchParams.set('redirectTo', '/apply')
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: signupEmail,
-        options: { emailRedirectTo: callbackUrl.toString() },
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl.toString() },
       })
-      if (otpError) {
-        setAuthError(`Something went wrong sending the link: ${otpError.message}`)
-      } else {
-        setLinkSent(true)
+      if (oauthError) {
+        setAuthError('Something went wrong starting Google sign-in. Please try again.')
+        setSigningIn(false)
       }
+      // On success the browser navigates away to Google — nothing else to do here.
     } catch {
-      setAuthError('Something went wrong sending the link. Please try again.')
-    } finally {
-      setSendingLink(false)
+      setAuthError('Something went wrong starting Google sign-in. Please try again.')
+      setSigningIn(false)
     }
   }
 
@@ -296,32 +293,19 @@ export default function ApplyPage() {
     return (
       <div className="max-w-sm mx-auto px-6 py-16">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
-        <p className="text-sm text-gray-500 mb-6">First, verify your email — we'll send a link to confirm it's really you before you fill out your profile.</p>
+        <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
 
-        {linkSent ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-800">
-            Check your email — we sent a verification link to <strong>{signupEmail}</strong>. Click it to continue.
-          </div>
-        ) : (
-          <form onSubmit={handleSendLink} className="flex flex-col gap-3">
-            <input
-              type="email"
-              required
-              value={signupEmail}
-              onChange={e => setSignupEmail(e.target.value)}
-              placeholder="you@email.com"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
-            {authError && <p className="text-sm text-red-600">{authError}</p>}
-            <button
-              type="submit"
-              disabled={sendingLink}
-              className="bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50"
-            >
-              {sendingLink ? 'Sending...' : 'Send verification link'}
-            </button>
-          </form>
-        )}
+        {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
+
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={signingIn}
+          className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+        >
+          <GoogleIcon />
+          {signingIn ? 'Redirecting…' : 'Continue with Google'}
+        </button>
       </div>
     )
   }
