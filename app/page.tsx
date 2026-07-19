@@ -23,10 +23,16 @@ const HOW_IT_WORKS = [
 ]
 
 const STEP_COLORS = [
-  { text: 'text-copper-600', border: 'border-copper-300' },
-  { text: 'text-leaf-600', border: 'border-leaf-300' },
-  { text: 'text-brass', border: 'border-brass-light' },
-  { text: 'text-copper-800', border: 'border-copper-400' },
+  { box: 'bg-copper-50 border-copper-200', badge: 'border-copper-300 text-copper-600' },
+  { box: 'bg-leaf-50 border-leaf-200', badge: 'border-leaf-300 text-leaf-600' },
+  { box: 'bg-brass-light/15 border-brass-light', badge: 'border-brass-light text-brass' },
+  { box: 'bg-copper-100 border-copper-300', badge: 'border-copper-400 text-copper-800' },
+]
+
+const STATS = [
+  { value: '2', label: 'Ways to offer your cooking', border: 'border-leaf-600', text: 'text-leaf-700' },
+  { value: '$0', label: 'Commission on what you earn', border: 'border-copper-600', text: 'text-copper-600' },
+  { value: 'Concierge', label: "Guided signup — talk, don't type", border: 'border-brass', text: 'text-brass' },
 ]
 
 const TRAITS = [
@@ -68,32 +74,6 @@ export default function Home() {
                 See How It Works
               </a>
             </div>
-            <div className="flex gap-6 mt-7 flex-wrap">
-              <div>
-                <div className="font-display text-lg text-brass-light">2</div>
-                <div className="text-xs text-paper/65">
-                  Ways to offer
-                  <br />
-                  your cooking
-                </div>
-              </div>
-              <div>
-                <div className="font-display text-lg text-brass-light">$0</div>
-                <div className="text-xs text-paper/65">
-                  Commission on
-                  <br />
-                  what you earn
-                </div>
-              </div>
-              <div>
-                <div className="font-display text-lg text-brass-light">Concierge</div>
-                <div className="text-xs text-paper/65">
-                  Guided signup —
-                  <br />
-                  talk, don&apos;t type
-                </div>
-              </div>
-            </div>
           </div>
 
           <div className="relative w-full max-w-xs mx-auto md:max-w-[400px] rounded-2xl overflow-hidden aspect-[4/5] bg-leaf-800">
@@ -109,6 +89,19 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* Built for Cooks, Not Platforms */}
+      <section className="max-w-6xl mx-auto px-6 py-12">
+        <h2 className="text-lg sm:text-xl text-leaf-800 text-center mb-7">Built for Cooks, Not Platforms</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          {STATS.map((stat) => (
+            <div key={stat.label} className={`bg-white rounded-xl p-6 border-l-4 text-center sm:text-left ${stat.border}`}>
+              <div className={`font-display text-3xl mb-1 ${stat.text}`}>{stat.value}</div>
+              <div className="text-sm text-gray-600">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* What We're Doing */}
       <section id="what-we-do" className="bg-panel py-14">
@@ -133,8 +126,8 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-8">
             {HOW_IT_WORKS.map(([title, body], i) => (
-              <div key={title}>
-                <div className={`w-7 h-7 rounded-full border font-display text-xs flex items-center justify-center mb-2.5 ${STEP_COLORS[i].border} ${STEP_COLORS[i].text}`}>
+              <div key={title} className={`rounded-xl border p-4 ${STEP_COLORS[i].box}`}>
+                <div className={`w-7 h-7 rounded-full border bg-white font-display text-xs flex items-center justify-center mb-2.5 ${STEP_COLORS[i].badge}`}>
                   {i + 1}
                 </div>
                 <h4 className="font-semibold text-sm text-leaf-800 mb-1">{title}</h4>
