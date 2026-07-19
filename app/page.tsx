@@ -204,7 +204,7 @@ export default function Home() {
                 recipes I grew up on. Sivan Cooks is the next step — the same entrepreneurial instinct, now applied to
                 an entirely new space.
               </p>
-              <p className="font-semibold text-leaf-800 mt-3">— Founder, Sivan Spices &amp; Sivan Cooks</p>
+              <p className="font-semibold text-leaf-800 mt-3">— Tara Jagannathan, Founder, Sivan Spices &amp; Sivan Cooks</p>
             </div>
           </div>
           <div>
