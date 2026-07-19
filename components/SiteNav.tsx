@@ -3,10 +3,9 @@
 import { useState } from 'react'
 
 const LINKS = [
-  { href: '/', label: 'About' },
   { href: '/cooks', label: 'Hire a Cook' },
   { href: '/jobs', label: 'Community Cravings' },
-  { href: '/become-a-cook', label: 'How to Become a Cook' },
+  { href: '/', label: 'About' },
 ]
 
 export default function SiteNav() {
@@ -20,8 +19,9 @@ export default function SiteNav() {
           <a key={l.href} href={l.href} className="text-paper/80 hover:text-brass-light">{l.label}</a>
         ))}
         <div className="flex items-center border border-paper/25 rounded-lg overflow-hidden">
-          <a href="/login" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light">Cook Log In</a>
-          <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700">Cook Sign Up</a>
+          <a href="/become-a-cook" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light">Cook Guide</a>
+          <a href="/login" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light border-l border-paper/25">Cook Log In</a>
+          <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700 border-l border-paper/25">Cook Sign Up</a>
         </div>
       </nav>
 
@@ -51,6 +51,9 @@ export default function SiteNav() {
             </a>
           ))}
           <div className="border-t border-gray-100 my-1" />
+          <a href="/become-a-cook" onClick={() => setOpen(false)} className="px-4 py-2.5 text-gray-600 hover:bg-copper-50 hover:text-copper-600">
+            Cook Guide
+          </a>
           <a href="/login" onClick={() => setOpen(false)} className="px-4 py-2.5 text-gray-600 hover:bg-copper-50 hover:text-copper-600">
             Cook Log In
           </a>
