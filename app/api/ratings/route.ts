@@ -15,7 +15,12 @@ const CONSECUTIVE_NEEDED = 3
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { booking_id, cook_id, taste, cleanliness, punctuality, respect, clean_appearance, notes } = body
+  const { booking_id, cook_id, rating_category, taste, cleanliness, punctuality, respect, clean_appearance, packaging, notes } = body
+
+  if (rating_category !== 'session' && rating_category !== 'item') {
+    return NextResponse.json({ error: 'Invalid rating category.' }, { status: 400 })
+  }
+  const isSession = rating_category === 'session'
 
   const supabase = getSupabase()
 
@@ -30,63 +35,102 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Feedback already submitted for this session.' }, { status: 409 })
   }
 
-  // Save rating
+  // Only the dimensions that apply to this category feed the average — a
+  // cook who was never physically in the client's home isn't judged on
+  // Cleanliness/Clean Appearance, and vice versa for Packaging.
+  const dims = isSession
+    ? { taste, cleanliness, punctuality, respect, clean_appearance }
+    : { taste, packaging, punctuality, respect }
+  const dimValues = Object.values(dims).filter((v): v is number => typeof v === 'number')
+  const overall_avg = dimValues.reduce((a, b) => a + b, 0) / dimValues.length
+
   const { error: ratingErr } = await supabase
     .from('cook_ratings')
-    .insert({ booking_id, cook_id, taste, cleanliness, punctuality, respect, clean_appearance, notes: notes || '' })
+    .insert({
+      booking_id,
+      cook_id,
+      rating_category,
+      taste,
+      punctuality,
+      respect,
+      cleanliness: isSession ? cleanliness : null,
+      clean_appearance: isSession ? clean_appearance : null,
+      packaging: isSession ? null : packaging,
+      overall_avg,
+      notes: notes || '',
+    })
 
   if (ratingErr) {
     return NextResponse.json({ error: ratingErr.message }, { status: 500 })
   }
 
-  // Recalculate averages across all sessions for this cook
-  const { data: allRatings } = await supabase
+  // Recalculate averages within THIS category only — a cook's item-selling
+  // reputation and in-home cooking reputation are tracked independently.
+  const { data: categoryRatings } = await supabase
     .from('cook_ratings')
-    .select('taste, cleanliness, punctuality, respect, clean_appearance, overall_avg')
+    .select('taste, cleanliness, punctuality, respect, clean_appearance, packaging, overall_avg, created_at')
     .eq('cook_id', cook_id)
+    .eq('rating_category', rating_category)
     .order('created_at', { ascending: true })
 
-  if (!allRatings || allRatings.length === 0) {
+  if (!categoryRatings || categoryRatings.length === 0) {
     return NextResponse.json({ success: true })
   }
 
-  const count = allRatings.length
-  const sum = (field: keyof typeof allRatings[0]) =>
-    allRatings.reduce((acc, r) => acc + (r[field] as number), 0)
+  const count = categoryRatings.length
+  const avgOf = (field: string) => {
+    const nums = categoryRatings.map(r => r[field as keyof typeof r]).filter((v): v is number => typeof v === 'number')
+    return nums.length > 0 ? nums.reduce((a, b) => a + b, 0) / nums.length : 0
+  }
+  const newCategoryOverall = avgOf('overall_avg')
 
-  const newOverall = sum('overall_avg') / count
+  const categoryUpdate = isSession
+    ? {
+        overall_score: newCategoryOverall,
+        taste_avg: avgOf('taste'),
+        cleanliness_avg: avgOf('cleanliness'),
+        punctuality_avg: avgOf('punctuality'),
+        respect_avg: avgOf('respect'),
+        clean_appearance_avg: avgOf('clean_appearance'),
+        session_count: count,
+      }
+    : {
+        item_overall_score: newCategoryOverall,
+        item_taste_avg: avgOf('taste'),
+        item_packaging_avg: avgOf('packaging'),
+        item_punctuality_avg: avgOf('punctuality'),
+        item_respect_avg: avgOf('respect'),
+        item_count: count,
+      }
 
-  await supabase
-    .from('cook_scores')
-    .update({
-      overall_score: newOverall,
-      taste_avg: sum('taste') / count,
-      cleanliness_avg: sum('cleanliness') / count,
-      punctuality_avg: sum('punctuality') / count,
-      respect_avg: sum('respect') / count,
-      clean_appearance_avg: sum('clean_appearance') / count,
-      session_count: count,
-    })
-    .eq('cook_id', cook_id)
+  await supabase.from('cook_scores').update(categoryUpdate).eq('cook_id', cook_id)
 
   // ── State machine ────────────────────────────────────────────────────────
-  const { data: cook } = await supabase
-    .from('cooks')
-    .select('status, name, email')
-    .eq('id', cook_id)
-    .single()
+  const [{ data: cook }, { data: scores }, { data: allRatings }] = await Promise.all([
+    supabase.from('cooks').select('status, name, email').eq('id', cook_id).single(),
+    supabase.from('cook_scores').select('*').eq('cook_id', cook_id).single(),
+    supabase.from('cook_ratings').select('overall_avg, created_at').eq('cook_id', cook_id).order('created_at', { ascending: true }),
+  ])
 
-  if (!cook) return NextResponse.json({ success: true })
+  if (!cook || !scores || !allRatings || allRatings.length === 0) return NextResponse.json({ success: true })
+
+  // Held to standard on both categories — use the worse of whichever
+  // category(ies) the cook actually has ratings in, so weak item packaging
+  // can't hide behind strong in-home sessions or vice versa.
+  const trackScores: number[] = []
+  if (scores.session_count > 0) trackScores.push(scores.overall_score)
+  if (scores.item_count > 0) trackScores.push(scores.item_overall_score)
+  const effectiveScore = trackScores.length > 0 ? Math.min(...trackScores) : newCategoryOverall
 
   const lastRating = allRatings[allRatings.length - 1]
   const lastAvg = lastRating.overall_avg as number
 
   let movedToWatch = false
 
-  if (cook.status === 'active' && newOverall < TRAINING_THRESHOLD) {
+  if (cook.status === 'active' && effectiveScore < TRAINING_THRESHOLD) {
     // First bad signal — give a grace session, don't restrict yet
     await supabase.from('cooks').update({ status: 'watch' }).eq('id', cook_id)
-    console.log(`[Ratings] ${cook.name} → watch (avg: ${newOverall.toFixed(2)})`)
+    console.log(`[Ratings] ${cook.name} → watch (effective: ${effectiveScore.toFixed(2)})`)
     movedToWatch = true
   } else if (cook.status === 'watch') {
     if (lastAvg >= TRAINING_THRESHOLD) {
@@ -110,24 +154,22 @@ export async function POST(request: Request) {
   }
 
   // ── Agent 3: Feedback Analysis ───────────────────────────────────────────
-  // Fires when a cook moves to watch — analyzes scores and emails the cook
-  if (movedToWatch) {
-    const tasteAvg  = sum('taste') / count
-    const cleanAvg  = sum('cleanliness') / count
-    const punctAvg  = sum('punctuality') / count
-    const respectAvg = sum('respect') / count
-    const appearAvg = sum('clean_appearance') / count
-
+  // Fires when a cook moves to watch — session-category only for now, since
+  // this agent's coaching modules (cleanliness, appearance, etc.) are
+  // specific to in-home cooking. Item/packaging coaching is a separate
+  // follow-up, not built here — firing this with null dimensions would
+  // produce garbage coaching output.
+  if (movedToWatch && isSession) {
     analyzeFeedback({
       cook_id,
       cook_name: cook.name,
       cook_email: cook.email,
-      taste_avg: tasteAvg,
-      cleanliness_avg: cleanAvg,
-      punctuality_avg: punctAvg,
-      respect_avg: respectAvg,
-      clean_appearance_avg: appearAvg,
-      overall_score: newOverall,
+      taste_avg: avgOf('taste'),
+      cleanliness_avg: avgOf('cleanliness'),
+      punctuality_avg: avgOf('punctuality'),
+      respect_avg: avgOf('respect'),
+      clean_appearance_avg: avgOf('clean_appearance'),
+      overall_score: newCategoryOverall,
       session_count: count,
     }).catch(err => console.error('[Agent 3] Error:', err))
   }

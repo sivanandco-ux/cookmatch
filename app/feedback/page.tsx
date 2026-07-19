@@ -29,7 +29,7 @@ export default async function FeedbackPage({
 
   const { data: booking } = await supabase
     .from('bookings')
-    .select('id, client_name, cook_id, cooks(id, name)')
+    .select('id, client_name, cook_id, request_type, cooks(id, name, cooking_arrangement)')
     .eq('id', bookingId)
     .single()
 
@@ -58,7 +58,17 @@ export default async function FeedbackPage({
     )
   }
 
-  const cook = booking.cooks as unknown as { id: string; name: string }
+  const cook = booking.cooks as unknown as { id: string; name: string; cooking_arrangement: string[] }
+
+  // 'session' only when this was a home-cooked-meal booking with a cook who
+  // actually cooks at the client's location — everything else (a specific
+  // item, or a session from a cook who only cooks from their own setup and
+  // delivers) never had the cook physically working in the client's space,
+  // so Cleanliness/Clean Appearance don't apply and Packaging does instead.
+  const ratingCategory: 'session' | 'item' =
+    booking.request_type === 'session' && cook.cooking_arrangement?.includes("Cook at client's location")
+      ? 'session'
+      : 'item'
 
   return (
     <FeedbackForm
@@ -66,6 +76,7 @@ export default async function FeedbackPage({
       cookId={cook.id}
       cookName={cook.name}
       clientName={booking.client_name}
+      ratingCategory={ratingCategory}
     />
   )
 }

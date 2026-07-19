@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { CookDish } from '@/lib/types'
+import { useFileDrop } from '@/lib/hooks/useFileDrop'
 
 const MAX_DISHES = 10
 
@@ -69,9 +70,7 @@ export default function CookProfileUploads({
     return () => clearTimeout(t)
   }, [profileSavedNotice])
 
-  async function handleIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  async function uploadIdFile(file: File) {
     setIdUploading(true)
     setIdError('')
     const formData = new FormData()
@@ -88,6 +87,15 @@ export default function CookProfileUploads({
     setIdSavedNotice(true)
     if (idInputRef.current) idInputRef.current.value = ''
   }
+
+  function handleIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) uploadIdFile(file)
+  }
+
+  const idDrag = useFileDrop(uploadIdFile)
+  const dishDrag = useFileDrop(file => setDishFile(file))
+  const editDishDrag = useFileDrop(file => setEditDishFile(file))
 
   async function handleAddDish() {
     if (!dishFile) return
@@ -264,16 +272,22 @@ export default function CookProfileUploads({
           <p className="text-sm text-gray-500 mb-2">Upload a driver's license, passport, or state ID to keep on file with your profile.</p>
         )}
         <input ref={idInputRef} type="file" accept="image/*,.pdf" onChange={handleIdUpload} className="hidden" />
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => idInputRef.current?.click()}
-            disabled={idUploading}
-            className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
-          >
-            {idUploading ? 'Uploading...' : hasId ? 'Replace ID' : 'Upload ID'}
-          </button>
-          {idSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
+        <div
+          {...idDrag.dragHandlers}
+          className={`rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${idDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
+        >
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => idInputRef.current?.click()}
+              disabled={idUploading}
+              className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
+            >
+              {idUploading ? 'Uploading...' : hasId ? 'Replace ID' : 'Upload ID'}
+            </button>
+            <span className="text-xs text-gray-400">or drag a file here</span>
+            {idSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
+          </div>
         </div>
         {idError && <p className="text-xs text-red-600 mt-1.5">{idError}</p>}
       </div>
@@ -311,7 +325,10 @@ export default function CookProfileUploads({
                       onChange={e => setEditDishFile(e.target.files?.[0] || null)}
                       className="hidden"
                     />
-                    <div className="flex flex-col gap-1">
+                    <div
+                      {...editDishDrag.dragHandlers}
+                      className={`flex flex-col gap-1 rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${editDishDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
+                    >
                       <button
                         type="button"
                         onClick={() => editDishInputRef.current?.click()}
@@ -319,7 +336,7 @@ export default function CookProfileUploads({
                       >
                         Replace photo
                       </button>
-                      <span className="text-xs text-gray-500">{editDishFile ? editDishFile.name : 'Keep current photo'}</span>
+                      <span className="text-xs text-gray-500">{editDishFile ? editDishFile.name : 'Keep current photo, or drag a new one here'}</span>
                     </div>
                   </div>
                   <input
@@ -385,7 +402,10 @@ export default function CookProfileUploads({
               onChange={e => setDishFile(e.target.files?.[0] || null)}
               className="hidden"
             />
-            <div className="flex items-center gap-2">
+            <div
+              {...dishDrag.dragHandlers}
+              className={`flex items-center gap-2 rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${dishDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
+            >
               <button
                 type="button"
                 onClick={() => dishInputRef.current?.click()}
@@ -393,7 +413,7 @@ export default function CookProfileUploads({
               >
                 Choose photo
               </button>
-              <span className="text-xs text-gray-500 truncate">{dishFile ? dishFile.name : 'No photo selected'}</span>
+              <span className="text-xs text-gray-500 truncate">{dishFile ? dishFile.name : 'No photo selected, or drag one here'}</span>
             </div>
             <input
               type="text"

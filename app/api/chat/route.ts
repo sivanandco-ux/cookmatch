@@ -13,7 +13,7 @@ function getSupabase() {
   )
 }
 
-const SYSTEM_PROMPT = `You are the friendly assistant for Sivan Chefs — a platform that connects home cooks with families and event hosts in the Bay Area, California.
+const SYSTEM_PROMPT = `You are the friendly assistant for Sivan Cooks — a platform that connects home cooks with families and event hosts in the Bay Area, California.
 
 Start by greeting the visitor warmly and asking: "Are you looking to hire a cook for your home, or are you interested in offering your cooking services?"
 

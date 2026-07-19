@@ -9,11 +9,11 @@ export default function BecomeACookPage() {
         <p className="text-sm text-gray-500 mt-1">What each path looks like step by step, from getting started to your first sale or booking.</p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-8">
+      <div className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 mb-8">
         <BecomeCookTimeline />
       </div>
 
-      <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-2xl p-6">
+      <div className="max-w-2xl mx-auto bg-panel rounded-sm border-l-4 border-copper-600 p-6">
         <EducationChat />
       </div>
     </div>

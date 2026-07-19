@@ -29,6 +29,7 @@ export interface Cook {
   instagram_url: string | null
   youtube_url: string | null
   cuisine_types: string[]
+  offering_types: string[]
   dietary_specialties: string[]
   occasion_types: string[]
   cooking_arrangement: string[]
@@ -259,6 +260,7 @@ export interface SessionBriefFormData {
   cleanup_needed: boolean
   kitchen_access_time: string
   city: string
+  state: string
   language_preferred: string
   recurring: boolean
   text_description: string

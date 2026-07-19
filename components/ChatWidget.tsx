@@ -7,13 +7,13 @@ import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
 import BecomeCookTimeline from '@/components/BecomeCookTimeline'
 import CityInput from '@/components/CityInput'
+import SpecialtyTagInput from '@/components/SpecialtyTagInput'
 import { US_STATES } from '@/lib/usStates'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
-const CUISINES = ['South Indian', 'North Indian', 'Tamil', 'Gujarati', 'Punjabi', 'Bengali', 'Maharashtrian', 'Hyderabadi', 'Rajasthani', 'Goan']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const GROCERY = [
@@ -68,8 +68,12 @@ function ModeCard({ icon, title, desc, onClick }: { icon: string; title: string;
 
 const DEFAULT_HOURLY_RATE = 30
 const COOKING_ARRANGEMENTS = ["Cook at client's location", 'Cook from my setup']
-const initCook = { name: '', email: '', phone: '', city: '', state: '', cooking_arrangement: [] as string[], cooking_arrangement_other: '', cuisine_types: [] as string[], dietary_specialties: [] as string[], years_experience: '', hourly_rate: String(DEFAULT_HOURLY_RATE), intro: '' }
-const initClient = { client_name: '', client_email: '', client_phone: '', city: '', requested_date: '', num_people: '', occasion: '', dietary_restrictions: [] as string[], grocery_situation: '', cleanup_needed: null as boolean | null, num_dishes: '', text_description: '' }
+const OFFERING_TYPES: { value: string; label: string }[] = [
+  { value: 'session', label: 'Home-cooked meals' },
+  { value: 'item', label: 'Specific items (pickles, baked goods, etc.)' },
+]
+const initCook = { name: '', email: '', phone: '', city: '', state: '', cooking_arrangement: [] as string[], cooking_arrangement_other: '', cuisine_types: [] as string[], offering_types: [] as string[], dietary_specialties: [] as string[], years_experience: '', hourly_rate: String(DEFAULT_HOURLY_RATE), intro: '' }
+const initClient = { request_type: 'session' as 'session' | 'item', specific_dishes: '', client_name: '', client_email: '', client_phone: '', city: '', state: '', requested_date: '', num_people: '', occasion: '', dietary_restrictions: [] as string[], grocery_situation: '', cleanup_needed: null as boolean | null, num_dishes: '', text_description: '' }
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
@@ -98,6 +102,23 @@ export default function ChatWidget() {
   // Voice language (applies to both voice memo and voice conversation modes)
   const [language, setLanguage] = useState('en-US')
   const languageLabel = VOICE_LANGUAGES.find(l => l.code === language)?.label ?? 'English'
+
+  // Growing pool of specific items cooks have actually entered, not a fixed
+  // list — cook suggestions cover everything ever entered, item suggestions
+  // are scoped to cooks who actually sell items (see /api/specialties).
+  const [cookSpecialtySuggestions, setCookSpecialtySuggestions] = useState<string[]>([])
+  const [itemSuggestions, setItemSuggestions] = useState<string[]>([])
+
+  useEffect(() => {
+    fetch('/api/specialties')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data.items)) setCookSpecialtySuggestions(data.items) })
+      .catch(() => {})
+    fetch('/api/specialties?type=item')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data.items)) setItemSuggestions(data.items) })
+      .catch(() => {})
+  }, [])
 
   // Cook email verification gate — a cook profile can't be created until the
   // email is confirmed via magic link, so identity is proven up front.
@@ -227,6 +248,7 @@ export default function ChatWidget() {
             ...(f.city !== undefined ? { city: f.city } : {}),
             ...(f.state !== undefined ? { state: f.state } : {}),
             ...(f.cooking_arrangement !== undefined ? { cooking_arrangement: f.cooking_arrangement } : {}),
+            ...(f.offering_types !== undefined ? { offering_types: f.offering_types } : {}),
             ...(f.cuisine_types !== undefined ? { cuisine_types: f.cuisine_types } : {}),
             ...(f.dietary_specialties !== undefined ? { dietary_specialties: f.dietary_specialties } : {}),
             ...(f.years_experience !== undefined ? { years_experience: String(f.years_experience) } : {}),
@@ -237,7 +259,10 @@ export default function ChatWidget() {
           setClient(prev => ({
             ...prev,
             ...(f.client_name !== undefined ? { client_name: f.client_name } : {}),
+            ...(f.request_type !== undefined ? { request_type: f.request_type } : {}),
+            ...(f.specific_dishes !== undefined ? { specific_dishes: f.specific_dishes } : {}),
             ...(f.city !== undefined ? { city: f.city } : {}),
+            ...(f.state !== undefined ? { state: f.state } : {}),
             ...(f.requested_date !== undefined ? { requested_date: f.requested_date } : {}),
             ...(f.num_people !== undefined ? { num_people: String(f.num_people) } : {}),
             ...(f.occasion !== undefined ? { occasion: f.occasion } : {}),
@@ -363,6 +388,9 @@ export default function ChatWidget() {
   function toggleCookingArrangement(v: string) {
     setCook(p => ({ ...p, cooking_arrangement: p.cooking_arrangement.includes(v) ? p.cooking_arrangement.filter(x => x !== v) : [...p.cooking_arrangement, v] }))
   }
+  function toggleCookOffering(v: string) {
+    setCook(p => ({ ...p, offering_types: p.offering_types.includes(v) ? p.offering_types.filter(x => x !== v) : [...p.offering_types, v] }))
+  }
   function toggleClient(v: string) {
     setClient(p => ({ ...p, dietary_restrictions: p.dietary_restrictions.includes(v) ? p.dietary_restrictions.filter(x => x !== v) : [...p.dietary_restrictions, v] }))
   }
@@ -382,10 +410,21 @@ export default function ChatWidget() {
     e.preventDefault(); setError('')
     const phone = path === 'cook' ? cook.phone : client.client_phone
     if (!isValidUsPhone(phone)) { setError('Please enter a valid 10-digit US phone number.'); return }
+    if (path === 'cook' && cook.cuisine_types.length === 0) {
+      setError('Please add at least one thing you make.'); return
+    }
     if (path === 'cook' && cook.cooking_arrangement.length === 0 && !cook.cooking_arrangement_other.trim()) {
       setError('Please select at least one option for how you cook.'); return
     }
-    if (path === 'client' && client.cleanup_needed === null) { setError('Please select Yes or No for cleanup.'); return }
+    if (path === 'cook' && cook.offering_types.length === 0) {
+      setError('Please select what you offer.'); return
+    }
+    if (path === 'client' && client.request_type === 'item' && !client.specific_dishes.trim()) {
+      setError('Please tell us what item you need.'); return
+    }
+    if (path === 'client' && client.request_type === 'session' && client.cleanup_needed === null) {
+      setError('Please select Yes or No for cleanup.'); return
+    }
     setView('review')
   }
 
@@ -414,7 +453,7 @@ export default function ChatWidget() {
   const dateLabel = client.requested_date ? new Date(client.requested_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''
 
   const headerTitle = voiceActive ? 'Voice Description'
-    : view === 'home' ? 'Sivan Chefs Home Cooks'
+    : view === 'home' ? 'Sivan Cooks'
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
     : view === 'cook-verify' ? 'Verify Your Email'
     : view === 'cook' ? 'Cook Sign Up'
@@ -577,10 +616,18 @@ export default function ChatWidget() {
                 <input className={ic} value={cook.cooking_arrangement_other} onChange={e => setCook(p => ({ ...p, cooking_arrangement_other: e.target.value }))} placeholder="Other (describe how you cook)" />
               </div>
               <div className="flex flex-col gap-1.5">
-                <Label>Cuisines you cook</Label>
+                <Label>What do you offer?</Label>
                 <div className="flex flex-wrap gap-1.5">
-                  {CUISINES.map(c => <Chip key={c} label={c} active={cook.cuisine_types.includes(c)} onClick={() => toggleCook('cuisine_types', c)} />)}
+                  {OFFERING_TYPES.map(o => <Chip key={o.value} label={o.label} active={cook.offering_types.includes(o.value)} onClick={() => toggleCookOffering(o.value)} />)}
                 </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <SpecialtyTagInput
+                  value={cook.cuisine_types}
+                  onChange={tags => setCook(p => ({ ...p, cuisine_types: tags }))}
+                  suggestions={cookSpecialtySuggestions}
+                  label="What do you make?"
+                />
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label>Dietary specialties</Label>
@@ -621,8 +668,8 @@ export default function ChatWidget() {
             <div className="flex-1 overflow-y-auto flex flex-col px-4 py-5 gap-5">
               <p className="text-xs text-gray-500 text-center leading-relaxed">
                 {path === 'cook'
-                  ? "Speak naturally — mention your name, city, cuisines you cook, years of experience, your rate, and a bit about yourself."
-                  : "Speak naturally — mention the date, number of people, dietary needs, and what you'd like cooked."}
+                  ? "Speak naturally — mention your name, city, whether you make home-cooked meals or specific items like pickles or baked goods, years of experience, your rate, and a bit about yourself."
+                  : "Speak naturally — mention whether you need a home-cooked meal or a specific item, the date if it's a meal, number of people, dietary needs, and what you'd like cooked."}
               </p>
               <p className="text-xs text-gray-400 text-center -mt-3">Speaking in {languageLabel}</p>
               {hasSpeech() ? (
@@ -675,6 +722,13 @@ export default function ChatWidget() {
                 </button>
               )}
               <div className="flex flex-col gap-1.5">
+                <Label>What do you need?</Label>
+                <div className="flex flex-col gap-1.5">
+                  <Chip label="A home-cooked meal" active={client.request_type === 'session'} onClick={() => setClient(p => ({ ...p, request_type: 'session' }))} />
+                  <Chip label="A specific item (pickles, baked goods, etc.)" active={client.request_type === 'item'} onClick={() => setClient(p => ({ ...p, request_type: 'item' }))} />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5">
                 <Label>Your Name</Label>
                 <input className={ic} value={client.client_name} onChange={e => setClient(p => ({ ...p, client_name: e.target.value }))} placeholder="Your full name" required />
               </div>
@@ -694,48 +748,73 @@ export default function ChatWidget() {
                   <CityInput className={ic} value={client.city} onChange={v => setClient(p => ({ ...p, city: v }))} required />
                 </div>
                 <div className="flex flex-col gap-1.5">
+                  <Label>State</Label>
+                  <select className={ic} value={client.state} onChange={e => setClient(p => ({ ...p, state: e.target.value }))} required>
+                    <option value="">Select...</option>
+                    {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              {client.request_type === 'session' && (
+                <div className="flex flex-col gap-1.5">
                   <Label>Date needed</Label>
                   <input className={ic} type="date" value={client.requested_date} onChange={e => setClient(p => ({ ...p, requested_date: e.target.value }))} required />
                 </div>
-              </div>
+              )}
+              {client.request_type === 'item' && (
+                <SpecialtyTagInput
+                  value={client.specific_dishes ? [client.specific_dishes] : []}
+                  onChange={tags => setClient(p => ({ ...p, specific_dishes: tags[0] || '' }))}
+                  suggestions={itemSuggestions}
+                  label="What item?"
+                  placeholder="e.g. Nut-free laddus"
+                  max={1}
+                />
+              )}
               <div className="flex flex-col gap-1.5">
                 <Label>Occasion</Label>
                 <div className="flex gap-2">
                   {OCCASIONS.map(o => <Chip key={o} label={o} active={client.occasion === o} onClick={() => setClient(p => ({ ...p, occasion: o }))} />)}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label>Number of people</Label>
-                  <input className={ic} type="number" min="2" max="14" value={client.num_people} onChange={e => setClient(p => ({ ...p, num_people: e.target.value }))} placeholder="2–14" required />
+              {client.request_type === 'session' && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Number of people</Label>
+                    <input className={ic} type="number" min="2" max="14" value={client.num_people} onChange={e => setClient(p => ({ ...p, num_people: e.target.value }))} placeholder="2–14" required />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Number of dishes</Label>
+                    <input className={ic} type="number" min="1" value={client.num_dishes} onChange={e => setClient(p => ({ ...p, num_dishes: e.target.value }))} placeholder="e.g. 3" required />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label>Number of dishes</Label>
-                  <input className={ic} type="number" min="1" value={client.num_dishes} onChange={e => setClient(p => ({ ...p, num_dishes: e.target.value }))} placeholder="e.g. 3" required />
-                </div>
-              </div>
+              )}
               <div className="flex flex-col gap-1.5">
                 <Label>Dietary requirements</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {DIETARY.map(d => <Chip key={d} label={d} active={client.dietary_restrictions.includes(d)} onClick={() => toggleClient(d)} />)}
                 </div>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label>Groceries</Label>
-                <div className="flex flex-col gap-1.5">
-                  {GROCERY.map(g => <Chip key={g.value} label={g.label} active={client.grocery_situation === g.value} onClick={() => setClient(p => ({ ...p, grocery_situation: g.value }))} />)}
-                </div>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label>Cleanup needed?</Label>
-                <div className="flex gap-2">
-                  {['Yes', 'No'].map(v => (
-                    <Chip key={v} label={v}
-                      active={client.cleanup_needed !== null && (v === 'Yes') === client.cleanup_needed}
-                      onClick={() => setClient(p => ({ ...p, cleanup_needed: v === 'Yes' }))} />
-                  ))}
-                </div>
-              </div>
+              {client.request_type === 'session' && (
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Groceries</Label>
+                    <div className="flex flex-col gap-1.5">
+                      {GROCERY.map(g => <Chip key={g.value} label={g.label} active={client.grocery_situation === g.value} onClick={() => setClient(p => ({ ...p, grocery_situation: g.value }))} />)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label>Cleanup needed?</Label>
+                    <div className="flex gap-2">
+                      {['Yes', 'No'].map(v => (
+                        <Chip key={v} label={v}
+                          active={client.cleanup_needed !== null && (v === 'Yes') === client.cleanup_needed}
+                          onClick={() => setClient(p => ({ ...p, cleanup_needed: v === 'Yes' }))} />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <Label>What should the cook prepare? (optional)</Label>
@@ -830,7 +909,8 @@ export default function ChatWidget() {
                     <Row label="City" value={cook.city} />
                     <Row label="State" value={cook.state} />
                     <Row label="How" value={[...cook.cooking_arrangement, cook.cooking_arrangement_other.trim()].filter(Boolean).join(', ')} />
-                    <Row label="Cuisines" value={cook.cuisine_types.join(', ')} />
+                    <Row label="Offers" value={cook.offering_types.map(v => OFFERING_TYPES.find(o => o.value === v)?.label ?? v).join(', ')} />
+                    <Row label="Makes" value={cook.cuisine_types.join(', ')} />
                     <Row label="Dietary" value={cook.dietary_specialties.join(', ') || 'None'} />
                     <Row label="Exp." value={cook.years_experience ? `${cook.years_experience} years` : ''} />
                     {cook.cooking_arrangement.includes("Cook at client's location") && (
@@ -840,17 +920,29 @@ export default function ChatWidget() {
                   </>
                 ) : (
                   <>
+                    <Row label="Need" value={client.request_type === 'item' ? 'A specific item' : 'A home-cooked meal'} />
                     <Row label="Name" value={client.client_name} />
                     <Row label="Email" value={client.client_email} />
                     <Row label="Phone" value={client.client_phone} />
                     <Row label="City" value={client.city} />
-                    <Row label="Date" value={dateLabel} />
-                    <Row label="People" value={client.num_people ? `${client.num_people} · ${categoryLabel}` : ''} />
+                    <Row label="State" value={client.state} />
+                    {client.request_type === 'item' ? (
+                      <Row label="Item" value={client.specific_dishes} />
+                    ) : (
+                      <>
+                        <Row label="Date" value={dateLabel} />
+                        <Row label="People" value={client.num_people ? `${client.num_people} · ${categoryLabel}` : ''} />
+                      </>
+                    )}
                     <Row label="Occasion" value={client.occasion} />
                     <Row label="Dietary" value={client.dietary_restrictions.join(', ') || 'None'} />
-                    <Row label="Groceries" value={groceryLabel} />
-                    <Row label="Cleanup" value={client.cleanup_needed === null ? '' : client.cleanup_needed ? 'Yes' : 'No'} />
-                    <Row label="Dishes" value={client.num_dishes} />
+                    {client.request_type === 'session' && (
+                      <>
+                        <Row label="Groceries" value={groceryLabel} />
+                        <Row label="Cleanup" value={client.cleanup_needed === null ? '' : client.cleanup_needed ? 'Yes' : 'No'} />
+                        <Row label="Dishes" value={client.num_dishes} />
+                      </>
+                    )}
                     {client.text_description && <Row label="Notes" value={client.text_description} />}
                   </>
                 )}

@@ -42,6 +42,22 @@ export async function POST(
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // A conversation is created the moment this pairing exists, so either side
+  // can message before the booking is confirmed — never a cold-message path,
+  // always tied to this specific job_interest.
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .insert({
+      intent_type: 'job_interest',
+      job_interest_id: interest.id,
+      cook_id,
+      client_name: job.client_name,
+      client_email: job.client_email,
+      client_phone: job.client_phone,
+    })
+    .select('id')
+    .single()
+
   // Email the client with cook's contact details
   sendCookInterestedToClient({
     clientName: job.client_name,
@@ -52,6 +68,7 @@ export async function POST(
     cookWhatsapp: cook.whatsapp ?? null,
     jobPostId: id,
     interestId: interest.id,
+    conversationId: conversation?.id ?? '',
     jobCategory: job.job_category,
     occasion: job.occasion,
     date: job.requested_date,

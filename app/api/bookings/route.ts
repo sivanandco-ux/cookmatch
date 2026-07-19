@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { sendBriefReceivedToCook } from '@/lib/email'
+import { sendBriefReceivedToCook, sendConversationLinkToClient } from '@/lib/email'
 
 function getSupabase() {
   return createClient(
@@ -64,6 +64,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  // A conversation is created the moment this brief is sent, so either side
+  // can message before the cook has even responded — never a cold-message
+  // path, always tied to this specific booking.
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .insert({
+      intent_type: 'booking',
+      booking_id: booking.id,
+      cook_id: body.cook_id,
+      client_name: body.client_name,
+      client_email: body.client_email,
+      client_phone: body.client_phone,
+    })
+    .select('id')
+    .single()
+
   await sendBriefReceivedToCook({
     cookName: cook.name,
     cookEmail: cook.email,
@@ -74,6 +90,15 @@ export async function POST(request: Request) {
     date: body.preferred_date,
     numPeople: body.num_people,
   }).catch(err => console.error('[Email] Brief notification failed:', err))
+
+  if (conversation) {
+    sendConversationLinkToClient({
+      clientName: body.client_name,
+      clientEmail: body.client_email,
+      cookName: cook.name,
+      conversationId: conversation.id,
+    }).catch(err => console.error('[Email] Conversation link (client) failed:', err))
+  }
 
   return NextResponse.json({ pending: true, booking_id: booking.id })
 }

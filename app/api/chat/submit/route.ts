@@ -56,6 +56,7 @@ export async function POST(request: Request) {
           video_url: null,
           photo_url: null,
           cuisine_types: data.cuisine_types || [],
+          offering_types: data.offering_types && data.offering_types.length > 0 ? data.offering_types : ['session'],
           dietary_specialties: data.dietary_specialties || [],
           occasion_types: ['Daily Meals / Tiffin', 'Festival / Occasion'],
           cooking_arrangement: data.cooking_arrangement || [],
@@ -100,20 +101,30 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Please provide a valid 10-digit US phone number.' }, { status: 400 })
       }
 
-      const numPeople = Number(data.num_people)
-      const numDishes = Number(data.num_dishes)
-      if (!Number.isFinite(numPeople) || numPeople < 2 || numPeople > 14) {
-        return NextResponse.json({ error: 'Number of people must be between 2 and 14.' }, { status: 400 })
-      }
-      if (!Number.isFinite(numDishes) || numDishes < 1) {
-        return NextResponse.json({ error: 'Number of dishes is missing or invalid.' }, { status: 400 })
-      }
-      if (!data.requested_date || !/^\d{4}-\d{2}-\d{2}$/.test(String(data.requested_date))) {
-        return NextResponse.json({ error: 'Requested date is missing or invalid.' }, { status: 400 })
+      const isItem = data.request_type === 'item'
+
+      if (isItem && !String(data.specific_dishes || '').trim()) {
+        return NextResponse.json({ error: 'Please describe the item you need.' }, { status: 400 })
       }
 
+      // Item orders don't have a party size or session date — sizing/date
+      // fields don't apply to buying a jar of pickles, so placeholders are
+      // stored instead of asking the client something irrelevant.
+      const numPeople = isItem ? 2 : Number(data.num_people)
+      const numDishes = isItem ? 0 : Number(data.num_dishes)
+      if (!isItem && (!Number.isFinite(numPeople) || numPeople < 2 || numPeople > 14)) {
+        return NextResponse.json({ error: 'Number of people must be between 2 and 14.' }, { status: 400 })
+      }
+      if (!isItem && (!Number.isFinite(numDishes) || numDishes < 1)) {
+        return NextResponse.json({ error: 'Number of dishes is missing or invalid.' }, { status: 400 })
+      }
+      if (!isItem && (!data.requested_date || !/^\d{4}-\d{2}-\d{2}$/.test(String(data.requested_date)))) {
+        return NextResponse.json({ error: 'Requested date is missing or invalid.' }, { status: 400 })
+      }
+      const requestedDate = isItem ? new Date().toISOString().split('T')[0] : data.requested_date
+
       const jobCategory =
-        numPeople <= 5 ? 'family_cooking' : numPeople <= 10 ? 'small_event' : 'medium_event'
+        isItem ? 'family_cooking' : numPeople <= 5 ? 'family_cooking' : numPeople <= 10 ? 'small_event' : 'medium_event'
 
       const { data: job, error } = await supabase
         .from('job_posts')
@@ -122,18 +133,20 @@ export async function POST(request: Request) {
           client_email: data.client_email,
           client_phone: clientPhone,
           job_category: jobCategory,
+          request_type: isItem ? 'item' : 'session',
           occasion: data.occasion,
-          specific_dishes: null,
+          specific_dishes: isItem ? String(data.specific_dishes).trim() : null,
           num_dishes: numDishes,
-          requested_date: data.requested_date,
+          requested_date: requestedDate,
           requested_time: null,
           expected_duration_hours: Number(data.expected_duration_hours) || 3,
           num_people: numPeople,
           dietary_restrictions: data.dietary_restrictions || [],
-          grocery_situation: data.grocery_situation,
-          cleanup_needed: Boolean(data.cleanup_needed),
+          grocery_situation: isItem ? 'client_has_everything' : data.grocery_situation,
+          cleanup_needed: isItem ? false : Boolean(data.cleanup_needed),
           kitchen_access_time: null,
           city: data.city,
+          state: data.state || null,
           parking_available: false,
           language_preferred: null,
           recurring: false,
@@ -171,13 +184,19 @@ export async function POST(request: Request) {
         }).catch(err => console.error(`[Submit] Cook notification failed:`, err))
       }
 
-      // Find cooks matching the job for the client to contact directly
+      // Find cooks matching the request for the client to contact directly.
+      // Item orders match on offering_types (does this cook sell items at
+      // all?) rather than job_categories, which is a session-sizing concept
+      // that doesn't apply to buying a jar of pickles.
       let matchQuery = supabase
         .from('cooks')
         .select('id, name, phone, whatsapp, cuisine_types, dietary_specialties')
         .eq('status', 'active')
         .contains('service_areas', [data.city])
-        .contains('job_categories', [jobCategory])
+
+      matchQuery = isItem
+        ? matchQuery.contains('offering_types', ['item'])
+        : matchQuery.contains('job_categories', [jobCategory])
 
       for (const diet of (data.dietary_restrictions as string[] || [])) {
         matchQuery = matchQuery.contains('dietary_specialties', [diet])

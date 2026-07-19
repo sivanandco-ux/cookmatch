@@ -222,7 +222,7 @@ export default async function CookProfilePage({
 
         {/* Right column — booking form */}
         <div className="md:col-span-1">
-          <div className="sticky top-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+          <div className="sticky top-6 bg-panel rounded-sm border-l-4 border-copper-600 p-5 shadow-sm">
             {c.status === 'pending' ? (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
                 <p className="text-sm font-semibold text-amber-800 mb-1">Profile under review</p>
@@ -271,7 +271,7 @@ export default async function CookProfilePage({
                     </div>
                   </div>
                 ) : (
-                  <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} cookDietarySpecialties={c.dietary_specialties} />
+                  <BookingForm cookId={c.id} cookName={c.name} availableDates={availableDates} cookDietarySpecialties={c.dietary_specialties} cookOfferingTypes={c.offering_types} cookCuisineTypes={c.cuisine_types} />
                 )}
               </>
             )}

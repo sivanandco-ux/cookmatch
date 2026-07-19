@@ -3,13 +3,13 @@ export default function HowItWorksPage() {
     <div className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
       <p className="text-gray-600 mb-10">
-        Sivan Chefs connects you with cooks across the USA who deliver healthy home-cooked food or come cook it in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
+        Sivan Cooks connects you with cooks across the USA who deliver healthy home-cooked food or come cook it in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
       </p>
 
       <div className="flex flex-col gap-10">
 
         {/* For Clients */}
-        <section className="bg-white border border-gray-200 rounded-xl p-6">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-5">For Clients</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -33,7 +33,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* For Cooks */}
-        <section className="bg-white border border-gray-200 rounded-xl p-6">
+        <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-5">For Cooks</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>

@@ -2,12 +2,19 @@
 
 import { useState } from 'react'
 
-const DIMENSIONS = [
-  { key: 'taste',           label: 'Taste' },
-  { key: 'cleanliness',     label: 'Cleanliness' },
-  { key: 'punctuality',     label: 'Punctuality' },
-  { key: 'respect',         label: 'Respect' },
+const SESSION_DIMENSIONS = [
+  { key: 'taste',            label: 'Taste' },
+  { key: 'cleanliness',      label: 'Cleanliness' },
+  { key: 'punctuality',      label: 'Punctuality' },
+  { key: 'respect',          label: 'Respect' },
   { key: 'clean_appearance', label: 'Clean Appearance' },
+] as const
+
+const ITEM_DIMENSIONS = [
+  { key: 'taste',       label: 'Taste' },
+  { key: 'packaging',   label: 'Packaging' },
+  { key: 'punctuality', label: 'Punctuality' },
+  { key: 'respect',     label: 'Respect' },
 ] as const
 
 function StarPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -35,13 +42,18 @@ export default function FeedbackForm({
   cookId,
   cookName,
   clientName,
+  ratingCategory,
 }: {
   bookingId: string
   cookId: string
   cookName: string
   clientName: string
+  ratingCategory: 'session' | 'item'
 }) {
-  const [ratings, setRatings] = useState({ taste: 0, cleanliness: 0, punctuality: 0, respect: 0, clean_appearance: 0 })
+  const DIMENSIONS = ratingCategory === 'session' ? SESSION_DIMENSIONS : ITEM_DIMENSIONS
+  const [ratings, setRatings] = useState<Record<string, number>>(
+    Object.fromEntries(DIMENSIONS.map(d => [d.key, 0]))
+  )
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -50,7 +62,7 @@ export default function FeedbackForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (Object.values(ratings).some(v => v === 0)) {
-      setError('Please rate all 5 dimensions before submitting.')
+      setError(`Please rate all ${DIMENSIONS.length} dimensions before submitting.`)
       return
     }
     setLoading(true)
@@ -59,7 +71,7 @@ export default function FeedbackForm({
     const res = await fetch('/api/ratings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ booking_id: bookingId, cook_id: cookId, ...ratings, notes }),
+      body: JSON.stringify({ booking_id: bookingId, cook_id: cookId, rating_category: ratingCategory, ...ratings, notes }),
     })
 
     if (!res.ok) {
@@ -86,7 +98,9 @@ export default function FeedbackForm({
 
   return (
     <div className="max-w-lg mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">How was your session with {cookName}?</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        {ratingCategory === 'session' ? `How was your session with ${cookName}?` : `How was your order from ${cookName}?`}
+      </h1>
       <p className="text-gray-500 text-sm mb-8">Hi {clientName}, share your experience — it takes under 2 minutes.</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">

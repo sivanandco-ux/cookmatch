@@ -71,9 +71,9 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           {/* Name + tagline */}
           <div>
             <h3 className="font-display font-bold text-gray-900">{formatName(cook.name)}</h3>
-            <p className="text-xs text-gray-500">{cook.tagline}</p>
+            <p className="text-sm text-gray-600">{cook.tagline}</p>
             {(cook.service_areas[0] || cook.state) && (
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-600 mt-0.5">
                 📍 {[cook.service_areas[0], cook.state].filter(Boolean).join(', ')}
               </p>
             )}
@@ -93,28 +93,28 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           {/* Cuisine tags */}
           <div className="flex flex-wrap gap-1.5">
             {cook.cuisine_types.slice(0, 3).map((c) => (
-              <span key={c} className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">
+              <span key={c} className="text-xs font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">
                 {c}
               </span>
             ))}
           </div>
 
           {/* Dietary */}
-          <p className="text-xs text-gray-500">{cook.dietary_specialties.join(' · ')}</p>
+          <p className="text-sm text-gray-600">{cook.dietary_specialties.join(' · ')}</p>
 
           {/* Dish photos */}
           {cook.cook_dishes && cook.cook_dishes.length > 0 && (
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {cook.cook_dishes.slice(0, 3).map(dish => (
                 <img
                   key={dish.id}
                   src={dish.photo_url}
                   alt={dish.description || 'Dish photo'}
-                  className="w-12 h-12 rounded-sm object-cover border border-copper-100"
+                  className="flex-1 min-w-0 aspect-square rounded-sm object-cover border border-copper-100"
                 />
               ))}
               {cook.cook_dishes.length > 3 && (
-                <div className="w-12 h-12 rounded-sm bg-copper-50 border border-copper-100 flex items-center justify-center text-xs text-gray-400 font-medium">
+                <div className="flex-1 min-w-0 aspect-square rounded-sm bg-copper-50 border border-copper-100 flex items-center justify-center text-sm text-gray-400 font-medium">
                   +{cook.cook_dishes.length - 3}
                 </div>
               )}
@@ -123,11 +123,11 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
 
           {/* Price */}
           {cook.price_min > 0 ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-gray-600">
               <span className="font-medium text-gray-900">${cook.price_min}</span>{priceLabel}
             </p>
           ) : (
-            <p className="text-xs text-gray-400">Rate negotiable</p>
+            <p className="text-sm text-gray-500">Rate negotiable</p>
           )}
 
           {/* Verified badges */}

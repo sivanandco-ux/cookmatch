@@ -52,6 +52,7 @@ export async function POST(request: Request) {
       cleanup_needed: body.cleanup_needed ?? false,
       kitchen_access_time: body.kitchen_access_time || null,
       city: body.city,
+      state: body.state || null,
       parking_available: body.parking_available ?? false,
       language_preferred: body.language_preferred || null,
       recurring: body.recurring ?? false,

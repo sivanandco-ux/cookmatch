@@ -5,13 +5,12 @@ import { createClient } from '@/lib/supabase/client'
 import { US_STATES } from '@/lib/usStates'
 import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
 import { makeTagline } from '@/lib/tagline'
-import { SPECIALTY_SUGGESTIONS } from '@/lib/specialtySuggestions'
 import CityInput from '@/components/CityInput'
 import SpecialtyTagInput from '@/components/SpecialtyTagInput'
+import { useFileDrop } from '@/lib/hooks/useFileDrop'
 
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 const AVAILABILITY = ['Available regularly', 'Made to order', 'Seasonal or festival-only']
-const LANGUAGES = ['English', 'Tamil', 'Hindi', 'Telugu', 'Kannada', 'Malayalam', 'Gujarati', 'Bengali', 'Punjabi', 'Marathi']
 const JOB_CATEGORIES = [
   { value: 'family_cooking', label: 'Family Cooking (2–5 people)' },
   { value: 'small_event', label: 'Small Event (6–10 people)' },
@@ -45,6 +44,10 @@ export default function ApplyPage() {
   const [state, setState] = useState('')
   const [otherCities, setOtherCities] = useState('')
   const [specialties, setSpecialties] = useState<string[]>([])
+  const [specialtySuggestions, setSpecialtySuggestions] = useState<string[]>([])
+  const [languages, setLanguages] = useState<string[]>([])
+  const [languageSuggestions, setLanguageSuggestions] = useState<string[]>([])
+  const [offeringTypes, setOfferingTypes] = useState<string[]>([])
   const [cooksAtClientLocation, setCooksAtClientLocation] = useState(false)
   const [arrangementOtherChecked, setArrangementOtherChecked] = useState(false)
   const [occasionOtherChecked, setOccasionOtherChecked] = useState(false)
@@ -61,6 +64,17 @@ export default function ApplyPage() {
   const [sendingLink, setSendingLink] = useState(false)
   const [linkSent, setLinkSent] = useState(false)
   const [authError, setAuthError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/specialties')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data.items)) setSpecialtySuggestions(data.items) })
+      .catch(() => {})
+    fetch('/api/languages')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data.items)) setLanguageSuggestions(data.items) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     try {
@@ -112,9 +126,7 @@ export default function ApplyPage() {
     setPolishing(false)
   }
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+  function processPhotoFile(file: File) {
     if (file.size > 5 * 1024 * 1024) {
       setError('Photo must be under 5MB.')
       return
@@ -122,6 +134,13 @@ export default function ApplyPage() {
     setPhotoFile(file)
     setPhotoPreview(URL.createObjectURL(file))
   }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) processPhotoFile(file)
+  }
+
+  const photoDrag = useFileDrop(processPhotoFile)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -133,6 +152,12 @@ export default function ApplyPage() {
 
     if (specialties.length === 0) {
       setError('Please add at least one thing you make.')
+      setLoading(false)
+      return
+    }
+
+    if (offeringTypes.length === 0) {
+      setError('Please select what you offer.')
       setLoading(false)
       return
     }
@@ -178,11 +203,12 @@ export default function ApplyPage() {
       tagline,
       video_url: formData.get('video_url') || null,
       cuisine_types: specialties,
+      offering_types: offeringTypes,
       photo_url: null as string | null,
       dietary_specialties: getChecked('dietary_specialties'),
       occasion_types: occasionTypes,
       cooking_arrangement: cookingArrangement,
-      languages: getChecked('languages'),
+      languages,
       price_min: priceValue,
       price_max: priceValue,
       price_unit: 'hourly',
@@ -279,7 +305,7 @@ export default function ApplyPage() {
       <div className="max-w-2xl mx-auto px-6 py-20 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Application Received!</h1>
-        <p className="text-gray-600 mb-2">Thank you for applying to Sivan Chefs. We will review your application and reach out within 2–3 business days.</p>
+        <p className="text-gray-600 mb-2">Thank you for applying to Sivan Cooks. We will review your application and reach out within 2–3 business days.</p>
         <p className="text-gray-500 text-sm">You will be notified via email once your profile is verified and live.</p>
         <a href="/cooks" className="mt-8 inline-block text-copper-600 hover:underline">Browse other cooks →</a>
       </div>
@@ -288,12 +314,12 @@ export default function ApplyPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Sivan Chefs as a Cook</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Sivan Cooks as a Cook</h1>
       <p className="text-gray-600 mb-8">Share your love of cooking and get discovered by families in your area.</p>
 
       {/* Platform benefits */}
       <div className="bg-copper-50 border border-copper-200 rounded-xl p-6 mb-8">
-        <h2 className="text-base font-semibold text-copper-900 mb-3">Why join Sivan Chefs?</h2>
+        <h2 className="text-base font-semibold text-copper-900 mb-3">Why join Sivan Cooks?</h2>
         <ul className="space-y-2 text-sm text-copper-800">
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Get discovered by families looking for home-cooked Indian meals</li>
           <li className="flex gap-2"><span className="mt-0.5">✓</span>Set your own hourly rate — no bidding, no rate cuts</li>
@@ -312,17 +338,18 @@ export default function ApplyPage() {
           <div className="flex items-center gap-4">
             <div
               onClick={() => photoInputRef.current?.click()}
-              className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-copper-400 overflow-hidden flex-shrink-0"
+              {...photoDrag.dragHandlers}
+              className={`w-20 h-20 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden flex-shrink-0 transition-colors ${photoDrag.isDragging ? 'border-copper-500 bg-copper-50' : 'border-gray-300 hover:border-copper-400'}`}
             >
               {photoPreview ? (
                 <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-xs text-gray-400 text-center leading-tight px-1">Add photo</span>
+                <span className="text-xs text-gray-400 text-center leading-tight px-1">Add or drop photo</span>
               )}
             </div>
             <div>
               <p className="text-sm font-medium text-gray-700">Profile photo</p>
-              <p className="text-xs text-gray-400 mb-2">Shown on your cook tile. Max 5MB.</p>
+              <p className="text-xs text-gray-400 mb-2">Shown on your cook tile. Max 5MB. Click or drag & drop.</p>
               <button
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
@@ -388,10 +415,39 @@ export default function ApplyPage() {
         {/* Cooking Details */}
         <section className="bg-panel rounded-sm border-l-4 border-copper-600 p-6 flex flex-col gap-5">
           <h2 className="text-lg font-semibold">Cooking Details</h2>
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-2">
+              What do you offer? <span className="text-red-500">*</span>
+            </p>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={offeringTypes.includes('session')}
+                  onChange={e => setOfferingTypes(prev =>
+                    e.target.checked ? [...prev, 'session'] : prev.filter(t => t !== 'session')
+                  )}
+                  className="rounded border-gray-300 text-copper-600"
+                />
+                <span className="text-sm text-gray-700">Home-cooked meals — cooked in your home, delivered, or picked up</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={offeringTypes.includes('item')}
+                  onChange={e => setOfferingTypes(prev =>
+                    e.target.checked ? [...prev, 'item'] : prev.filter(t => t !== 'item')
+                  )}
+                  className="rounded border-gray-300 text-copper-600"
+                />
+                <span className="text-sm text-gray-700">Specific items — like pickles or baked goods</span>
+              </label>
+            </div>
+          </div>
           <SpecialtyTagInput
             value={specialties}
             onChange={setSpecialties}
-            suggestions={SPECIALTY_SUGGESTIONS}
+            suggestions={specialtySuggestions}
             label="What do you make?"
           />
           <CheckboxGroup name="dietary_specialties" options={DIETARY} label="Dietary specialties" />
@@ -423,7 +479,14 @@ export default function ApplyPage() {
               />
             )}
           </div>
-          <CheckboxGroup name="languages" options={LANGUAGES} label="Languages you speak" />
+          <SpecialtyTagInput
+            value={languages}
+            onChange={setLanguages}
+            suggestions={languageSuggestions}
+            label="Languages you speak"
+            placeholder="e.g. Hindi, Tamil, English"
+            skipValidation
+          />
         </section>
 
         {/* Cooking Arrangement */}
@@ -628,10 +691,10 @@ export default function ApplyPage() {
         {/* Approval */}
         <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-copper-900 mb-2">Approval</h2>
-          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Chefs approves cooks by checking references. We may follow up with you after you apply.</p>
+          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Cooks approves cooks by checking references. We may follow up with you after you apply.</p>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
-            <span className="text-sm text-gray-700">I accept the Sivan Chefs Terms of Service</span>
+            <span className="text-sm text-gray-700">I accept the Sivan Cooks Terms of Service</span>
           </label>
         </section>
 

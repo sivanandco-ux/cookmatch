@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import VoiceMemoRecorder from './VoiceMemoRecorder'
 import CityInput from './CityInput'
+import SpecialtyTagInput from './SpecialtyTagInput'
+import { US_STATES } from '@/lib/usStates'
 import type { SessionBriefFormData, JobCategory, GrocerySituation, RequestType } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
@@ -26,13 +28,31 @@ interface Props {
   cookId?: string
   cookName?: string
   cookDietarySpecialties?: string[]
+  cookOfferingTypes?: string[]
+  cookCuisineTypes?: string[]
   onSubmit: (data: SessionBriefFormData) => Promise<void>
   submitLabel?: string
 }
 
-export default function SessionBrief({ mode, availableDates = [], cookName, cookDietarySpecialties, onSubmit, submitLabel }: Props) {
-  const [requestType, setRequestType] = useState<RequestType>('session')
+export default function SessionBrief({ mode, availableDates = [], cookName, cookDietarySpecialties, cookOfferingTypes, cookCuisineTypes, onSubmit, submitLabel }: Props) {
+  // When browsing a specific cook who only offers one request type, there's
+  // nothing to toggle — lock to that type and skip the choice entirely. In
+  // job-board mode (no specific cook yet) the client always gets the choice.
+  const lockedType = cookOfferingTypes && cookOfferingTypes.length === 1 ? (cookOfferingTypes[0] as RequestType) : null
+  const [requestType, setRequestType] = useState<RequestType>(lockedType ?? 'session')
   const [jobCategory, setJobCategory] = useState<JobCategory | ''>('')
+  const [state, setState] = useState('')
+  const [specificDishesTags, setSpecificDishesTags] = useState<string[]>([])
+  const [itemSuggestions, setItemSuggestions] = useState<string[]>([])
+
+  useEffect(() => {
+    if (cookCuisineTypes && cookCuisineTypes.length > 0) return
+    fetch('/api/specialties?type=item')
+      .then(res => res.json())
+      .then(data => { if (Array.isArray(data.items)) setItemSuggestions(data.items) })
+      .catch(() => {})
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [selectedDate, setSelectedDate] = useState('')
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([])
   const [voiceMemoUrl, setVoiceMemoUrl] = useState('')
@@ -60,11 +80,12 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
     if (!isItem && !jobCategory) { setError('Please select a job type.'); return }
-    if (isItem && !get('specific_dishes').trim()) {
+    if (isItem && specificDishesTags.length === 0) {
       setError('Please tell us what item you need.')
       return
     }
-    if (!selectedDate) { setError('Please select a date.'); return }
+    if (!isItem && !selectedDate) { setError('Please select a date.'); return }
+    if (!state) { setError('Please select your state.'); return }
     if (!voiceMemoUrl && !textDescription.trim()) {
       setError('Please provide at least one description — a voice memo, a written description, or both.')
       return
@@ -86,11 +107,14 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       job_category: (isItem ? 'family_cooking' : jobCategory) as JobCategory,
       request_type: requestType,
       occasion: get('occasion'),
-      specific_dishes: isItem ? get('specific_dishes').trim() : '',
+      specific_dishes: isItem ? (specificDishesTags[0] || '') : '',
       // Quantity for an item order isn't the client's call — the cook sets
       // it once they've seen the request, so there's no field to read here.
       num_dishes: isItem ? 0 : Number(get('num_dishes')),
-      preferred_date: selectedDate,
+      // Item orders aren't tied to a session date — the database still
+      // requires a value, so a placeholder (today) is stored rather than
+      // asking the client something that doesn't apply to buying an item.
+      preferred_date: isItem ? new Date().toISOString().split('T')[0] : selectedDate,
       preferred_time: '',
       expected_duration_hours: 2,
       num_people: numPeople,
@@ -99,6 +123,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       cleanup_needed: isItem ? false : ((form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false),
       kitchen_access_time: '',
       city: get('city'),
+      state,
       language_preferred: '',
       recurring: false,
       text_description: textDescription,
@@ -118,34 +143,36 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-      {/* Section 0: What do you need? */}
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-gray-900">What do you need? <span className="text-red-500">*</span></p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <label
-            className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-              requestType === 'session' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
-            }`}
-          >
-            <span className="flex items-center gap-3">
-              <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-copper-600" />
-              <span className="text-sm font-medium text-gray-900">A home-cooked meal</span>
-            </span>
-            <span className="text-xs text-gray-500 pl-6">Cooked in your home, delivered, or picked up</span>
-          </label>
-          <label
-            className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-              requestType === 'item' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
-            }`}
-          >
-            <span className="flex items-center gap-3">
-              <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-copper-600" />
-              <span className="text-sm font-medium text-gray-900">A specific item</span>
-            </span>
-            <span className="text-xs text-gray-500 pl-6">Like pickles or baked goods</span>
-          </label>
+      {/* Section 0: What do you need? — skipped when the cook only offers one type */}
+      {!lockedType && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-semibold text-gray-900">What do you need? <span className="text-red-500">*</span></p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label
+              className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                requestType === 'session' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <input type="radio" name="request_type_radio" value="session" checked={requestType === 'session'} onChange={() => setRequestType('session')} className="text-copper-600" />
+                <span className="text-sm font-medium text-gray-900">A home-cooked meal</span>
+              </span>
+              <span className="text-xs text-gray-500 pl-6">Cooked in your home, delivered, or picked up</span>
+            </label>
+            <label
+              className={`flex flex-col gap-0.5 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                requestType === 'item' ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <input type="radio" name="request_type_radio" value="item" checked={requestType === 'item'} onChange={() => setRequestType('item')} className="text-copper-600" />
+                <span className="text-sm font-medium text-gray-900">A specific item</span>
+              </span>
+              <span className="text-xs text-gray-500 pl-6">Like pickles or baked goods</span>
+            </label>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Section 1: Job type */}
       <div className="flex flex-col gap-3">
@@ -181,15 +208,14 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
         )}
 
         {requestType === 'item' && (
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">What item? <span className="text-red-500">*</span></label>
-            <input
-              name="specific_dishes"
-              required
-              placeholder="e.g. Nut-free laddus"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
+          <SpecialtyTagInput
+            value={specificDishesTags}
+            onChange={setSpecificDishesTags}
+            suggestions={cookCuisineTypes && cookCuisineTypes.length > 0 ? cookCuisineTypes : itemSuggestions}
+            label="What item?"
+            placeholder="e.g. Nut-free laddus"
+            max={1}
+          />
         )}
 
         <div className={requestType === 'item' ? '' : 'grid grid-cols-2 gap-3'}>
@@ -209,49 +235,51 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
         </div>
       </div>
 
-      {/* Section 2: When */}
-      <div className="flex flex-col gap-3">
-        <p className="text-sm font-semibold text-gray-900">When?</p>
+      {/* Section 2: When — dates only apply to a home-cooked meal session, not a specific item order */}
+      {requestType === 'session' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-semibold text-gray-900">When?</p>
 
-        {mode === 'browse' ? (
-          <div>
-            <label className="text-xs text-gray-500 mb-2 block">Select an available date <span className="text-red-500">*</span></label>
-            {availableDates.length === 0 ? (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-3 text-sm text-amber-800">
-                This cook has no available dates yet — check back soon.
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-1.5">
-                {availableDates.map(date => (
-                  <button
-                    key={date}
-                    type="button"
-                    onClick={() => setSelectedDate(date)}
-                    className={`rounded-lg px-2 py-2 text-xs font-medium border transition-colors ${
-                      selectedDate === date
-                        ? 'bg-copper-600 text-white border-copper-600'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-copper-300'
-                    }`}
-                  >
-                    {formatDate(date)}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Preferred date <span className="text-red-500">*</span></label>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={e => setSelectedDate(e.target.value)}
-              min={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString().split('T')[0]}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
-          </div>
-        )}
-      </div>
+          {mode === 'browse' ? (
+            <div>
+              <label className="text-xs text-gray-500 mb-2 block">Select an available date <span className="text-red-500">*</span></label>
+              {availableDates.length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-3 text-sm text-amber-800">
+                  This cook has no available dates yet — check back soon.
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {availableDates.map(date => (
+                    <button
+                      key={date}
+                      type="button"
+                      onClick={() => setSelectedDate(date)}
+                      className={`rounded-lg px-2 py-2 text-xs font-medium border transition-colors ${
+                        selectedDate === date
+                          ? 'bg-copper-600 text-white border-copper-600'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-copper-300'
+                      }`}
+                    >
+                      {formatDate(date)}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Preferred date <span className="text-red-500">*</span></label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={e => setSelectedDate(e.target.value)}
+                min={new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Section 3: Who */}
       <div className="flex flex-col gap-3">
@@ -301,9 +329,23 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-gray-900">Logistics</p>
 
-        <div>
-          <label className="text-xs text-gray-500 mb-1 block">City <span className="text-red-500">*</span></label>
-          <CityInput name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">State <span className="text-red-500">*</span></label>
+            <select
+              value={state}
+              onChange={e => setState(e.target.value)}
+              required
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="" disabled>Select state</option>
+              {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">City <span className="text-red-500">*</span></label>
+            <CityInput name="city" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+          </div>
         </div>
 
         {requestType === 'session' && (
@@ -366,7 +408,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
 
       <button
         type="submit"
-        disabled={loading || (mode === 'browse' && availableDates.length === 0)}
+        disabled={loading || (mode === 'browse' && requestType === 'session' && availableDates.length === 0)}
         className="bg-copper-600 text-white py-3 rounded-lg font-medium hover:bg-copper-700 disabled:opacity-60"
       >
         {loading ? 'Submitting...' : (submitLabel ?? 'Submit Session Brief')}

@@ -1,6 +1,6 @@
 import { Resend } from 'resend'
 
-const FROM = 'CookMatch <cookmatch-admin@sivanspices.com>'
+const FROM = 'Sivan Cooks <sivancooks-admin@sivanspices.com>'
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 function getResend() {
@@ -40,7 +40,7 @@ export async function sendCookNotification({
     subject: `New booking inquiry from ${clientName}`,
     html: `
       <p>Hi ${cookName},</p>
-      <p>You have a new booking inquiry on CookMatch.</p>
+      <p>You have a new booking inquiry on Sivan Cooks.</p>
       <table cellpadding="6" style="border-collapse:collapse;">
         <tr><td><strong>Client</strong></td><td>${clientName}</td></tr>
         <tr><td><strong>Phone</strong></td><td>${clientPhone}</td></tr>
@@ -53,7 +53,7 @@ export async function sendCookNotification({
       <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
       <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off your first order.</p>
       <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Cook notification failed:', error.message)
@@ -98,7 +98,7 @@ export async function sendClientConfirmation({
       <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
       <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off your first order.</p>
       <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Client confirmation failed:', error.message)
@@ -165,7 +165,7 @@ export async function sendCookWatchNotification({
       </ul>
 
       <p style="margin-top:24px;">You have <strong>one upcoming session</strong> to show improvement before your profile is placed in training mode. We believe in you.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Cook watch notification failed:', error.message)
@@ -190,7 +190,7 @@ export async function sendFeedbackRequest({
     html: `
       <p>Hi ${clientName},</p>
       <p>We hope you had a wonderful cooking session with <strong>${cookName}</strong> today!</p>
-      <p>Your feedback helps us maintain quality and helps ${cookName} grow on CookMatch.</p>
+      <p>Your feedback helps us maintain quality and helps ${cookName} grow on Sivan Cooks.</p>
       <p style="margin-top:24px;">
         <a href="${feedbackUrl}"
            style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
@@ -198,7 +198,7 @@ export async function sendFeedbackRequest({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;">Takes less than 2 minutes.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Feedback request failed:', error.message)
@@ -227,7 +227,7 @@ export async function sendCheckinEmail({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;margin-top:16px;">Takes less than a minute. Keeping your availability up to date ensures you get more bookings.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Check-in email failed:', error.message)
@@ -280,7 +280,7 @@ export async function sendBriefReceivedToCook({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;">Only accept if you are fully available on this date.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Brief received (cook) failed:', error.message)
@@ -319,7 +319,7 @@ export async function sendCookAcceptedToClient({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;">You can also cancel from the same page if your plans have changed.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Cook accepted (client) failed:', error.message)
@@ -365,7 +365,7 @@ export async function sendSessionConfirmedToBoth({
         <h3 style="margin-top:24px;">Your Sivan Spices gift 🎁</h3>
         <p>Use code <strong style="font-size:18px;color:#ea580c;">${discountCode}</strong> for 20% off at Sivan Spices.com</p>
         <p><a href="https://sivanspices.com" style="color:#ea580c;">Shop Sivan Spices →</a></p>
-        <p>— CookMatch Team</p>
+        <p>— Sivan Cooks Team</p>
       `,
     }),
     resend.emails.send({
@@ -380,7 +380,7 @@ export async function sendSessionConfirmedToBoth({
           <tr><td><strong>Date</strong></td><td>${date}</td></tr>
         </table>
         <p>Coordinate directly with the client for directions, parking, and any final details.</p>
-        <p>— CookMatch Team</p>
+        <p>— Sivan Cooks Team</p>
       `,
     }),
   ]).catch(err => console.error('[Email] Session confirmed failed:', err))
@@ -395,6 +395,7 @@ export async function sendCookInterestedToClient({
   cookWhatsapp,
   jobPostId,
   interestId,
+  conversationId,
   jobCategory,
   occasion,
   date,
@@ -407,11 +408,13 @@ export async function sendCookInterestedToClient({
   cookWhatsapp: string | null
   jobPostId: string
   interestId: string
+  conversationId: string
   jobCategory: string
   occasion: string
   date: string
 }) {
   const confirmUrl = `${SITE_URL}/jobs/${jobPostId}/confirm?interest_id=${interestId}`
+  const messageUrl = `${SITE_URL}/messages/${conversationId}`
   const categoryLabel: Record<string, string> = {
     family_cooking: 'Family Cooking',
     small_event: 'Small Event',
@@ -430,8 +433,16 @@ export async function sendCookInterestedToClient({
         <tr><td><strong>Date</strong></td><td>${date}</td></tr>
       </table>
 
-      <h3 style="margin-top:24px;">Step 1 — Contact ${cookName} to discuss details</h3>
-      <p>Before you confirm, reach out to ${cookName} directly to agree on the arrival time, menu, and any other details.</p>
+      <h3 style="margin-top:24px;">Step 1 — Chat with ${cookName} to discuss details</h3>
+      <p>Before you confirm, chat with ${cookName} directly to agree on the arrival time, menu, and any other details.</p>
+      <p style="margin:12px 0;">
+        <a href="${messageUrl}"
+           style="background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          💬 Chat with ${cookName}
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">Please keep the conversation respectful and about the job — you can report it from the chat at any time if something feels off.</p>
+      <p>You can also reach ${cookName} directly:</p>
       <table cellpadding="6" style="border-collapse:collapse;margin:12px 0;">
         <tr><td><strong>Phone</strong></td><td>${cookPhone}</td></tr>
         <tr><td><strong>Email</strong></td><td>${cookEmail}</td></tr>
@@ -447,10 +458,123 @@ export async function sendCookInterestedToClient({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;">If this cook is not a good fit after your conversation, simply ignore this email and wait — other cooks may express interest too.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Cook interested (client) failed:', error.message)
+}
+
+export async function sendConversationLinkToClient({
+  clientName,
+  clientEmail,
+  cookName,
+  conversationId,
+}: {
+  clientName: string
+  clientEmail: string
+  cookName: string
+  conversationId: string
+}) {
+  const messageUrl = `${SITE_URL}/messages/${conversationId}`
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(clientEmail),
+    subject: `Chat with ${cookName} about your session brief`,
+    html: `
+      <p>Hi ${clientName},</p>
+      <p>Your session brief has been sent to <strong>${cookName}</strong>. You can chat with them directly to ask questions or work out details while you wait for them to respond.</p>
+      <p style="margin-top:16px;">
+        <a href="${messageUrl}"
+           style="background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          💬 Chat with ${cookName}
+        </a>
+      </p>
+      <p style="color:#9ca3af;font-size:13px;">Please keep the conversation respectful and about the food — you can report it from the chat at any time if something feels off.</p>
+      <p>— Sivan Cooks Team</p>
+    `,
+  })
+  if (error) console.error('[Email] Conversation link (client) failed:', error.message)
+}
+
+export async function sendNewMessageNotification({
+  recipientEmail,
+  recipientName,
+  senderName,
+  conversationUrl,
+}: {
+  recipientEmail: string
+  recipientName: string
+  senderName: string
+  conversationUrl: string
+}) {
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: to(recipientEmail),
+    subject: `New message from ${senderName}`,
+    html: `
+      <p>Hi ${recipientName},</p>
+      <p><strong>${senderName}</strong> sent you a new message.</p>
+      <p style="margin-top:16px;">
+        <a href="${conversationUrl}"
+           style="background:#2563eb;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">
+          💬 Continue Chat
+        </a>
+      </p>
+      <p>— Sivan Cooks Team</p>
+    `,
+  })
+  if (error) console.error('[Email] New message notification failed:', error.message)
+}
+
+export async function sendConversationReported({
+  conversationId,
+  reporterType,
+  reason,
+  details,
+  clientName,
+  clientEmail,
+  clientPhone,
+  cookName,
+  recentMessages,
+}: {
+  conversationId: string
+  reporterType: 'client' | 'cook'
+  reason: string
+  details: string
+  clientName: string
+  clientEmail: string
+  clientPhone: string
+  cookName: string
+  recentMessages: { sender_type: 'client' | 'cook'; body: string }[]
+}) {
+  const transcript = recentMessages.length > 0
+    ? recentMessages.map(m => `<p style="margin:4px 0;"><strong>${m.sender_type === 'cook' ? cookName : clientName}:</strong> ${m.body}</p>`).join('')
+    : '<p style="color:#9ca3af;">No messages were sent in this conversation.</p>'
+
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: 'sivanandco1904@gmail.com',
+    subject: `Conversation reported — ${reason}`,
+    html: `
+      <p>A conversation has been flagged for review.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Conversation ID</strong></td><td>${conversationId}</td></tr>
+        <tr><td><strong>Reported by</strong></td><td>${reporterType === 'cook' ? cookName : clientName} (${reporterType})</td></tr>
+        <tr><td><strong>Cook</strong></td><td>${cookName}</td></tr>
+        <tr><td><strong>Client</strong></td><td>${clientName}</td></tr>
+        <tr><td><strong>Client email</strong></td><td>${clientEmail}</td></tr>
+        <tr><td><strong>Client phone</strong></td><td>${clientPhone}</td></tr>
+        <tr><td><strong>Reason</strong></td><td>${reason}</td></tr>
+        ${details ? `<tr><td><strong>Details</strong></td><td>${details}</td></tr>` : ''}
+      </table>
+      <h3 style="margin-top:24px;">Last messages in this conversation</h3>
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;">
+        ${transcript}
+      </div>
+      <p>— Sivan Cooks System</p>
+    `,
+  })
+  if (error) console.error('[Email] Conversation report failed:', error.message)
 }
 
 export async function sendSessionReminder({
@@ -485,7 +609,7 @@ export async function sendSessionReminder({
           ${time ? `<tr><td><strong>Time</strong></td><td>${time}</td></tr>` : ''}
         </table>
         <p>Make sure the kitchen is accessible and any agreed ingredients are ready.</p>
-        <p>— CookMatch Team</p>
+        <p>— Sivan Cooks Team</p>
       `,
     }),
     resend.emails.send({
@@ -500,7 +624,7 @@ export async function sendSessionReminder({
           ${time ? `<tr><td><strong>Time</strong></td><td>${time}</td></tr>` : ''}
         </table>
         <p>Please contact the client if anything has changed.</p>
-        <p>— CookMatch Team</p>
+        <p>— Sivan Cooks Team</p>
       `,
     }),
   ]).catch(err => console.error('[Email] Session reminder failed:', err))
@@ -521,10 +645,10 @@ export async function sendWelcomeEmail({
   const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
-    subject: `Welcome to CookMatch — you are approved!`,
+    subject: `Welcome to Sivan Cooks — you are approved!`,
     html: `
       <p>Hi ${cookName},</p>
-      <p>Great news — your CookMatch application has been approved. You are now an active cook on our platform.</p>
+      <p>Great news — your Sivan Cooks application has been approved. You are now an active cook on our platform.</p>
 
       <h3 style="margin-top:24px;">Your dashboard</h3>
       <p>This is your home base. You can see session briefs from clients, respond to job postings, and manage your bookings here. <strong>Save this link</strong> — you will use it every time you log in.</p>
@@ -544,7 +668,7 @@ export async function sendWelcomeEmail({
       <p style="margin-top:24px;color:#6b7280;font-size:13px;">
         Your dashboard link: <a href="${dashboardUrl}" style="color:#ea580c;">${dashboardUrl}</a>
       </p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Welcome email failed:', error.message)
@@ -613,7 +737,7 @@ export async function sendCookInterestNotification({
         </a>
       </p>
       <p style="color:#9ca3af;font-size:13px;">The booking only locks in once both you and the client have confirmed.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Cook interest notification failed:', error.message)
@@ -655,7 +779,7 @@ export async function sendNewJobNotification({
     subject: `New job posted in ${city} — ${categoryLabel[jobCategory] ?? jobCategory}`,
     html: `
       <p>Hi ${cookName},</p>
-      <p>A new job has been posted on CookMatch that may be a good fit for you.</p>
+      <p>A new job has been posted on Sivan Cooks that may be a good fit for you.</p>
       <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
         <tr><td><strong>Type</strong></td><td>${categoryLabel[jobCategory] ?? jobCategory}</td></tr>
         <tr><td><strong>Occasion</strong></td><td>${occasion}</td></tr>
@@ -674,8 +798,8 @@ export async function sendNewJobNotification({
       <p style="margin-top:12px;">
         <a href="${dashboardUrl}" style="color:#ea580c;">Go to my dashboard →</a>
       </p>
-      <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are an approved cook on CookMatch.</p>
-      <p>— CookMatch Team</p>
+      <p style="color:#9ca3af;font-size:13px;">You are receiving this because you are an approved cook on Sivan Cooks.</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error(`[Email] New job notification failed for ${cookEmail}:`, error.message)
@@ -708,7 +832,7 @@ export async function sendJobReport({
         ${details ? `<tr><td><strong>Details</strong></td><td>${details}</td></tr>` : ''}
       </table>
       <p><a href="${jobUrl}" style="color:#ea580c;">View job post →</a></p>
-      <p>— CookMatch System</p>
+      <p>— Sivan Cooks System</p>
     `,
   })
   if (error) console.error('[Email] Job report failed:', error.message)
@@ -724,13 +848,13 @@ export async function sendDormantNotification({
   const { error } = await getResend().emails.send({
     from: FROM,
     to: to(cookEmail),
-    subject: `Your CookMatch profile has been paused`,
+    subject: `Your Sivan Cooks profile has been paused`,
     html: `
       <p>Hi ${cookName},</p>
-      <p>We haven't heard from you in over 60 days, so your CookMatch profile has been temporarily paused and is no longer visible to clients.</p>
+      <p>We haven't heard from you in over 60 days, so your Sivan Cooks profile has been temporarily paused and is no longer visible to clients.</p>
       <p>To reactivate your profile, simply reply to this email or contact us at <a href="mailto:contact@sivanspices.com" style="color:#ea580c;">contact@sivanspices.com</a>.</p>
       <p>We'd love to have you back.</p>
-      <p>— CookMatch Team</p>
+      <p>— Sivan Cooks Team</p>
     `,
   })
   if (error) console.error('[Email] Dormant notification failed:', error.message)

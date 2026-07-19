@@ -74,7 +74,7 @@ export default async function CookDashboardPage({
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [{ data: bookings }, { data: openJobs }, { data: myInterests }, { data: idDocument }, { data: dishes }] = await Promise.all([
+  const [{ data: bookings }, { data: openJobs }, { data: myInterests }, { data: idDocument }, { data: dishes }, { data: conversations }] = await Promise.all([
     supabase
       .from('bookings')
       .select('*')
@@ -103,9 +103,20 @@ export default async function CookDashboardPage({
       .select('*')
       .eq('cook_id', cook_id)
       .order('sort_order', { ascending: true }),
+    supabase
+      .from('conversations')
+      .select('booking_id, job_interest_id, cook_token')
+      .eq('cook_id', cook_id),
   ])
 
   const allBookings = (bookings || []) as DashboardBooking[]
+
+  const cookTokenByBookingId: Record<string, string> = {}
+  const cookTokenByJobInterestId: Record<string, string> = {}
+  for (const c of conversations || []) {
+    if (c.booking_id) cookTokenByBookingId[c.booking_id] = c.cook_token
+    if (c.job_interest_id) cookTokenByJobInterestId[c.job_interest_id] = c.cook_token
+  }
 
   interface MyInterest {
     id: string
@@ -197,6 +208,7 @@ export default async function CookDashboardPage({
                 cookId={cook_id}
                 mode="pending"
                 cancellationCount={cancellationCounts[booking.client_email] ?? 0}
+                cookToken={cookTokenByBookingId[booking.id]}
               />
             ))}
           </div>
@@ -215,6 +227,7 @@ export default async function CookDashboardPage({
                 cookId={cook_id}
                 mode="accepted"
                 cancellationCount={cancellationCounts[booking.client_email] ?? 0}
+                cookToken={cookTokenByBookingId[booking.id]}
               />
             ))}
           </div>
@@ -233,6 +246,7 @@ export default async function CookDashboardPage({
                 cookId={cook_id}
                 mode="in_progress"
                 cancellationCount={0}
+                cookToken={cookTokenByBookingId[booking.id]}
               />
             ))}
           </div>
@@ -251,6 +265,7 @@ export default async function CookDashboardPage({
                 cookId={cook_id}
                 mode="confirmed"
                 cancellationCount={0}
+                cookToken={cookTokenByBookingId[booking.id]}
               />
             ))}
           </div>
@@ -286,6 +301,15 @@ export default async function CookDashboardPage({
                       <a href={`mailto:${job.client_email}`} className="text-sm text-blue-800 hover:underline">✉️ {job.client_email}</a>
                     </div>
                   </div>
+
+                  {cookTokenByJobInterestId[interest.id] && (
+                    <a
+                      href={`/cook-messages/${cookTokenByJobInterestId[interest.id]}`}
+                      className="block text-center bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700"
+                    >
+                      💬 Chat with {job.client_name}
+                    </a>
+                  )}
 
                   <JobInterestActions
                     jobId={job.id}
@@ -362,7 +386,7 @@ export default async function CookDashboardPage({
   )
 }
 
-function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: DashboardBooking; cookId: string; mode: 'pending' | 'accepted' | 'confirmed' | 'in_progress'; cancellationCount: number }) {
+function BriefCard({ booking, cookId, mode, cancellationCount, cookToken }: { booking: DashboardBooking; cookId: string; mode: 'pending' | 'accepted' | 'confirmed' | 'in_progress'; cancellationCount: number; cookToken?: string }) {
   const statusColors = {
     pending: 'bg-amber-50 border-amber-200',
     accepted: 'bg-blue-50 border-blue-200',
@@ -462,6 +486,16 @@ function BriefCard({ booking, cookId, mode, cancellationCount }: { booking: Dash
             This client has cancelled within 48 hours on {cancellationCount} previous {cancellationCount === 1 ? 'occasion' : 'occasions'}.
           </p>
         </div>
+      )}
+
+      {/* Messages */}
+      {cookToken && (
+        <a
+          href={`/cook-messages/${cookToken}`}
+          className="block text-center bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700"
+        >
+          💬 Chat with {booking.client_name}
+        </a>
       )}
 
       {/* Actions */}

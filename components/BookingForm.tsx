@@ -9,11 +9,15 @@ export default function BookingForm({
   cookName,
   availableDates,
   cookDietarySpecialties,
+  cookOfferingTypes,
+  cookCuisineTypes,
 }: {
   cookId: string
   cookName: string
   availableDates: string[]
   cookDietarySpecialties?: string[]
+  cookOfferingTypes?: string[]
+  cookCuisineTypes?: string[]
 }) {
   const [submitted, setSubmitted] = useState(false)
 
@@ -50,6 +54,8 @@ export default function BookingForm({
       availableDates={availableDates}
       cookName={cookName}
       cookDietarySpecialties={cookDietarySpecialties}
+      cookOfferingTypes={cookOfferingTypes}
+      cookCuisineTypes={cookCuisineTypes}
       onSubmit={handleSubmit}
       submitLabel={`Send Brief to ${cookName}`}
     />

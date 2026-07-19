@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       video_url: body.video_url,
       photo_url: body.photo_url ?? null,
       cuisine_types: cuisineTypes,
+      offering_types: body.offering_types && body.offering_types.length > 0 ? body.offering_types : ['session'],
       dietary_specialties: body.dietary_specialties,
       occasion_types: body.occasion_types,
       cooking_arrangement: body.cooking_arrangement || [],

@@ -8,12 +8,16 @@ export default function SpecialtyTagInput({
   suggestions,
   label,
   placeholder,
+  max,
+  skipValidation,
 }: {
   value: string[]
   onChange: (tags: string[]) => void
   suggestions: string[]
   label: string
   placeholder?: string
+  max?: number
+  skipValidation?: boolean
 }) {
   const [text, setText] = useState('')
   const [checking, setChecking] = useState(false)
@@ -23,10 +27,24 @@ export default function SpecialtyTagInput({
     return value.some(v => v.toLowerCase() === tag.toLowerCase())
   }
 
+  // With a max reached, a newly-added tag replaces the existing one(s)
+  // instead of appending — used to reuse this component as a single
+  // validated-item field (max=1) rather than a multi-tag list.
+  function addTag(tag: string, current: string[]) {
+    if (max && current.length >= max) return [tag]
+    return [...current, tag]
+  }
+
   async function addTyped(raw: string) {
     const trimmed = raw.trim()
     if (!trimmed || checking) return
     if (hasTag(trimmed)) { setText(''); return }
+
+    if (skipValidation) {
+      onChange(addTag(trimmed, value))
+      setText('')
+      return
+    }
 
     setChecking(true)
     setError('')
@@ -39,7 +57,7 @@ export default function SpecialtyTagInput({
       const data = await res.json()
       if (data.valid) {
         const finalTag = data.corrected || trimmed
-        if (!hasTag(finalTag)) onChange([...value, finalTag])
+        if (!hasTag(finalTag)) onChange(addTag(finalTag, value))
         setText('')
       } else {
         setError(`"${trimmed}" doesn't look like a valid cuisine, cooking style, or food specialty. Try something like "Chettinad" (a cuisine), "Baking" (a category), or "Pickles" (a specific item).`)
@@ -52,7 +70,7 @@ export default function SpecialtyTagInput({
   }
 
   function addSuggestion(s: string) {
-    if (!hasTag(s)) onChange([...value, s])
+    if (!hasTag(s)) onChange(addTag(s, value))
   }
 
   function removeTag(tag: string) {

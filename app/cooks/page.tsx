@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { createClient } from '@/lib/supabase/server'
 import CookTile from '@/components/CookTile'
 import type { CookWithDetails } from '@/lib/types'
-import { SPECIALTY_SUGGESTIONS } from '@/lib/specialtySuggestions'
 import { US_STATES } from '@/lib/usStates'
 
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
@@ -23,12 +22,7 @@ export default async function CooksPage({
     .in('status', ['active', 'pending'])
     .order('created_at', { ascending: false })
 
-  // "Other" isn't a real stored specialty value — cooks can type anything
-  // (validated inline as they add it) rather than picking from the
-  // suggestion list, so filtering for it means matching anything outside
-  // the known suggestions rather than an exact .contains() match.
-  const isOtherCuisine = filters.cuisine === 'Other'
-  if (filters.cuisine && !isOtherCuisine) {
+  if (filters.cuisine) {
     query = query.contains('cuisine_types', [filters.cuisine])
   }
   if (filters.dietary) {
@@ -41,14 +35,22 @@ export default async function CooksPage({
     query = query.eq('state', filters.state)
   }
 
-  const { data: rawCooks } = await query
+  // The specialty dropdown's own options come from every cook's actual
+  // entries, independent of the other filters currently selected —
+  // otherwise picking a state would narrow the specialty list's own
+  // options, which reads as broken rather than helpful (same principle
+  // as the Community Cravings state/item filters).
+  const [{ data: rawCooks }, { data: allCooks }] = await Promise.all([
+    query,
+    supabase.from('cooks').select('cuisine_types').in('status', ['active', 'pending']),
+  ])
 
-  const filteredCooks = isOtherCuisine
-    ? (rawCooks || []).filter(c => (c.cuisine_types || []).some((ct: string) => !SPECIALTY_SUGGESTIONS.includes(ct)))
-    : (rawCooks || [])
+  const specialtyOptions = [...new Set(
+    (allCooks || []).flatMap(c => (c.cuisine_types as string[] | null) || [])
+  )].sort()
 
   // Sort by trust score descending — highest trust shown first
-  const cooks = [...filteredCooks].sort((a, b) => {
+  const cooks = [...(rawCooks || [])].sort((a, b) => {
     const scoreA = (a as CookWithDetails).cook_scores?.trust_score ?? 0
     const scoreB = (b as CookWithDetails).cook_scores?.trust_score ?? 0
     return scoreB - scoreA
@@ -57,7 +59,6 @@ export default async function CooksPage({
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
-        <p className="text-sm font-medium text-copper-600 mb-1">Sivan Chefs: Connecting Local Culinary Artisans</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
       </div>
 
@@ -69,8 +70,7 @@ export default async function CooksPage({
           className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
         >
           <option value="">All Specialties</option>
-          {SPECIALTY_SUGGESTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
-          <option value="Other">Other</option>
+          {specialtyOptions.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
 
         <select

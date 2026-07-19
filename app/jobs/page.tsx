@@ -41,6 +41,7 @@ interface JobTile {
   grocery_situation: string
   cleanup_needed: boolean
   city: string
+  state: string | null
   recurring: boolean
   status: string
   created_at: string
@@ -55,7 +56,12 @@ interface JobTile {
   additional_notes?: string | null
 }
 
-export default async function JobBoardPage() {
+export default async function JobBoardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ state?: string; item?: string }>
+}) {
+  const filters = await searchParams
   const supabase = getSupabase()
 
   // Cook identity is derived from the actual login session, never from a URL
@@ -84,21 +90,40 @@ export default async function JobBoardPage() {
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, specific_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at, voice_memo_url, client_name'
+    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, specific_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, state, recurring, status, created_at, voice_memo_url, client_name'
 
   const today = new Date().toISOString().split('T')[0]
 
-  const { data: jobs } = await supabase
+  let query = supabase
     .from('job_posts')
     .select(selectFields)
     .in('status', ['open', 'taken'])
     .gte('requested_date', today)
     .order('created_at', { ascending: false })
 
+  if (filters.state) query = query.eq('state', filters.state)
+  if (filters.item) query = query.eq('specific_dishes', filters.item)
+
+  const { data: jobs } = await query
   const jobList = (jobs || []) as unknown as JobTile[]
 
+  // Filter option lists are built from the full open/upcoming board,
+  // independent of the current filter selections — otherwise picking a
+  // state would narrow the item dropdown's own options (and vice versa),
+  // which reads as broken rather than helpful.
+  const { data: facetRows } = await supabase
+    .from('job_posts')
+    .select('state, specific_dishes, request_type')
+    .in('status', ['open', 'taken'])
+    .gte('requested_date', today)
+
+  const stateOptions = [...new Set((facetRows || []).map(r => r.state).filter((s): s is string => !!s))].sort()
+  const itemOptions = [...new Set(
+    (facetRows || []).filter(r => r.request_type === 'item').map(r => r.specific_dishes).filter((d): d is string => !!d)
+  )].sort()
+
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className={`${isCook ? 'max-w-4xl' : 'max-w-7xl'} mx-auto px-6 py-10`}>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Community Cravings</h1>
@@ -123,6 +148,40 @@ export default async function JobBoardPage() {
         </div>
       )}
 
+      {/* Filters */}
+      <form className="flex flex-wrap gap-3 mb-8">
+        <select
+          name="state"
+          defaultValue={filters.state || ''}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+        >
+          <option value="">All States</option>
+          {stateOptions.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+
+        <select
+          name="item"
+          defaultValue={filters.item || ''}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+        >
+          <option value="">All Items</option>
+          {itemOptions.map(i => <option key={i} value={i}>{i}</option>)}
+        </select>
+
+        <button
+          type="submit"
+          className="bg-copper-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-copper-700"
+        >
+          Filter
+        </button>
+
+        {(filters.state || filters.item) && (
+          <a href="/jobs" className="text-sm text-gray-500 px-3 py-2 hover:text-copper-600">
+            Clear filters
+          </a>
+        )}
+      </form>
+
       {jobList.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-gray-500 text-lg mb-4">No open cravings right now.</p>
@@ -130,8 +189,14 @@ export default async function JobBoardPage() {
             Post Your Craving
           </Link>
         </div>
-      ) : (
+      ) : isCook ? (
         <div className="flex flex-col gap-4">
+          {jobList.map(job => (
+            <JobCard key={job.id} job={job} isCook={isCook} cookId={cook_id} />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {jobList.map(job => (
             <JobCard key={job.id} job={job} isCook={isCook} cookId={cook_id} />
           ))}
@@ -151,7 +216,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
   const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
 
   return (
-    <div className={`bg-panel rounded-sm border-l-4 p-5 flex flex-col gap-3 ${isTaken ? 'border-l-amber-400 opacity-80' : 'border-l-copper-600'}`}>
+    <div className={`bg-panel rounded-sm border-l-4 p-5 flex flex-col gap-3 h-full ${isTaken ? 'border-l-amber-400 opacity-80' : 'border-l-copper-600'}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -173,7 +238,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
 
       {/* Key highlights */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">📍 {job.city}</span>
+        <span className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">📍 {[job.city, job.state].filter(Boolean).join(', ')}</span>
         {job.voice_memo_url && (
           <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
         )}
@@ -216,7 +281,7 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
       )}
 
       {/* Actions */}
-      <div className="flex gap-3 pt-1">
+      <div className="flex gap-3 pt-1 mt-auto">
         <Link
           href={`/jobs/${job.id}${cookId ? `?cook_id=${cookId}` : ''}`}
           className="text-sm text-copper-600 hover:underline"
