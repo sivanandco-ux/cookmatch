@@ -23,6 +23,13 @@ export async function GET(request: Request) {
   const redirectTo = safeRedirectPath(searchParams.get('redirectTo'))
   const intent = searchParams.get('intent') // 'signup' when verifying email to create a new cook profile
 
+  // Google redirects back with `error` (e.g. access_denied) instead of a
+  // code when the user cancels the consent screen — distinct from a stale
+  // magic-link, which has neither `code` nor `error`.
+  if (searchParams.get('error')) {
+    return NextResponse.redirect(`${origin}/login?error=oauth_failed`)
+  }
+
   if (!code) {
     return NextResponse.redirect(`${origin}/login?error=missing_code`)
   }

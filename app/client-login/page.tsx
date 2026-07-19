@@ -5,11 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const ERROR_MESSAGES: Record<string, string> = {
-  invalid_link: 'That sign-in attempt is invalid or expired. Please try again below.',
   missing_code: 'That sign-in attempt is invalid or expired. Please try again below.',
-  no_application: "We couldn't find a Sivan Cooks application for that Google account's email.",
   no_user: 'Something went wrong signing you in. Please try again.',
-  email_mismatch: 'This email is linked to a different account. Contact support if this seems wrong.',
   not_authorized: 'Please log in to view that page.',
   oauth_failed: 'Something went wrong signing in with Google. Please try again.',
 }
@@ -25,7 +22,7 @@ function GoogleIcon() {
   )
 }
 
-function LoginForm() {
+function ClientLoginForm() {
   const searchParams = useSearchParams()
   const urlError = searchParams.get('error')
   const redirectTo = searchParams.get('redirectTo')
@@ -37,24 +34,25 @@ function LoginForm() {
     setSigningIn(true)
     setError('')
     const supabase = createClient()
-    const callbackUrl = new URL('/auth/callback', window.location.origin)
+    const callbackUrl = new URL('/client-auth/callback', window.location.origin)
     if (redirectTo) callbackUrl.searchParams.set('redirectTo', redirectTo)
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: callbackUrl.toString() },
     })
     if (oauthError) {
-      console.error('[Login] signInWithOAuth failed:', oauthError.status, oauthError.message)
+      console.error('[ClientLogin] signInWithOAuth failed:', oauthError.status, oauthError.message)
       setError('Something went wrong starting Google sign-in. Please try again.')
       setSigningIn(false)
     }
-    // On success the browser navigates away to Google — nothing else to do here.
   }
 
   return (
     <div className="max-w-sm mx-auto px-6 py-16">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Cook Login</h1>
-      <p className="text-sm text-gray-500 mb-6">Sign in with the Google account you applied with.</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
+      <p className="text-sm text-gray-500 mb-6">
+        Sign in with Google to see all your bookings and conversations with cooks in one place.
+      </p>
 
       {urlError && (
         <p className="text-sm text-red-600 mb-4">{ERROR_MESSAGES[urlError] || 'Something went wrong. Please try again.'}</p>
@@ -70,14 +68,18 @@ function LoginForm() {
         <GoogleIcon />
         {signingIn ? 'Redirecting…' : 'Continue with Google'}
       </button>
+
+      <p className="text-xs text-gray-400 mt-6 text-center">
+        You don&apos;t need an account to book a cook or message them — this just gives you one place to see everything.
+      </p>
     </div>
   )
 }
 
-export default function LoginPage() {
+export default function ClientLoginPage() {
   return (
     <Suspense fallback={null}>
-      <LoginForm />
+      <ClientLoginForm />
     </Suspense>
   )
 }
