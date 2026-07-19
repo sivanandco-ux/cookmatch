@@ -27,7 +27,14 @@ export default function SiteNav() {
 
     async function loadSession() {
       try {
-        const { data: { user } } = await supabase.auth.getUser()
+        // getSession() reads the session straight from cookies — no network
+        // round-trip. getUser() re-verifies against the auth server on every
+        // call, which is the right call for a security-sensitive server-side
+        // decision (middleware uses it for that reason) but is overkill and
+        // an extra point of failure for a purely cosmetic "are they logged
+        // in" check here.
+        const { data: { session: authSession } } = await supabase.auth.getSession()
+        const user = authSession?.user
         if (!user) {
           setSession(null)
           return

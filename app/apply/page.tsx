@@ -88,11 +88,16 @@ export default function ApplyPage() {
 
     try {
       const supabase = createClient()
-      supabase.auth.getUser().then(({ data: { user } }) => {
+      // getSession() reads straight from cookies — no live round-trip to the
+      // auth server, so no dependency on that call succeeding from the
+      // browser. A session existing here already means the email was
+      // verified at sign-in (Google or magic-link), so this doesn't need
+      // getUser()'s server re-check.
+      supabase.auth.getSession().then(({ data: { session: authSession } }) => {
         if (settled) return
         settled = true
         clearTimeout(timeout)
-        if (user?.email) { setVerifiedEmail(user.email); setAuthState('verified') }
+        if (authSession?.user?.email) { setVerifiedEmail(authSession.user.email); setAuthState('verified') }
         else setAuthState('unverified')
       }).catch(() => {
         if (settled) return
