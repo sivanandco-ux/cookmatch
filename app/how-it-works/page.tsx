@@ -15,9 +15,9 @@ export default function HowItWorksPage() {
             <div>
               <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you approved cooks in your area who can deliver a meal or come cook at your home</li>
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Let you see their cuisine specialties, ratings, and availability before booking</li>
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Connect you directly with the cook — you get their phone, email, and WhatsApp</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Show you approved cooks in your area — for a full home-cooked session, or for specific items like pickles, laddus, and baked goods</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Let you see their cuisine specialties, ratings, and availability before reaching out</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Give you a private link to message the cook directly and work out the details — no account or login needed</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you a feedback link after your session to rate your experience</li>
               </ul>
             </div>
@@ -39,8 +39,9 @@ export default function HowItWorksPage() {
             <div>
               <h3 className="text-sm font-semibold text-green-700 uppercase tracking-wide mb-3">What we do</h3>
               <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>List your profile, specialties, and availability so clients can find you</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>List your profile, specialties, and availability so clients can find you — for sessions, specific items, or both</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Review your application and activate your profile manually</li>
+                <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Give you a private link to message clients directly — no account or login needed</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Send you weekly availability reminders so your profile stays active</li>
                 <li className="flex gap-2"><span className="text-green-600 mt-0.5">✓</span>Monitor your ratings and provide coaching if feedback drops</li>
               </ul>

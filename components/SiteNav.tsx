@@ -3,6 +3,7 @@
 import { useState } from 'react'
 
 const LINKS = [
+  { href: '/', label: 'About' },
   { href: '/cooks', label: 'Hire a Cook' },
   { href: '/jobs', label: 'Community Cravings' },
   { href: '/become-a-cook', label: 'How to Become a Cook' },
