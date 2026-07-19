@@ -127,7 +127,15 @@ export default function Home() {
               </p>
               <p>
                 My own journey started in between tech roles, when I launched{' '}
-                <strong className="text-copper-700">Sivan Spices</strong> to share the authentic, pure, and healthy
+                <a
+                  href="https://www.sivanspices.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-copper-700 underline decoration-copper-300 hover:decoration-copper-700"
+                >
+                  Sivan Spices
+                </a>{' '}
+                to share the authentic, pure, and healthy
                 recipes I grew up on. Sivan Cooks is the next step — the same entrepreneurial instinct, now applied to
                 an entirely new space.
               </p>
