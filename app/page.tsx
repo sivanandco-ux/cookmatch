@@ -22,6 +22,13 @@ const HOW_IT_WORKS = [
   ['Cook, deliver, grow', "Build a track record, earn trust, and get surfaced as one of the platform's star cooks."],
 ]
 
+const STEP_COLORS = [
+  { text: 'text-copper-600', border: 'border-copper-300' },
+  { text: 'text-leaf-600', border: 'border-leaf-300' },
+  { text: 'text-brass', border: 'border-brass-light' },
+  { text: 'text-copper-800', border: 'border-copper-400' },
+]
+
 const TRAITS = [
   ['You make something real', "A full meal, a festival sweet, a pickle recipe passed down for generations — anything you'd be proud to put your name on."],
   ['You want it on your terms', "Set your own rate, your own hours, and only take on what you actually want to make. This is flexible income, not a shift you're assigned."],
@@ -103,6 +110,71 @@ export default function Home() {
         </div>
       </header>
 
+      {/* What We're Doing */}
+      <section id="what-we-do" className="bg-panel py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-8">
+            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">What We&apos;re Doing</div>
+            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Two ways to share what you cook</h2>
+            <p className="text-sm text-gray-600">
+              Every cook on Sivan Cooks offers one or both of these — whichever fits how they actually like to cook.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {OFFERS.map((offer) => (
+              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
+                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
+                  {offer.icon}
+                </div>
+                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
+                <p className="text-gray-600 text-sm">{offer.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-8">
+            {HOW_IT_WORKS.map(([title, body], i) => (
+              <div key={title}>
+                <div className={`w-7 h-7 rounded-full border font-display text-xs flex items-center justify-center mb-2.5 ${STEP_COLORS[i].border} ${STEP_COLORS[i].text}`}>
+                  {i + 1}
+                </div>
+                <h4 className="font-semibold text-sm text-leaf-800 mb-1">{title}</h4>
+                <p className="text-xs text-gray-600">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Who We Want to Onboard */}
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <div id="onboard" className="relative overflow-hidden bg-leaf-700 text-paper rounded-2xl p-6 sm:p-10">
+          <div className="max-w-xl mb-7 relative">
+            <div className="text-xs font-semibold uppercase tracking-widest text-brass-light mb-2">Who We Want to Onboard</div>
+            <h2 className="text-xl sm:text-2xl text-paper mb-2.5">
+              If people already ask you to cook for them, you belong here.
+            </h2>
+            <p className="text-sm text-paper/80">
+              We&apos;re not looking for restaurant experience or a commercial kitchen. We&apos;re looking for the
+              cook everyone already knows about.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+            {TRAITS.map(([title, body]) => (
+              <div key={title} className="border-t border-brass-light/30 pt-3">
+                <h4 className="font-display text-base text-brass-light mb-1.5">{title}</h4>
+                <p className="text-xs text-paper/75">{body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 flex items-center gap-4 flex-wrap relative">
+            <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+              Apply to Become a Cook →
+            </a>
+            <p className="text-xs text-paper/65">Takes about 10 minutes. No cooking résumé required.</p>
+          </div>
+        </div>
+      </section>
+
       {/* Who We Are */}
       <section className="max-w-6xl mx-auto px-6 py-14">
         <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
@@ -159,71 +231,6 @@ export default function Home() {
               directly, and agree on the rest themselves — no middleman marking up the price, no corporate kitchen
               between you and the person who actually cooked your food.
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* What We're Doing */}
-      <section id="what-we-do" className="bg-panel py-14">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="max-w-xl mb-8">
-            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">What We&apos;re Doing</div>
-            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Two ways to share what you cook</h2>
-            <p className="text-sm text-gray-600">
-              Every cook on Sivan Cooks offers one or both of these — whichever fits how they actually like to cook.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {OFFERS.map((offer) => (
-              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
-                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
-                  {offer.icon}
-                </div>
-                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
-                <p className="text-gray-600 text-sm">{offer.body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-8">
-            {HOW_IT_WORKS.map(([title, body], i) => (
-              <div key={title}>
-                <div className="w-7 h-7 rounded-full border border-copper-300 text-copper-600 font-display text-xs flex items-center justify-center mb-2.5">
-                  {i + 1}
-                </div>
-                <h4 className="font-semibold text-sm text-leaf-800 mb-1">{title}</h4>
-                <p className="text-xs text-gray-600">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Who We Want to Onboard */}
-      <section className="max-w-6xl mx-auto px-6 py-14">
-        <div id="onboard" className="relative overflow-hidden bg-leaf-700 text-paper rounded-2xl p-6 sm:p-10">
-          <div className="max-w-xl mb-7 relative">
-            <div className="text-xs font-semibold uppercase tracking-widest text-brass-light mb-2">Who We Want to Onboard</div>
-            <h2 className="text-xl sm:text-2xl text-paper mb-2.5">
-              If people already ask you to cook for them, you belong here.
-            </h2>
-            <p className="text-sm text-paper/80">
-              We&apos;re not looking for restaurant experience or a commercial kitchen. We&apos;re looking for the
-              cook everyone already knows about.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {TRAITS.map(([title, body]) => (
-              <div key={title} className="border-t border-brass-light/30 pt-3">
-                <h4 className="font-display text-base text-brass-light mb-1.5">{title}</h4>
-                <p className="text-xs text-paper/75">{body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex items-center gap-4 flex-wrap relative">
-            <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-              Apply to Become a Cook →
-            </a>
-            <p className="text-xs text-paper/65">Takes about 10 minutes. No cooking résumé required.</p>
           </div>
         </div>
       </section>
