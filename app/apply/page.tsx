@@ -77,15 +77,36 @@ export default function ApplyPage() {
   }, [])
 
   useEffect(() => {
+    let settled = false
+    // getUser() makes a live round-trip to the auth server rather than
+    // reading a cached session — if that call hangs instead of resolving
+    // or rejecting (network issue, stuck refresh), this page would
+    // otherwise be stuck on "Loading..." forever with no way out.
+    const timeout = setTimeout(() => {
+      if (!settled) { settled = true; setAuthState('unverified') }
+    }, 6000)
+
     try {
       const supabase = createClient()
       supabase.auth.getUser().then(({ data: { user } }) => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
         if (user?.email) { setVerifiedEmail(user.email); setAuthState('verified') }
         else setAuthState('unverified')
-      }).catch(() => setAuthState('unverified'))
+      }).catch(() => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        setAuthState('unverified')
+      })
     } catch {
+      settled = true
+      clearTimeout(timeout)
       setAuthState('unverified')
     }
+
+    return () => clearTimeout(timeout)
   }, [])
 
   async function handleSendLink(e: React.FormEvent) {

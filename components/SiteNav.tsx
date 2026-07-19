@@ -26,20 +26,28 @@ export default function SiteNav() {
     const supabase = createClient()
 
     async function loadSession() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          setSession(null)
+          return
+        }
+        // A logged-in user is either a cook (goes to their dashboard) or a
+        // client (goes to My Bookings) — this is the only place that
+        // distinction needs resolving just to pick the avatar's link target.
+        const { data: cook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
+        setSession({
+          avatarUrl: (user.user_metadata?.avatar_url || user.user_metadata?.picture || null) as string | null,
+          name: (user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'Account') as string,
+          dashboardHref: cook ? `/dashboard/${cook.id}` : '/my-bookings',
+        })
+      } catch (err) {
+        // getUser() makes a live round-trip to the auth server — if it
+        // errors (network blip, expired refresh token) fall back to the
+        // logged-out nav rather than leaving state stuck mid-check forever.
+        console.error('[SiteNav] Session check failed:', err)
         setSession(null)
-        return
       }
-      // A logged-in user is either a cook (goes to their dashboard) or a
-      // client (goes to My Bookings) — this is the only place that
-      // distinction needs resolving just to pick the avatar's link target.
-      const { data: cook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
-      setSession({
-        avatarUrl: (user.user_metadata?.avatar_url || user.user_metadata?.picture || null) as string | null,
-        name: (user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'Account') as string,
-        dashboardHref: cook ? `/dashboard/${cook.id}` : '/my-bookings',
-      })
     }
 
     loadSession()
