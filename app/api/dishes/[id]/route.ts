@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { verifyCookOwnership } from '@/lib/auth/verifyCookOwnership'
+import { validateDishPhoto } from '@/lib/validateDishPhoto'
 
 function getSupabase() {
   return createClient(
@@ -89,6 +90,11 @@ export async function PATCH(
     const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const fileName = `${cookId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
+
+    const { isFood } = await validateDishPhoto(buffer, file.type)
+    if (!isFood) {
+      return NextResponse.json({ error: "That doesn't look like a photo of food — please upload a photo of a dish you've made." }, { status: 400 })
+    }
 
     const { error: uploadError } = await supabase.storage
       .from('cook-dishes')
