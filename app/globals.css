@@ -42,3 +42,24 @@ body {
 h1, h2 {
   font-family: var(--font-display), Georgia, serif;
 }
+
+/* Landing page hero slideshow — crossfades through 3 real dish photos */
+.hero-slideshow { position: absolute; inset: 0; }
+.hero-slide {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; animation: hero-slide-fade 9s infinite ease-in-out;
+}
+.hero-slide:nth-child(1) { animation-delay: 0s; }
+.hero-slide:nth-child(2) { animation-delay: -3s; }
+.hero-slide:nth-child(3) { animation-delay: -6s; }
+@keyframes hero-slide-fade {
+  0% { opacity: 0; }
+  6% { opacity: 1; }
+  28% { opacity: 1; }
+  36% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide { animation: none; opacity: 0; }
+  .hero-slide:first-child { opacity: 1; }
+}
