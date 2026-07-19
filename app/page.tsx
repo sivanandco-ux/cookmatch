@@ -89,7 +89,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative w-full max-w-sm mx-auto md:max-w-none md:mx-0 rounded-2xl overflow-hidden aspect-[4/5] bg-leaf-800">
+          <div className="relative w-full max-w-xs mx-auto md:max-w-[400px] rounded-2xl overflow-hidden aspect-[4/5] bg-leaf-800">
             <div className="hero-slideshow">
               <img className="hero-slide" src="/landing-dishes/pistachio-baklava.jpg" alt="Pistachio baklava made by a cook on Sivan Cooks" />
               <img className="hero-slide" src="/landing-dishes/rasam.jpg" alt="Homemade rasam made by a cook on Sivan Cooks" />
@@ -137,9 +137,9 @@ export default function Home() {
           <div>
             <div className="text-sm font-semibold text-copper-600 mb-3">Who We Are</div>
             <p className="text-sm text-gray-600 mb-3">
-              <strong className="text-leaf-800 font-semibold">Sivan Cooks</strong> is a directory and matchmaking
-              platform for local culinary artisans — home cooks who make real food, the way it&apos;s made at home,
-              not in a commercial kitchen chasing volume.
+              <strong className="text-leaf-800 font-semibold">Sivan Cooks</strong>{' '}
+              is a directory and matchmaking platform for local culinary artisans — home cooks who make real food,
+              the way it&apos;s made at home, not in a commercial kitchen chasing volume.
             </p>
             <p className="text-sm text-gray-600 mb-3">
               We built it because the best cooking in any neighborhood usually never leaves that neighborhood. A
