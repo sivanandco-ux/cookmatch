@@ -32,38 +32,38 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <header className="relative overflow-hidden bg-gradient-to-b from-leaf-700 to-leaf-800 text-paper py-16 sm:py-24">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative">
+      <header className="relative overflow-hidden bg-gradient-to-b from-leaf-700 to-leaf-800 text-paper py-10 sm:py-14">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center relative">
           <div>
-            <div className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-brass-light mb-5">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-light mb-3">
               Home Cooking Marketplace
             </div>
-            <h1 className="text-3xl sm:text-4xl leading-tight mb-6 text-paper">
+            <h1 className="text-2xl sm:text-3xl leading-tight mb-4 text-paper">
               Every neighborhood has
               <br />
               <span className="text-brass-light">a few incredible cooks.</span>
               <br />
               We help you find them.
             </h1>
-            <p className="text-lg text-paper/80 max-w-md mb-8">
+            <p className="text-sm sm:text-base text-paper/80 max-w-md mb-6">
               Sivan Cooks connects local families with home cooks making authentic meals, pickles, sweets, snacks, and
               baked goods — the kind of food that usually only travels as far as a phone number passed between
               neighbors.
             </p>
-            <div className="flex flex-wrap gap-3">
-              <a href="#onboard" className="bg-copper-600 hover:bg-copper-700 text-white font-semibold px-7 py-3.5 rounded-lg">
+            <div className="flex flex-wrap gap-2.5">
+              <a href="#onboard" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
                 Apply as a Cook →
               </a>
               <a
                 href="#what-we-do"
-                className="border border-paper/35 hover:border-brass-light hover:text-brass-light text-paper font-semibold px-7 py-3.5 rounded-lg"
+                className="text-sm border border-paper/35 hover:border-brass-light hover:text-brass-light text-paper font-semibold px-5 py-2.5 rounded-lg"
               >
                 See How It Works
               </a>
             </div>
-            <div className="flex gap-8 mt-10 flex-wrap">
+            <div className="flex gap-6 mt-7 flex-wrap">
               <div>
-                <div className="font-display text-2xl text-brass-light">2</div>
+                <div className="font-display text-lg text-brass-light">2</div>
                 <div className="text-xs text-paper/65">
                   Ways to offer
                   <br />
@@ -71,7 +71,7 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <div className="font-display text-2xl text-brass-light">$0</div>
+                <div className="font-display text-lg text-brass-light">$0</div>
                 <div className="text-xs text-paper/65">
                   Commission on
                   <br />
@@ -79,7 +79,7 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <div className="font-display text-2xl text-brass-light">Concierge</div>
+                <div className="font-display text-lg text-brass-light">Concierge</div>
                 <div className="text-xs text-paper/65">
                   Guided signup —
                   <br />
@@ -89,15 +89,14 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative w-full rounded-3xl overflow-hidden aspect-[4/5] bg-leaf-800 border border-brass-light/25">
+          <div className="relative w-full max-w-sm mx-auto md:max-w-none md:mx-0 rounded-2xl overflow-hidden aspect-[4/5] bg-leaf-800">
             <div className="hero-slideshow">
               <img className="hero-slide" src="/landing-dishes/pistachio-baklava.jpg" alt="Pistachio baklava made by a cook on Sivan Cooks" />
               <img className="hero-slide" src="/landing-dishes/rasam.jpg" alt="Homemade rasam made by a cook on Sivan Cooks" />
               <img className="hero-slide" src="/landing-dishes/curry-leaf-rice.jpg" alt="Curry leaf rice made by a cook on Sivan Cooks" />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-leaf-900/75 to-transparent pointer-events-none" />
-            <div className="absolute inset-4 border border-brass-light/30 rounded-2xl pointer-events-none z-10" />
-            <div className="absolute left-5 bottom-5 z-10 text-paper text-xs font-semibold">
+            <div className="absolute left-4 bottom-4 z-10 text-paper text-xs font-semibold">
               Real dishes from cooks in the directory
             </div>
           </div>
@@ -105,22 +104,22 @@ export default function Home() {
       </header>
 
       {/* Who We Are */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-14 items-start">
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-10 items-start">
           <div>
-            <div className="font-display text-7xl leading-none text-brass mb-1">&ldquo;</div>
-            <p className="font-display text-xl text-leaf-800 leading-snug mb-5">
+            <div className="font-display text-5xl leading-none text-brass mb-1">&ldquo;</div>
+            <p className="font-display text-lg text-leaf-800 leading-snug mb-4">
               Food made by someone who actually cares what you think of it — that&apos;s the whole idea.
             </p>
-            <div className="bg-panel border-l-[3px] border-copper-600 rounded p-6 text-[15.5px] leading-relaxed text-gray-600">
-              <p className="mb-3.5">
+            <div className="bg-panel border-l-[3px] border-copper-600 rounded p-5 text-sm leading-relaxed text-gray-600">
+              <p className="mb-3">
                 Growing up in Chennai, India, I was surrounded by home-based businesses — electrical work, packaging,
                 spare parts, the small operations that quietly kept everything running. Some of my earliest memories
                 aren&apos;t of playgrounds — they&apos;re of listening to my parents and their colleagues debate
                 startup ideas around the dinner table in the 1980s. Everyone I knew started small and built something
                 real.
               </p>
-              <p className="mb-3.5">
+              <p className="mb-3">
                 Food wasn&apos;t part of that world — but the principles are the same, and the struggles are just as
                 familiar: cash flow, finding customers, earning trust before anyone takes a chance on you. That&apos;s
                 exactly what makes food interesting to me now. I believe it&apos;s a space overdue for real
@@ -132,22 +131,22 @@ export default function Home() {
                 recipes I grew up on. Sivan Cooks is the next step — the same entrepreneurial instinct, now applied to
                 an entirely new space.
               </p>
-              <p className="font-semibold text-leaf-800 mt-4">— Founder, Sivan Spices &amp; Sivan Cooks</p>
+              <p className="font-semibold text-leaf-800 mt-3">— Founder, Sivan Spices &amp; Sivan Cooks</p>
             </div>
           </div>
           <div>
-            <div className="text-[17px] font-semibold text-copper-600 mb-4">Who We Are</div>
-            <p className="text-gray-600 mb-4">
+            <div className="text-sm font-semibold text-copper-600 mb-3">Who We Are</div>
+            <p className="text-sm text-gray-600 mb-3">
               <strong className="text-leaf-800 font-semibold">Sivan Cooks</strong> is a directory and matchmaking
               platform for local culinary artisans — home cooks who make real food, the way it&apos;s made at home,
               not in a commercial kitchen chasing volume.
             </p>
-            <p className="text-gray-600 mb-4">
+            <p className="text-sm text-gray-600 mb-3">
               We built it because the best cooking in any neighborhood usually never leaves that neighborhood. A
               friend&apos;s mother who makes the only mango pickle you&apos;ll ever want. A neighbor who bakes laddus
               for every festival and would happily make a batch for you too, if only you knew to ask.
             </p>
-            <p className="text-gray-600">
+            <p className="text-sm text-gray-600">
               Sivan Cooks is how you ask. Clients browse or post what they&apos;re craving; cooks get matched, chat
               directly, and agree on the rest themselves — no middleman marking up the price, no corporate kitchen
               between you and the person who actually cooked your food.
@@ -157,34 +156,34 @@ export default function Home() {
       </section>
 
       {/* What We're Doing */}
-      <section id="what-we-do" className="bg-panel py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-xl mb-12">
-            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-3">What We&apos;re Doing</div>
-            <h2 className="text-3xl text-leaf-800 mb-3.5">Two ways to share what you cook</h2>
-            <p className="text-gray-600">
+      <section id="what-we-do" className="bg-panel py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-8">
+            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">What We&apos;re Doing</div>
+            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Two ways to share what you cook</h2>
+            <p className="text-sm text-gray-600">
               Every cook on Sivan Cooks offers one or both of these — whichever fits how they actually like to cook.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {OFFERS.map((offer) => (
-              <div key={offer.title} className={`bg-white rounded-2xl p-8 border-l-4 ${offer.accent}`}>
-                <div className={`w-11 h-11 rounded-xl ${offer.iconBg} text-white flex items-center justify-center font-display text-xl mb-4`}>
+              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
+                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
                   {offer.icon}
                 </div>
-                <h3 className="text-xl text-leaf-800 mb-2.5">{offer.title}</h3>
-                <p className="text-gray-600 text-[15px]">{offer.body}</p>
+                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
+                <p className="text-gray-600 text-sm">{offer.body}</p>
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-8">
             {HOW_IT_WORKS.map(([title, body], i) => (
               <div key={title}>
-                <div className="w-8 h-8 rounded-full border-[1.5px] border-copper-300 text-copper-600 font-display text-sm flex items-center justify-center mb-3">
+                <div className="w-7 h-7 rounded-full border border-copper-300 text-copper-600 font-display text-xs flex items-center justify-center mb-2.5">
                   {i + 1}
                 </div>
                 <h4 className="font-semibold text-sm text-leaf-800 mb-1">{title}</h4>
-                <p className="text-[13.5px] text-gray-600">{body}</p>
+                <p className="text-xs text-gray-600">{body}</p>
               </div>
             ))}
           </div>
@@ -192,52 +191,52 @@ export default function Home() {
       </section>
 
       {/* Who We Want to Onboard */}
-      <section className="max-w-7xl mx-auto px-6 py-20">
-        <div id="onboard" className="relative overflow-hidden bg-leaf-700 text-paper rounded-3xl p-8 sm:p-16">
-          <div className="max-w-xl mb-10 relative">
-            <div className="text-xs font-semibold uppercase tracking-widest text-brass-light mb-3">Who We Want to Onboard</div>
-            <h2 className="text-3xl sm:text-4xl text-paper mb-3.5">
+      <section className="max-w-6xl mx-auto px-6 py-14">
+        <div id="onboard" className="relative overflow-hidden bg-leaf-700 text-paper rounded-2xl p-6 sm:p-10">
+          <div className="max-w-xl mb-7 relative">
+            <div className="text-xs font-semibold uppercase tracking-widest text-brass-light mb-2">Who We Want to Onboard</div>
+            <h2 className="text-xl sm:text-2xl text-paper mb-2.5">
               If people already ask you to cook for them, you belong here.
             </h2>
-            <p className="text-paper/80">
+            <p className="text-sm text-paper/80">
               We&apos;re not looking for restaurant experience or a commercial kitchen. We&apos;re looking for the
               cook everyone already knows about.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-7 relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
             {TRAITS.map(([title, body]) => (
-              <div key={title} className="border-t border-brass-light/30 pt-4">
-                <h4 className="font-display text-lg text-brass-light mb-2">{title}</h4>
-                <p className="text-sm text-paper/75">{body}</p>
+              <div key={title} className="border-t border-brass-light/30 pt-3">
+                <h4 className="font-display text-base text-brass-light mb-1.5">{title}</h4>
+                <p className="text-xs text-paper/75">{body}</p>
               </div>
             ))}
           </div>
-          <div className="mt-12 flex items-center gap-5 flex-wrap relative">
-            <a href="/apply" className="bg-copper-600 hover:bg-copper-700 text-white font-semibold px-7 py-3.5 rounded-lg">
+          <div className="mt-8 flex items-center gap-4 flex-wrap relative">
+            <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
               Apply to Become a Cook →
             </a>
-            <p className="text-sm text-paper/65">Takes about 10 minutes. No cooking résumé required.</p>
+            <p className="text-xs text-paper/65">Takes about 10 minutes. No cooking résumé required.</p>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="text-center py-24 px-6">
-        <h2 className="text-3xl sm:text-4xl text-leaf-800 mb-4 max-w-2xl mx-auto">
+      <section className="text-center py-16 px-6">
+        <h2 className="text-xl sm:text-2xl text-leaf-800 mb-3 max-w-2xl mx-auto">
           Your neighborhood already has a star cook.
           <br />
           Let&apos;s help people find them.
         </h2>
-        <p className="text-lg text-gray-600 max-w-md mx-auto mb-8">
+        <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto mb-6">
           Whether that&apos;s you, or someone you know — Sivan Cooks exists to make the introduction.
         </p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          <a href="/apply" className="bg-copper-600 hover:bg-copper-700 text-white font-semibold px-7 py-3.5 rounded-lg">
+        <div className="flex gap-2.5 justify-center flex-wrap">
+          <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
             Apply as a Cook
           </a>
           <a
             href="/cooks"
-            className="border border-copper-300 text-leaf-800 hover:border-copper-600 font-semibold px-7 py-3.5 rounded-lg"
+            className="text-sm border border-copper-300 text-leaf-800 hover:border-copper-600 font-semibold px-5 py-2.5 rounded-lg"
           >
             Browse Cooks
           </a>
