@@ -66,7 +66,7 @@ export default async function CookDashboardPage({
 
   const { data: cook } = await supabase
     .from('cooks')
-    .select('id, name, status, bio, instagram_url, youtube_url')
+    .select('id, name, status, bio, photo_url, instagram_url, youtube_url, whatsapp_group_link')
     .eq('id', cook_id)
     .single()
 
@@ -181,9 +181,12 @@ export default async function CookDashboardPage({
         cookId={cook_id}
         idUploaded={!!idDocument}
         initialDishes={dishes || []}
+        initialName={cook.name}
+        initialPhotoUrl={cook.photo_url}
         initialBio={cook.bio || ''}
         initialInstagramUrl={cook.instagram_url}
         initialYoutubeUrl={cook.youtube_url}
+        initialWhatsappGroupLink={cook.whatsapp_group_link}
       />
 
       {/* Pending — needs action */}

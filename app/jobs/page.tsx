@@ -107,19 +107,30 @@ export default async function JobBoardPage({
   const { data: jobs } = await query
   const jobList = (jobs || []) as unknown as JobTile[]
 
-  // Filter option lists are built from the full open/upcoming board,
-  // independent of the current filter selections — otherwise picking a
-  // state would narrow the item dropdown's own options (and vice versa),
-  // which reads as broken rather than helpful.
-  const { data: facetRows } = await supabase
-    .from('job_posts')
-    .select('state, specific_dishes, request_type')
-    .in('status', ['open', 'taken'])
-    .gte('requested_date', today)
+  // State options come from the open/upcoming board itself — independent of
+  // the current filter selections, otherwise picking an item would narrow
+  // the state dropdown's own options, which reads as broken rather than
+  // helpful. Item options are different: they come from what cooks have
+  // actually entered as sellable items (same source as /api/specialties?
+  // type=item), not from job_posts.specific_dishes — that reflects only
+  // whatever's currently been requested, which is sparse/empty early on and
+  // says nothing about what cooks can actually make.
+  const [{ data: facetRows }, { data: itemCooks }] = await Promise.all([
+    supabase
+      .from('job_posts')
+      .select('state')
+      .in('status', ['open', 'taken'])
+      .gte('requested_date', today),
+    supabase
+      .from('cooks')
+      .select('cuisine_types')
+      .in('status', ['active', 'pending'])
+      .contains('offering_types', ['item']),
+  ])
 
   const stateOptions = [...new Set((facetRows || []).map(r => r.state).filter((s): s is string => !!s))].sort()
   const itemOptions = [...new Set(
-    (facetRows || []).filter(r => r.request_type === 'item').map(r => r.specific_dishes).filter((d): d is string => !!d)
+    (itemCooks || []).flatMap(c => (c.cuisine_types as string[] | null) || [])
   )].sort()
 
   return (

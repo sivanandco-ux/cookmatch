@@ -10,16 +10,22 @@ export default function CookProfileUploads({
   cookId,
   idUploaded,
   initialDishes,
+  initialName,
+  initialPhotoUrl,
   initialBio,
   initialInstagramUrl,
   initialYoutubeUrl,
+  initialWhatsappGroupLink,
 }: {
   cookId: string
   idUploaded: boolean
   initialDishes: CookDish[]
+  initialName: string
+  initialPhotoUrl: string | null
   initialBio: string
   initialInstagramUrl: string | null
   initialYoutubeUrl: string | null
+  initialWhatsappGroupLink: string | null
 }) {
   const [hasId, setHasId] = useState(idUploaded)
   const [dishes, setDishes] = useState(initialDishes)
@@ -40,9 +46,16 @@ export default function CookProfileUploads({
   const [editDishSaving, setEditDishSaving] = useState(false)
   const [editDishError, setEditDishError] = useState('')
 
+  const [name, setName] = useState(initialName)
+  const [photoUrl, setPhotoUrl] = useState(initialPhotoUrl)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoError, setPhotoError] = useState('')
   const [bio, setBio] = useState(initialBio)
   const [instagramUrl, setInstagramUrl] = useState(initialInstagramUrl || '')
   const [youtubeUrl, setYoutubeUrl] = useState(initialYoutubeUrl || '')
+  const [whatsappGroupLink, setWhatsappGroupLink] = useState(initialWhatsappGroupLink || '')
   const [polishing, setPolishing] = useState(false)
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileError, setProfileError] = useState('')
@@ -51,6 +64,7 @@ export default function CookProfileUploads({
   const idInputRef = useRef<HTMLInputElement>(null)
   const dishInputRef = useRef<HTMLInputElement>(null)
   const editDishInputRef = useRef<HTMLInputElement>(null)
+  const photoInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!idSavedNotice) return
@@ -178,13 +192,54 @@ export default function CookProfileUploads({
     }
   }
 
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError('Photo must be under 5MB.')
+      return
+    }
+    setPhotoError('')
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+
   async function handleSaveProfile() {
     setProfileSaving(true)
     setProfileError('')
+
+    // A newly chosen photo is uploaded to storage first — /api/upload-photo
+    // just stores the blob and hands back a URL, same helper the apply page
+    // uses. Only once we have that URL does the profile save persist it.
+    let nextPhotoUrl = photoUrl
+    if (photoFile) {
+      setPhotoUploading(true)
+      const formData = new FormData()
+      formData.append('photo', photoFile)
+      const uploadRes = await fetch('/api/upload-photo', { method: 'POST', body: formData })
+      setPhotoUploading(false)
+      if (!uploadRes.ok) {
+        const data = await uploadRes.json().catch(() => ({}))
+        setProfileSaving(false)
+        setPhotoError(data.error || 'Photo upload failed. Please try again.')
+        return
+      }
+      const uploadData = await uploadRes.json()
+      nextPhotoUrl = uploadData.url
+    }
+
     const res = await fetch('/api/update-cook-profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cook_id: cookId, bio, instagram_url: instagramUrl, youtube_url: youtubeUrl }),
+      body: JSON.stringify({
+        cook_id: cookId,
+        name,
+        photo_url: nextPhotoUrl,
+        bio,
+        instagram_url: instagramUrl,
+        youtube_url: youtubeUrl,
+        whatsapp_group_link: whatsappGroupLink,
+      }),
     })
     setProfileSaving(false)
     if (!res.ok) {
@@ -192,6 +247,10 @@ export default function CookProfileUploads({
       setProfileError(data.error || 'Update failed. Please try again.')
       return
     }
+    setPhotoUrl(nextPhotoUrl)
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    if (photoInputRef.current) photoInputRef.current.value = ''
     setProfileSavedNotice(true)
   }
 
@@ -210,6 +269,38 @@ export default function CookProfileUploads({
       {/* About you */}
       <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
         <p className="text-sm font-medium text-gray-700 mb-2">About you</p>
+
+        <div className="flex items-center gap-4 mb-4">
+          <input ref={photoInputRef} type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+          <div
+            onClick={() => photoInputRef.current?.click()}
+            className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-copper-400 overflow-hidden shrink-0"
+          >
+            {photoPreview || photoUrl ? (
+              <img src={photoPreview || photoUrl || ''} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] text-gray-400 text-center leading-tight px-1">Add photo</span>
+            )}
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-gray-500 block mb-1">Name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              className="text-xs text-copper-600 hover:text-copper-700 mt-1"
+            >
+              {photoUrl || photoPreview ? 'Change photo' : 'Add a profile photo'}
+            </button>
+            {photoError && <p className="text-xs text-red-600 mt-1">{photoError}</p>}
+          </div>
+        </div>
+
         <div className="flex items-center justify-between mb-1">
           <label className="text-xs text-gray-500">Introduction</label>
           <button
@@ -248,16 +339,27 @@ export default function CookProfileUploads({
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
           </div>
+          <div className="sm:col-span-2">
+            <label className="text-xs text-gray-500 block mb-1">WhatsApp group invite link</label>
+            <input
+              type="url"
+              value={whatsappGroupLink}
+              onChange={e => setWhatsappGroupLink(e.target.value)}
+              placeholder="https://chat.whatsapp.com/..."
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            />
+            <p className="text-xs text-gray-400 mt-1">If you run a WhatsApp group, share the invite link here so interested clients can join.</p>
+          </div>
         </div>
         {profileError && <p className="text-xs text-red-600 mb-2">{profileError}</p>}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleSaveProfile}
-            disabled={profileSaving || !bio.trim()}
+            disabled={profileSaving || !bio.trim() || !name.trim()}
             className="text-xs text-white bg-copper-600 rounded-lg px-3 py-1.5 hover:bg-copper-700 disabled:opacity-40"
           >
-            {profileSaving ? 'Saving...' : 'Save'}
+            {profileSaving || photoUploading ? 'Saving...' : 'Save'}
           </button>
           {profileSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
         </div>
