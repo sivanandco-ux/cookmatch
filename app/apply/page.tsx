@@ -144,7 +144,7 @@ export default function ApplyPage() {
     if (file) processPhotoFile(file)
   }
 
-  const photoDrag = useFileDrop(processPhotoFile)
+  const photoDrag = useFileDrop(files => processPhotoFile(files[0]))
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()

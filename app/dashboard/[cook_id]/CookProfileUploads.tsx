@@ -35,11 +35,9 @@ export default function CookProfileUploads({
   const [idError, setIdError] = useState('')
   const [idSavedNotice, setIdSavedNotice] = useState(false)
 
-  const [showAddDish, setShowAddDish] = useState(false)
-  const [dishFile, setDishFile] = useState<File | null>(null)
-  const [dishDescription, setDishDescription] = useState('')
   const [dishUploading, setDishUploading] = useState(false)
-  const [dishError, setDishError] = useState('')
+  const [dishUploadProgress, setDishUploadProgress] = useState<{ done: number; total: number } | null>(null)
+  const [dishErrors, setDishErrors] = useState<string[]>([])
   const [dishSavedNotice, setDishSavedNotice] = useState(false)
 
   const [editingDishId, setEditingDishId] = useState<string | null>(null)
@@ -109,31 +107,54 @@ export default function CookProfileUploads({
     if (file) uploadIdFile(file)
   }
 
-  const idDrag = useFileDrop(uploadIdFile)
-  const dishDrag = useFileDrop(file => setDishFile(file))
-  const editDishDrag = useFileDrop(file => setEditDishFile(file))
+  const idDrag = useFileDrop(files => uploadIdFile(files[0]))
+  const editDishDrag = useFileDrop(files => setEditDishFile(files[0]))
 
-  async function handleAddDish() {
-    if (!dishFile) return
-    setDishUploading(true)
-    setDishError('')
-    const formData = new FormData()
-    formData.append('photo', dishFile)
-    formData.append('cook_id', cookId)
-    formData.append('description', dishDescription)
-    const res = await fetch('/api/upload-dish-photo', { method: 'POST', body: formData })
-    setDishUploading(false)
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      setDishError(data.error || 'Upload failed. Please try again.')
+  // Uploads every dropped/selected photo one after another, no per-photo
+  // confirmation step — a cook adding several dishes shouldn't have to
+  // click "add" once per photo. Descriptions can be added afterward via the
+  // edit pencil on each thumbnail.
+  const dishDrag = useFileDrop(files => uploadDishFiles(files))
+
+  async function uploadDishFiles(files: File[]) {
+    if (dishUploading) return
+    const slotsLeft = MAX_DISHES - dishes.length
+    const toUpload = files.slice(0, slotsLeft)
+    const skippedCount = files.length - toUpload.length
+    if (toUpload.length === 0) {
+      setDishErrors([`You're at the ${MAX_DISHES}-photo limit — remove one before adding more.`])
       return
     }
-    const data = await res.json()
-    setDishes(prev => [...prev, data.dish])
-    setDishFile(null)
-    setDishDescription('')
-    setShowAddDish(false)
-    setDishSavedNotice(true)
+
+    setDishUploading(true)
+    setDishErrors([])
+    setDishSavedNotice(false)
+    setDishUploadProgress({ done: 0, total: toUpload.length })
+
+    const errors: string[] = []
+    for (const file of toUpload) {
+      const formData = new FormData()
+      formData.append('photo', file)
+      formData.append('cook_id', cookId)
+      formData.append('description', '')
+      const res = await fetch('/api/upload-dish-photo', { method: 'POST', body: formData })
+      if (res.ok) {
+        const data = await res.json()
+        setDishes(prev => [...prev, data.dish])
+      } else {
+        const data = await res.json().catch(() => ({}))
+        errors.push(`${file.name}: ${data.error || 'Upload failed'}`)
+      }
+      setDishUploadProgress(prev => (prev ? { ...prev, done: prev.done + 1 } : prev))
+    }
+    if (skippedCount > 0) {
+      errors.push(`${skippedCount} photo${skippedCount > 1 ? 's' : ''} skipped — you're at the ${MAX_DISHES}-photo limit.`)
+    }
+
+    setDishUploading(false)
+    setDishUploadProgress(null)
+    setDishErrors(errors)
+    if (errors.length === 0) setDishSavedNotice(true)
     if (dishInputRef.current) dishInputRef.current.value = ''
   }
 
@@ -400,22 +421,11 @@ export default function CookProfileUploads({
 
       {/* Dish photos */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-medium text-gray-700">Dish photos ({dishes.length}/{MAX_DISHES})</p>
-          {dishes.length < MAX_DISHES && !showAddDish && (
-            <button
-              type="button"
-              onClick={() => setShowAddDish(true)}
-              className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50"
-            >
-              + Add a dish
-            </button>
-          )}
-        </div>
+        <p className="text-sm font-medium text-gray-700 mb-2">Dish photos ({dishes.length}/{MAX_DISHES})</p>
         <p className="text-sm text-gray-500 mb-3">
           Add photos of dishes you've cooked in the past — this is what clients see on your profile to decide if they want to book you.
         </p>
-        {dishSavedNotice && <p className="text-xs text-green-600 mb-3">✓ Dish photo saved to your profile</p>}
+        {dishSavedNotice && <p className="text-xs text-green-600 mb-3">✓ Dish photos saved to your profile</p>}
 
         {dishes.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
@@ -499,53 +509,36 @@ export default function CookProfileUploads({
           </div>
         )}
 
-        {showAddDish && (
-          <div className="border border-gray-200 rounded-lg p-3 flex flex-col gap-2">
+        {dishes.length < MAX_DISHES && (
+          <div
+            {...dishDrag.dragHandlers}
+            className={`rounded-lg border-2 border-dashed p-4 flex flex-col items-center gap-2 text-center transition-colors ${dishDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-gray-200'}`}
+          >
             <input
               ref={dishInputRef}
               type="file"
               accept="image/*"
-              onChange={e => setDishFile(e.target.files?.[0] || null)}
+              multiple
+              onChange={e => { const files = Array.from(e.target.files || []); if (files.length > 0) uploadDishFiles(files) }}
               className="hidden"
+              disabled={dishUploading}
             />
-            <div
-              {...dishDrag.dragHandlers}
-              className={`flex items-center gap-2 rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${dishDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
+            <button
+              type="button"
+              onClick={() => dishInputRef.current?.click()}
+              disabled={dishUploading}
+              className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
             >
-              <button
-                type="button"
-                onClick={() => dishInputRef.current?.click()}
-                className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 shrink-0"
-              >
-                Choose photo
-              </button>
-              <span className="text-xs text-gray-500 truncate">{dishFile ? dishFile.name : 'No photo selected, or drag one here'}</span>
-            </div>
-            <input
-              type="text"
-              value={dishDescription}
-              onChange={e => setDishDescription(e.target.value)}
-              placeholder="e.g. Chettinad chicken curry"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            />
-            {dishError && <p className="text-xs text-red-600">{dishError}</p>}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => { setShowAddDish(false); setDishFile(null); setDishDescription(''); setDishError('') }}
-                className="flex-1 border border-gray-300 text-gray-600 py-1.5 rounded-lg text-xs"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleAddDish}
-                disabled={!dishFile || dishUploading}
-                className="flex-1 bg-copper-600 text-white py-1.5 rounded-lg text-xs font-medium hover:bg-copper-700 disabled:opacity-50"
-              >
-                {dishUploading ? 'Uploading...' : 'Save dish'}
-              </button>
-            </div>
+              {dishUploading
+                ? `Uploading ${dishUploadProgress ? dishUploadProgress.done + 1 : 1} of ${dishUploadProgress?.total ?? 1}...`
+                : '+ Add dish photos'}
+            </button>
+            <span className="text-xs text-gray-400">or drag photos here — select or drop several at once, they upload automatically</span>
+          </div>
+        )}
+        {dishErrors.length > 0 && (
+          <div className="mt-2 flex flex-col gap-0.5">
+            {dishErrors.map((err, i) => <p key={i} className="text-xs text-red-600">{err}</p>)}
           </div>
         )}
       </div>
