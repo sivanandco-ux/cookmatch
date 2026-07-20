@@ -114,8 +114,7 @@ export default function SiteNav() {
         ) : (
           <div className="flex items-center border border-paper/25 rounded-lg overflow-hidden">
             <a href="/become-a-cook" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light">Cook Guide</a>
-            <a href="/login" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light border-l border-paper/25">Cook Log In</a>
-            <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700 border-l border-paper/25">Cook Sign Up</a>
+            <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700 border-l border-paper/25">Cook Sign In</a>
           </div>
         )}
       </nav>
@@ -162,11 +161,8 @@ export default function SiteNav() {
               <a href="/become-a-cook" onClick={() => setOpen(false)} className="px-4 py-2.5 text-gray-600 hover:bg-copper-50 hover:text-copper-600">
                 Cook Guide
               </a>
-              <a href="/login" onClick={() => setOpen(false)} className="px-4 py-2.5 text-gray-600 hover:bg-copper-50 hover:text-copper-600">
-                Cook Log In
-              </a>
               <a href="/apply" onClick={() => setOpen(false)} className="mx-4 mt-1 mb-1 px-4 py-2 text-center rounded-lg bg-copper-600 text-white hover:bg-copper-700">
-                Cook Sign Up
+                Cook Sign In
               </a>
             </>
           )}

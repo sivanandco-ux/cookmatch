@@ -273,8 +273,8 @@ export default function ApplyPage() {
   if (authState === 'unverified') {
     return (
       <div className="max-w-sm mx-auto px-6 py-16">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
-        <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Cook Sign In</h1>
+        <p className="text-sm text-gray-500 mb-6">Sign in with Google — returning cooks go straight to their dashboard, new cooks fill out a quick application.</p>
 
         {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
 
