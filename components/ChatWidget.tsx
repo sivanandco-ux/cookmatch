@@ -11,7 +11,7 @@ import SpecialtyTagInput from '@/components/SpecialtyTagInput'
 import GoogleIcon from '@/components/GoogleIcon'
 import { US_STATES } from '@/lib/usStates'
 
-type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
+type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'cook-waitlist' | 'voice-chat' | 'review' | 'done' | 'learn'
 type PathType = 'cook' | 'client'
 type ChatPhase = 'idle' | 'listening' | 'thinking' | 'speaking'
 
@@ -128,6 +128,16 @@ export default function ChatWidget() {
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
 
+  // Cook signups are capped (see lib/cookCap.ts) — checked lazily right
+  // before a verified visitor would otherwise see the signup form.
+  const [waitlistName, setWaitlistName] = useState('')
+  const [waitlistState, setWaitlistState] = useState('')
+  const [waitlistCity, setWaitlistCity] = useState('')
+  const [waitlistCookingInterest, setWaitlistCookingInterest] = useState('')
+  const [waitlistJoining, setWaitlistJoining] = useState(false)
+  const [waitlistJoined, setWaitlistJoined] = useState(false)
+  const [waitlistError, setWaitlistError] = useState('')
+
   const recRef = useRef<any>(null)
   const chatMsgRef = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([])
 
@@ -146,7 +156,8 @@ export default function ChatWidget() {
         if (typeof window !== 'undefined') {
           const params = new URLSearchParams(window.location.search)
           if (params.get('opencookwidget') === '1' && user?.email) {
-            setOpen(true); setPath('cook'); setView('mode')
+            setOpen(true); setPath('cook')
+            openCookFlow()
             params.delete('opencookwidget')
             const query = params.toString()
             window.history.replaceState({}, '', window.location.pathname + (query ? `?${query}` : '') + window.location.hash)
@@ -157,6 +168,38 @@ export default function ChatWidget() {
       setCookAuthState('unverified')
     }
   }, [])
+
+  // Cook signups are capped (see lib/cookCap.ts) — a verified visitor sees
+  // the normal signup form, or a short waitlist form once full. Checked
+  // here rather than blocking earlier so a returning cook's Google sign-in
+  // is never delayed by it.
+  async function openCookFlow() {
+    try {
+      const res = await fetch('/api/cook-cap')
+      const data = res.ok ? await res.json() : { full: false }
+      setView(data.full ? 'cook-waitlist' : 'mode')
+    } catch {
+      setView('mode')
+    }
+  }
+
+  async function handleJoinWaitlist(e: FormEvent) {
+    e.preventDefault()
+    setWaitlistError('')
+    setWaitlistJoining(true)
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: waitlistName, state: waitlistState, city: waitlistCity, cooking_interest: waitlistCookingInterest }),
+    })
+    setWaitlistJoining(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setWaitlistError(data.error || 'Something went wrong. Please try again.')
+      return
+    }
+    setWaitlistJoined(true)
+  }
 
   async function handleGoogleSignIn() {
     setSigningIn(true); setAuthError('')
@@ -453,6 +496,7 @@ export default function ChatWidget() {
     : view === 'home' ? 'Sivan Cooks'
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
     : view === 'cook-verify' ? 'Verify Your Email'
+    : view === 'cook-waitlist' ? 'Cook Waitlist'
     : view === 'cook' ? 'Cook Sign Up'
     : view === 'client' ? 'Post Your Craving'
     : view === 'voice-chat' ? (path === 'cook' ? 'Cook Sign Up' : 'Post Your Craving')
@@ -491,7 +535,7 @@ export default function ChatWidget() {
               </button>
               <button onClick={() => {
                   setPath('cook')
-                  if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); setView('mode') }
+                  if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); openCookFlow() }
                   else { setAuthError(''); setView('cook-verify') }
                 }}
                 className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
@@ -556,6 +600,42 @@ export default function ChatWidget() {
                 <GoogleIcon />
                 {signingIn ? 'Redirecting…' : 'Continue with Google'}
               </button>
+            </div>
+          )}
+
+          {/* Cook waitlist — shown instead of the signup form once the cap is reached */}
+          {view === 'cook-waitlist' && (
+            <div className="flex-1 overflow-y-auto flex flex-col px-5 py-8 gap-4">
+              {waitlistJoined ? (
+                <>
+                  <p className="text-center text-2xl">✓</p>
+                  <p className="text-sm text-gray-700 text-center font-medium">You're on the list!</p>
+                  <p className="text-xs text-gray-500 text-center">
+                    We're at our cook capacity right now. We'll reach out at <strong>{verifiedEmail}</strong> as soon as a spot opens up.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-700 text-center font-medium">We're full right now</p>
+                  <p className="text-xs text-gray-500 text-center">
+                    Sivan Cooks is limited to a small number of cooks while we're just getting started. Join the waitlist and we'll reach out the moment a spot opens up.
+                  </p>
+                  <form onSubmit={handleJoinWaitlist} className="flex flex-col gap-3">
+                    <input type="text" required value={waitlistName} onChange={e => setWaitlistName(e.target.value)} placeholder="Your name" className={ic} />
+                    <input type="email" disabled value={verifiedEmail} className={`${ic} bg-gray-50 text-gray-500`} />
+                    <select required value={waitlistState} onChange={e => setWaitlistState(e.target.value)} className={`${ic} bg-white`}>
+                      <option value="" disabled>Select your state</option>
+                      {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <CityInput value={waitlistCity} onChange={setWaitlistCity} required placeholder="City you'd cook/serve in" className={ic} />
+                    <input type="text" required value={waitlistCookingInterest} onChange={e => setWaitlistCookingInterest(e.target.value)} placeholder="What kind of cooking? e.g. South Indian, baking" className={ic} />
+                    {waitlistError && <p className="text-xs text-red-600 text-center">{waitlistError}</p>}
+                    <button type="submit" disabled={waitlistJoining} className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50">
+                      {waitlistJoining ? 'Joining...' : 'Join the waitlist'}
+                    </button>
+                  </form>
+                </>
+              )}
             </div>
           )}
 
