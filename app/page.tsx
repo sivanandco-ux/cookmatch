@@ -1,3 +1,20 @@
+const CLIENT_OFFERS = [
+  {
+    title: 'A Home-Cooked Meal',
+    body: "Book a cook for a family dinner, a festival spread, or a small gathering — cooked in their kitchen or delivered to yours. The kind of food that usually only travels as far as a phone number passed between neighbors.",
+    icon: '☺',
+    accent: 'border-copper-600',
+    iconBg: 'bg-copper-600',
+  },
+  {
+    title: 'A Specialty Dish',
+    body: "Pickles, laddus, baked goods, sauces — order the specialty a home cook near you is already known for among friends and family, made fresh to order.",
+    icon: '✿',
+    accent: 'border-leaf-500',
+    iconBg: 'bg-leaf-700',
+  },
+]
+
 const OFFERS = [
   {
     title: 'Home-Cooked Sessions',
@@ -64,14 +81,14 @@ export default function Home() {
               neighbors.
             </p>
             <div className="flex flex-wrap gap-2.5">
-              <a href="#onboard" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-                Apply as a Cook →
+              <a href="/cooks" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+                Find a Cook Near You →
               </a>
               <a
-                href="#what-we-do"
+                href="#onboard"
                 className="text-sm border border-paper/35 hover:border-brass-light hover:text-brass-light text-paper font-semibold px-5 py-2.5 rounded-lg"
               >
-                See How It Works
+                Apply as a Cook
               </a>
             </div>
           </div>
@@ -89,6 +106,39 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* For Clients */}
+      <section className="bg-panel py-14">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-xl mb-8">
+            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">For Clients</div>
+            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Real home cooking, no commission markup</h2>
+            <p className="text-sm text-gray-600">
+              100% of what you pay goes straight to the cook — Sivan Cooks doesn&apos;t take a cut. You work out price
+              and details directly with them; we just help you find each other.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {CLIENT_OFFERS.map((offer) => (
+              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
+                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
+                  {offer.icon}
+                </div>
+                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
+                <p className="text-gray-600 text-sm">{offer.body}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-7 flex items-center gap-4 flex-wrap">
+            <a href="/cooks" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+              Find a Cook Near You →
+            </a>
+            <a href="/jobs/post" className="text-sm border border-copper-300 hover:border-copper-500 text-copper-700 font-semibold px-5 py-2.5 rounded-lg">
+              Post What You&apos;re Craving
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Built for Cooks, Not Platforms */}
       <section className="max-w-6xl mx-auto px-6 py-12">

@@ -59,7 +59,11 @@ export default async function CooksPage({
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Find a Home Cook Near You</h1>
+        <p className="text-gray-500">
+          Real home-cooked meals and made-to-order specialties — pickles, sweets, baked goods, and more. Message a
+          cook directly and work out the details yourselves; 100% of what you pay goes to them, no commission.
+        </p>
       </div>
 
       {/* Filters */}
