@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { convertHeicIfNeeded } from '@/lib/convertHeicIfNeeded'
 
 function getSupabase() {
   return createClient(
@@ -20,14 +21,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Photo must be under 5MB' }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  const { buffer, mediaType, ext } = await convertHeicIfNeeded(rawBuffer, file.type, file.name)
   const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
 
   const supabase = getSupabase()
   const { error } = await supabase.storage
     .from('cook-photos')
-    .upload(fileName, buffer, { contentType: file.type, upsert: false })
+    .upload(fileName, buffer, { contentType: mediaType, upsert: false })
 
   if (error) {
     console.error('[Upload] Storage error:', error.message)

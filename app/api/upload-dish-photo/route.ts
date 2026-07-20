@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { verifyCookOwnership } from '@/lib/auth/verifyCookOwnership'
 import { validateDishPhoto } from '@/lib/validateDishPhoto'
+import { convertHeicIfNeeded } from '@/lib/convertHeicIfNeeded'
 
 const MAX_DISHES = 10
 
@@ -41,18 +42,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: `You can only add up to ${MAX_DISHES} dish photos` }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const rawBuffer = Buffer.from(await file.arrayBuffer())
+  const { buffer, mediaType, ext } = await convertHeicIfNeeded(rawBuffer, file.type, file.name)
   const fileName = `${cookId}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
 
-  const { isFood } = await validateDishPhoto(buffer, file.type)
+  const { isFood } = await validateDishPhoto(buffer, mediaType)
   if (!isFood) {
     return NextResponse.json({ error: "That doesn't look like a photo of food — please upload a photo of a dish you've made." }, { status: 400 })
   }
 
   const { error: uploadError } = await supabase.storage
     .from('cook-dishes')
-    .upload(fileName, buffer, { contentType: file.type, upsert: false })
+    .upload(fileName, buffer, { contentType: mediaType, upsert: false })
 
   if (uploadError) {
     console.error('[Upload Dish] Storage error:', uploadError.message)
