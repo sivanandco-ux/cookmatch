@@ -48,11 +48,24 @@ export default function SiteNav() {
         })
         // A logged-in user is either a cook (goes to their dashboard) or a
         // client (goes to My Bookings) — resolved separately since it needs
-        // a DB round-trip through the Supabase client, which shouldn't block
-        // the avatar itself from appearing.
-        const { data: cook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
-        if (cook) {
-          setSession(prev => prev && { ...prev, dashboardHref: `/dashboard/${cook.id}` })
+        // a DB round-trip, which shouldn't block the avatar itself from
+        // appearing. Uses a plain fetch against PostgREST directly (cooks
+        // is publicly readable) instead of the Supabase client's .from() —
+        // that call has shown the same unreliable multi-second-or-hung
+        // behavior as getSession() and signOut() on this project.
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/cooks?user_id=eq.${user.id}&select=id`,
+          {
+            headers: {
+              apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+            },
+          }
+        )
+        const rows = res.ok ? await res.json() : []
+        if (rows[0]?.id) {
+          const cookId = rows[0].id
+          setSession(prev => prev && { ...prev, dashboardHref: `/dashboard/${cookId}` })
         }
       } catch (err) {
         // Fall back to the logged-out nav rather than leaving state stuck
