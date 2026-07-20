@@ -33,7 +33,10 @@ export default function SiteNav() {
         // decision (middleware uses it for that reason) but is overkill and
         // an extra point of failure for a purely cosmetic "are they logged
         // in" check here.
-        const { data: { session: authSession } } = await supabase.auth.getSession()
+        const { data: { session: authSession }, error: sessionError } = await supabase.auth.getSession()
+        // TEMPORARY DEBUG — remove once the nav session bug is diagnosed.
+        console.log('[SiteNav debug] document.cookie has sb- entries:', document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]))
+        console.log('[SiteNav debug] getSession() result:', { hasSession: !!authSession, userId: authSession?.user?.id, error: sessionError })
         const user = authSession?.user
         if (!user) {
           setSession(null)
