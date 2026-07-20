@@ -23,6 +23,12 @@ export default function SiteNav() {
   const router = useRouter()
 
   useEffect(() => {
+    // TEMPORARY DEBUG — remove once the nav session bug is diagnosed.
+    // console.log wasn't showing up in the console at all (even though other
+    // client-side JS on the page demonstrably runs), so writing straight to
+    // the tab title instead — impossible to miss, no DevTools filtering to
+    // fight with.
+    document.title = 'NAV-EFFECT-STARTED'
     const supabase = createClient()
 
     async function loadSession() {
@@ -34,9 +40,8 @@ export default function SiteNav() {
         // an extra point of failure for a purely cosmetic "are they logged
         // in" check here.
         const { data: { session: authSession }, error: sessionError } = await supabase.auth.getSession()
-        // TEMPORARY DEBUG — remove once the nav session bug is diagnosed.
-        console.log('[SiteNav debug] document.cookie has sb- entries:', document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]))
-        console.log('[SiteNav debug] getSession() result:', { hasSession: !!authSession, userId: authSession?.user?.id, error: sessionError })
+        const cookieNames = document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]).join(',') || 'NONE'
+        document.title = `NAV: cookies=[${cookieNames}] hasSession=${!!authSession} err=${sessionError ? sessionError.message : 'none'}`
         const user = authSession?.user
         if (!user) {
           setSession(null)
@@ -55,6 +60,7 @@ export default function SiteNav() {
         // getUser() makes a live round-trip to the auth server — if it
         // errors (network blip, expired refresh token) fall back to the
         // logged-out nav rather than leaving state stuck mid-check forever.
+        document.title = `NAV-CATCH: ${err instanceof Error ? err.message : String(err)}`
         console.error('[SiteNav] Session check failed:', err)
         setSession(null)
       }
