@@ -14,23 +14,20 @@ export async function scoreProfile(cook_id: string) {
   const supabase = getSupabase()
 
   // Gather all signals in parallel
-  const [cookRes, scoreRes, verRes] = await Promise.all([
+  const [cookRes, scoreRes] = await Promise.all([
     supabase.from('cooks').select('name, bio, photo_url, video_url, languages, status').eq('id', cook_id).single(),
     supabase.from('cook_scores').select('overall_score, session_count, item_overall_score, item_count').eq('cook_id', cook_id).single(),
-    supabase.from('cook_verifications').select('id_verified, background_check_passed, food_handler_certified').eq('cook_id', cook_id).single(),
   ])
 
   const cook = cookRes.data
   const score = scoreRes.data
-  const verification = verRes.data
 
-  if (!cook || !score || !verification) {
+  if (!cook || !score) {
     console.error('[Agent 5] Missing data for cook:', cook_id)
     return
   }
 
   const profileComplete = [cook.bio, cook.photo_url, cook.video_url, cook.languages?.length > 0].filter(Boolean).length
-  const verifiedCount   = [verification.id_verified, verification.background_check_passed, verification.food_handler_certified].filter(Boolean).length
 
   // A cook can be rated on two independent tracks — in-home sessions and
   // sold items — since the skills genuinely differ (conduct in someone's
@@ -44,7 +41,7 @@ export async function scoreProfile(cook_id: string) {
     ? ((score.overall_score ?? 0) * sessionCount + (score.item_overall_score ?? 0) * itemCount) / totalEngagements
     : 0
 
-  console.log(`[Agent 5] Scoring ${cook.name} — sessions: ${sessionCount}, items: ${itemCount}, verified: ${verifiedCount}/3, profile: ${profileComplete}/4`)
+  console.log(`[Agent 5] Scoring ${cook.name} — sessions: ${sessionCount}, items: ${itemCount}, profile: ${profileComplete}/4`)
 
   const response = await anthropic.messages.create({
     model: 'claude-opus-4-8',
@@ -59,15 +56,13 @@ Calculate a trust score (0–100) for this cook using the signals and weights be
 Signals:
 - Blended rating average: ${blendedRating.toFixed(2)} / 5.0 (across both in-home sessions and sold items, weighted by how many ratings each has)
 ${sessionCount > 0 ? `- In-home session rating: ${(score.overall_score ?? 0).toFixed(2)} / 5.0 (${sessionCount} rated)\n` : ''}${itemCount > 0 ? `- Item rating: ${(score.item_overall_score ?? 0).toFixed(2)} / 5.0 (${itemCount} rated)\n` : ''}- Engagements completed (sessions + items): ${totalEngagements}
-- Verification: ${verifiedCount} of 3 passed (ID, background check, food handler cert)
 - Profile completeness: ${profileComplete} of 4 filled (bio, photo, video, languages)
 - Status: ${cook.status}
 
 Weights:
-- Ratings 40%: (blended_rating_avg / 5) × 40  — use 0 if no ratings yet
-- Verification 30%: (verified / 3) × 30
-- Experience 20%: (min(engagements, 20) / 20) × 20
-- Profile 10%: (complete / 4) × 10
+- Ratings 50%: (blended_rating_avg / 5) × 50  — use 0 if no ratings yet
+- Experience 35%: (min(engagements, 20) / 20) × 35
+- Profile 15%: (complete / 4) × 15
 
 If status is "watch" subtract 10. If status is "training" subtract 15. Minimum score is 0.
 

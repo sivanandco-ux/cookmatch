@@ -915,3 +915,29 @@ export async function sendContactMessage({
   })
   if (error) console.error('[Email] Contact message failed:', error.message)
 }
+
+export async function sendNewCookPendingReview({
+  cookName,
+  cookEmail,
+  cookId,
+}: {
+  cookName: string
+  cookEmail: string
+  cookId: string
+}) {
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: 'sivanandco1904@gmail.com',
+    subject: `New cook application needs review — ${cookName}`,
+    html: `
+      <p>A new cook applied and is past the auto-approve threshold — their profile is <strong>pending</strong> until manually activated.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Name</strong></td><td>${cookName}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${cookEmail}</td></tr>
+      </table>
+      <p><a href="${SITE_URL}/admin" style="color:#ea580c;">Review and activate in admin →</a></p>
+      <p>— Sivan Cooks System</p>
+    `,
+  })
+  if (error) console.error('[Email] New cook pending-review notification failed:', error.message)
+}
