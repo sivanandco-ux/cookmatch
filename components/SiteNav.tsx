@@ -20,16 +20,9 @@ interface Session {
 export default function SiteNav() {
   const [open, setOpen] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
-  // TEMPORARY DEBUG — remove once the nav session bug is diagnosed. Neither
-  // console.log nor document.title changes were showing up, despite other
-  // client-side JS on the page demonstrably running (chat widget opens and
-  // renders real content) — rendering the diagnostic as visible page text
-  // instead, which can't be filtered, overwritten, or hidden by anything.
-  const [debugText, setDebugText] = useState('NAV-EFFECT-NOT-RUN-YET')
   const router = useRouter()
 
   useEffect(() => {
-    setDebugText('NAV-EFFECT-STARTED')
     const supabase = createClient()
 
     async function loadSession() {
@@ -40,9 +33,7 @@ export default function SiteNav() {
         // decision (middleware uses it for that reason) but is overkill and
         // an extra point of failure for a purely cosmetic "are they logged
         // in" check here.
-        const { data: { session: authSession }, error: sessionError } = await supabase.auth.getSession()
-        const cookieNames = document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]).join(',') || 'NONE'
-        setDebugText(`cookies=[${cookieNames}] hasSession=${!!authSession} err=${sessionError ? sessionError.message : 'none'}`)
+        const { data: { session: authSession } } = await supabase.auth.getSession()
         const user = authSession?.user
         if (!user) {
           setSession(null)
@@ -58,10 +49,8 @@ export default function SiteNav() {
           dashboardHref: cook ? `/dashboard/${cook.id}` : '/my-bookings',
         })
       } catch (err) {
-        // getUser() makes a live round-trip to the auth server — if it
-        // errors (network blip, expired refresh token) fall back to the
-        // logged-out nav rather than leaving state stuck mid-check forever.
-        setDebugText(`CATCH: ${err instanceof Error ? err.message : String(err)}`)
+        // Fall back to the logged-out nav rather than leaving state stuck
+        // mid-check forever if the session check errors for any reason.
         console.error('[SiteNav] Session check failed:', err)
         setSession(null)
       }
@@ -104,10 +93,6 @@ export default function SiteNav() {
 
   return (
     <div className="relative">
-      {/* TEMPORARY DEBUG banner — remove once the nav session bug is diagnosed */}
-      <div className="fixed top-0 left-0 right-0 z-[999] bg-red-600 text-white text-xs font-mono px-2 py-1 break-all">
-        {debugText}
-      </div>
       {/* Desktop nav */}
       <nav className="hidden md:flex gap-6 items-center text-sm font-medium">
         {LINKS.map(l => (
