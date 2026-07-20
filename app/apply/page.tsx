@@ -63,6 +63,12 @@ export default function ApplyPage() {
   const [verifiedEmail, setVerifiedEmail] = useState('')
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
+  // TEMPORARY DEBUG — /apply bounces back to the "Continue with Google" gate
+  // after completing Google sign-in instead of showing the form. Same class
+  // of bug as the nav avatar issue (see lib/supabase/client.ts comment), but
+  // this is a separate code path, so re-instrumenting here to see whether
+  // cookies/session are actually present on the post-redirect load.
+  const [debugText, setDebugText] = useState('APPLY-EFFECT-NOT-RUN-YET')
 
   useEffect(() => {
     fetch('/api/specialties')
@@ -77,12 +83,18 @@ export default function ApplyPage() {
 
   useEffect(() => {
     let settled = false
+    const startedAt = Date.now()
+    setDebugText('APPLY-EFFECT-STARTED')
     // getUser() makes a live round-trip to the auth server rather than
     // reading a cached session — if that call hangs instead of resolving
     // or rejecting (network issue, stuck refresh), this page would
     // otherwise be stuck on "Loading..." forever with no way out.
     const timeout = setTimeout(() => {
-      if (!settled) { settled = true; setAuthState('unverified') }
+      if (!settled) {
+        settled = true
+        setDebugText(`TIMEOUT after ${Date.now() - startedAt}ms`)
+        setAuthState('unverified')
+      }
     }, 6000)
 
     try {
@@ -92,16 +104,20 @@ export default function ApplyPage() {
       // browser. A session existing here already means the email was
       // verified at sign-in (Google or magic-link), so this doesn't need
       // getUser()'s server re-check.
-      supabase.auth.getSession().then(({ data: { session: authSession } }) => {
+      supabase.auth.getSession().then(({ data: { session: authSession }, error: sessionError }) => {
         if (settled) return
         settled = true
         clearTimeout(timeout)
+        const elapsed = Date.now() - startedAt
+        const cookieNames = document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]).join(',') || 'NONE'
+        setDebugText(`[${elapsed}ms] cookies=[${cookieNames}] hasSession=${!!authSession} email=${authSession?.user?.email || 'none'} err=${sessionError ? sessionError.message : 'none'}`)
         if (authSession?.user?.email) { setVerifiedEmail(authSession.user.email); setAuthState('verified') }
         else setAuthState('unverified')
-      }).catch(() => {
+      }).catch(err => {
         if (settled) return
         settled = true
         clearTimeout(timeout)
+        setDebugText(`CATCH: ${err instanceof Error ? err.message : String(err)}`)
         setAuthState('unverified')
       })
     } catch {
@@ -285,28 +301,43 @@ export default function ApplyPage() {
     setLoading(false)
   }
 
+  // TEMPORARY DEBUG banner — remove once the /apply session bug is diagnosed
+  const debugBanner = (
+    <div className="fixed top-0 left-0 right-0 z-[999] bg-red-600 text-white text-xs font-mono px-2 py-1 break-all">
+      {debugText}
+    </div>
+  )
+
   if (authState === 'checking') {
-    return <div className="max-w-sm mx-auto px-6 py-20 text-center text-sm text-gray-400">Loading...</div>
+    return (
+      <>
+        {debugBanner}
+        <div className="max-w-sm mx-auto px-6 py-20 text-center text-sm text-gray-400">Loading...</div>
+      </>
+    )
   }
 
   if (authState === 'unverified') {
     return (
-      <div className="max-w-sm mx-auto px-6 py-16">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
-        <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
+      <>
+        {debugBanner}
+        <div className="max-w-sm mx-auto px-6 py-16">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
+          <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
 
-        {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
+          {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
 
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={signingIn}
-          className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-        >
-          <GoogleIcon />
-          {signingIn ? 'Redirecting…' : 'Continue with Google'}
-        </button>
-      </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={signingIn}
+            className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
+            <GoogleIcon />
+            {signingIn ? 'Redirecting…' : 'Continue with Google'}
+          </button>
+        </div>
+      </>
     )
   }
 
