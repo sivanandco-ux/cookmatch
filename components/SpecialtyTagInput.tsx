@@ -35,13 +35,21 @@ export default function SpecialtyTagInput({
     return [...current, tag]
   }
 
+  // The placeholder text ("e.g. Chettinad, Baking, Pickles") implies commas
+  // separate multiple entries — split on them so "Batter, Sambar" becomes
+  // two tags instead of one literal "Batter, Sambar" tag.
   async function addTyped(raw: string) {
-    const trimmed = raw.trim()
-    if (!trimmed || checking) return
-    if (hasTag(trimmed)) { setText(''); return }
+    const parts = raw.split(',').map(p => p.trim()).filter(Boolean)
+    if (parts.length === 0 || checking) return
 
     if (skipValidation) {
-      onChange(addTag(trimmed, value))
+      let next = value
+      for (const part of parts) {
+        if (!next.some(v => v.toLowerCase() === part.toLowerCase())) {
+          next = addTag(part, next)
+        }
+      }
+      onChange(next)
       setText('')
       return
     }
@@ -49,18 +57,31 @@ export default function SpecialtyTagInput({
     setChecking(true)
     setError('')
     try {
-      const res = await fetch('/api/validate-specialty', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: trimmed }),
-      })
-      const data = await res.json()
-      if (data.valid) {
-        const finalTag = data.corrected || trimmed
-        if (!hasTag(finalTag)) onChange(addTag(finalTag, value))
-        setText('')
+      let next = value
+      const invalid: string[] = []
+      for (const part of parts) {
+        if (next.some(v => v.toLowerCase() === part.toLowerCase())) continue
+        const res = await fetch('/api/validate-specialty', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: part }),
+        })
+        const data = await res.json()
+        if (data.valid) {
+          const finalTag = data.corrected || part
+          if (!next.some(v => v.toLowerCase() === finalTag.toLowerCase())) {
+            next = addTag(finalTag, next)
+          }
+        } else {
+          invalid.push(part)
+        }
+      }
+      onChange(next)
+      if (invalid.length > 0) {
+        setText(invalid.join(', '))
+        setError(`${invalid.map(t => `"${t}"`).join(', ')} ${invalid.length > 1 ? "don't" : "doesn't"} look like a valid cuisine, cooking style, or food specialty. Try something like "Chettinad" (a cuisine), "Baking" (a category), or "Pickles" (a specific item).`)
       } else {
-        setError(`"${trimmed}" doesn't look like a valid cuisine, cooking style, or food specialty. Try something like "Chettinad" (a cuisine), "Baking" (a category), or "Pickles" (a specific item).`)
+        setText('')
       }
     } catch {
       setError('Something went wrong checking that — please try again.')

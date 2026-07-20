@@ -5,12 +5,22 @@ export interface SpecialtyValidation {
   corrected?: string
 }
 
+// Dietary category, not a specialty — cooks already set this via the
+// dedicated Vegetarian/Non-Vegetarian/Eggetarian checkboxes (dietary_specialties),
+// so letting it through here would duplicate it into cuisine_types and
+// pollute the specialty filter dropdown with a non-cuisine entry.
+const DIETARY_TERMS = new Set(['vegetarian', 'nonvegetarian', 'eggetarian', 'veg', 'nonveg'])
+function isDietaryTerm(text: string): boolean {
+  return DIETARY_TERMS.has(text.toLowerCase().replace(/[\s-]/g, ''))
+}
+
 // Validates a single cook-entered specialty (one cuisine, cooking style, or
 // food item at a time) — used for inline validation as each tag is added,
 // rather than validating a whole batch at form-submit time.
 export async function validateSpecialty(input: string): Promise<SpecialtyValidation> {
   const trimmed = input.trim()
   if (!trimmed) return { valid: false }
+  if (isDietaryTerm(trimmed)) return { valid: false }
 
   const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const response = await anthropic.messages.create({
