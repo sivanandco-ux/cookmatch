@@ -20,20 +20,33 @@ interface Session {
 export default function SiteNav() {
   const [open, setOpen] = useState(false)
   const [session, setSession] = useState<Session | null>(null)
+  // TEMPORARY DEBUG — round two. Round one's debug banner proved
+  // getSession() was hanging forever (never resolved, never threw) in a
+  // real logged-in browser. The fix (singleton browser client, see
+  // lib/supabase/client.ts) is deployed, but the avatar still isn't
+  // showing — this racing timeout + banner distinguishes "still hanging"
+  // from "resolves but finds no session" so we know which bug is left.
+  const [debugText, setDebugText] = useState('NAV-EFFECT-NOT-RUN-YET')
   const router = useRouter()
 
   useEffect(() => {
     const supabase = createClient()
+    const startedAt = Date.now()
+    setDebugText('NAV-EFFECT-STARTED')
 
     async function loadSession() {
       try {
-        // getSession() reads the session straight from cookies — no network
-        // round-trip. getUser() re-verifies against the auth server on every
-        // call, which is the right call for a security-sensitive server-side
-        // decision (middleware uses it for that reason) but is overkill and
-        // an extra point of failure for a purely cosmetic "are they logged
-        // in" check here.
-        const { data: { session: authSession } } = await supabase.auth.getSession()
+        const timeout = new Promise<'TIMEOUT'>(resolve => setTimeout(() => resolve('TIMEOUT'), 4000))
+        const result = await Promise.race([supabase.auth.getSession(), timeout])
+        const elapsed = Date.now() - startedAt
+        if (result === 'TIMEOUT') {
+          setDebugText(`TIMEOUT after ${elapsed}ms — getSession() never resolved`)
+          setSession(null)
+          return
+        }
+        const { data: { session: authSession }, error: sessionError } = result
+        const cookieNames = document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]).join(',') || 'NONE'
+        setDebugText(`[${elapsed}ms] cookies=[${cookieNames}] hasSession=${!!authSession} email=${authSession?.user?.email || 'none'} err=${sessionError ? sessionError.message : 'none'}`)
         const user = authSession?.user
         if (!user) {
           setSession(null)
@@ -51,6 +64,7 @@ export default function SiteNav() {
       } catch (err) {
         // Fall back to the logged-out nav rather than leaving state stuck
         // mid-check forever if the session check errors for any reason.
+        setDebugText(`CATCH: ${err instanceof Error ? err.message : String(err)}`)
         console.error('[SiteNav] Session check failed:', err)
         setSession(null)
       }
@@ -93,6 +107,10 @@ export default function SiteNav() {
 
   return (
     <div className="relative">
+      {/* TEMPORARY DEBUG banner — remove once the nav session bug is diagnosed */}
+      <div className="fixed top-0 left-0 right-0 z-[999] bg-red-600 text-white text-xs font-mono px-2 py-1 break-all">
+        {debugText}
+      </div>
       {/* Desktop nav */}
       <nav className="hidden md:flex gap-6 items-center text-sm font-medium">
         {LINKS.map(l => (
