@@ -5,6 +5,8 @@ import type { CookDish } from '@/lib/types'
 import { useFileDrop } from '@/lib/hooks/useFileDrop'
 
 const MAX_DISHES = 10
+// ID verification is on hold indefinitely — flip this back on when it resumes.
+const SHOW_ID_UPLOAD = false
 
 export default function CookProfileUploads({
   cookId,
@@ -254,7 +256,7 @@ export default function CookProfileUploads({
     setProfileSavedNotice(true)
   }
 
-  const profileComplete = hasId && dishes.length > 0
+  const profileComplete = (!SHOW_ID_UPLOAD || hasId) && dishes.length > 0
 
   return (
     <section className="mb-10">
@@ -366,33 +368,35 @@ export default function CookProfileUploads({
       </div>
 
       {/* ID document */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
-        <p className="text-sm font-medium text-gray-700 mb-1">Government-issued ID</p>
-        {hasId ? (
-          <p className="text-sm text-green-700 mb-2">✓ ID on file</p>
-        ) : (
-          <p className="text-sm text-gray-500 mb-2">Upload a driver's license, passport, or state ID to keep on file with your profile.</p>
-        )}
-        <input ref={idInputRef} type="file" accept="image/*,.pdf" onChange={handleIdUpload} className="hidden" />
-        <div
-          {...idDrag.dragHandlers}
-          className={`rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${idDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
-        >
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => idInputRef.current?.click()}
-              disabled={idUploading}
-              className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
-            >
-              {idUploading ? 'Uploading...' : hasId ? 'Replace ID' : 'Upload ID'}
-            </button>
-            <span className="text-xs text-gray-400">or drag a file here</span>
-            {idSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
+      {SHOW_ID_UPLOAD && (
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
+          <p className="text-sm font-medium text-gray-700 mb-1">Government-issued ID</p>
+          {hasId ? (
+            <p className="text-sm text-green-700 mb-2">✓ ID on file</p>
+          ) : (
+            <p className="text-sm text-gray-500 mb-2">Upload a driver's license, passport, or state ID to keep on file with your profile.</p>
+          )}
+          <input ref={idInputRef} type="file" accept="image/*,.pdf" onChange={handleIdUpload} className="hidden" />
+          <div
+            {...idDrag.dragHandlers}
+            className={`rounded-lg border-2 border-dashed p-2 -m-2 transition-colors ${idDrag.isDragging ? 'border-copper-400 bg-copper-50' : 'border-transparent'}`}
+          >
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => idInputRef.current?.click()}
+                disabled={idUploading}
+                className="text-xs text-copper-600 border border-copper-300 rounded-lg px-3 py-1.5 hover:bg-copper-50 disabled:opacity-40"
+              >
+                {idUploading ? 'Uploading...' : hasId ? 'Replace ID' : 'Upload ID'}
+              </button>
+              <span className="text-xs text-gray-400">or drag a file here</span>
+              {idSavedNotice && <span className="text-xs text-green-600">✓ Saved</span>}
+            </div>
           </div>
+          {idError && <p className="text-xs text-red-600 mt-1.5">{idError}</p>}
         </div>
-        {idError && <p className="text-xs text-red-600 mt-1.5">{idError}</p>}
-      </div>
+      )}
 
       {/* Dish photos */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">
