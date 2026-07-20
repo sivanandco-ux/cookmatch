@@ -1,6 +1,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { sendWaitlistNotification } from '@/lib/email'
 
 function getServiceSupabase() {
   return createServiceClient(
@@ -45,6 +46,9 @@ export async function POST(request: Request) {
     console.error('[Waitlist] DB error:', error.message)
     return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 })
   }
+
+  await sendWaitlistNotification({ name, email: user.email, state, city, cookingInterest })
+    .catch(err => console.error('[Waitlist] Notification email failed:', err))
 
   return NextResponse.json({ success: true })
 }

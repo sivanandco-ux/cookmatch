@@ -859,3 +859,35 @@ export async function sendDormantNotification({
   })
   if (error) console.error('[Email] Dormant notification failed:', error.message)
 }
+
+export async function sendWaitlistNotification({
+  name,
+  email,
+  state,
+  city,
+  cookingInterest,
+}: {
+  name: string
+  email: string
+  state: string
+  city: string
+  cookingInterest: string
+}) {
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: 'sivanandco1904@gmail.com',
+    subject: `New cook waitlist signup — ${name}`,
+    html: `
+      <p>Someone joined the cook waitlist (signups are currently capped).</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>Name</strong></td><td>${name}</td></tr>
+        <tr><td><strong>Email</strong></td><td>${email}</td></tr>
+        <tr><td><strong>Location</strong></td><td>${city}, ${state}</td></tr>
+        <tr><td><strong>Cooking interest</strong></td><td>${cookingInterest}</td></tr>
+      </table>
+      <p><a href="${SITE_URL}/admin" style="color:#ea580c;">View full waitlist in admin →</a></p>
+      <p>— Sivan Cooks System</p>
+    `,
+  })
+  if (error) console.error('[Email] Waitlist notification failed:', error.message)
+}

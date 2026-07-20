@@ -25,6 +25,16 @@ interface Cook {
   created_at: string
 }
 
+interface WaitlistEntry {
+  id: string
+  name: string | null
+  email: string
+  city: string | null
+  state: string | null
+  cooking_interest: string | null
+  created_at: string
+}
+
 const CATEGORY: Record<string, string> = {
   family_cooking: 'Family',
   small_event: 'Small Event',
@@ -137,17 +147,21 @@ function Section<T extends { id: string }>({
   )
 }
 
-export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, adminKey }: {
+export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, waitlist: initialWaitlist, adminKey }: {
   jobs: Job[]
   cooks: Cook[]
+  waitlist: WaitlistEntry[]
   adminKey: string
 }) {
   const [jobs, setJobs] = useState(initialJobs)
   const [cooks, setCooks] = useState(initialCooks)
+  const [waitlist, setWaitlist] = useState(initialWaitlist)
   const [selectedJobs, setSelectedJobs] = useState<Set<string>>(new Set())
   const [selectedCooks, setSelectedCooks] = useState<Set<string>>(new Set())
+  const [selectedWaitlist, setSelectedWaitlist] = useState<Set<string>>(new Set())
   const [deletingJobs, setDeletingJobs] = useState(false)
   const [deletingCooks, setDeletingCooks] = useState(false)
+  const [deletingWaitlist, setDeletingWaitlist] = useState(false)
   const [activating, setActivating] = useState<string | null>(null)
   const [error, setError] = useState('')
 
@@ -210,6 +224,25 @@ export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, adm
     if (res.ok) {
       setCooks(c => c.filter(x => !selectedCooks.has(x.id)))
       setSelectedCooks(new Set())
+    } else {
+      const d = await res.json()
+      setError(d.error || 'Delete failed')
+    }
+  }
+
+  async function deleteWaitlist() {
+    if (!confirm(`Remove ${selectedWaitlist.size} waitlist entr${selectedWaitlist.size === 1 ? 'y' : 'ies'}?`)) return
+    setDeletingWaitlist(true)
+    setError('')
+    const res = await fetch('/api/admin/waitlist', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'x-admin-key': adminKey },
+      body: JSON.stringify({ ids: [...selectedWaitlist] }),
+    })
+    setDeletingWaitlist(false)
+    if (res.ok) {
+      setWaitlist(w => w.filter(x => !selectedWaitlist.has(x.id)))
+      setSelectedWaitlist(new Set())
     } else {
       const d = await res.json()
       setError(d.error || 'Delete failed')
@@ -304,6 +337,26 @@ export default function AdminPanel({ jobs: initialJobs, cooks: initialCooks, adm
                 </button>
               )}
             </td>
+          </>
+        )}
+      />
+
+      <Section
+        title="Cook Waitlist"
+        items={waitlist}
+        selected={selectedWaitlist}
+        onToggle={id => toggle(selectedWaitlist, id, setSelectedWaitlist)}
+        onSelectAll={() => selectAll(waitlist, selectedWaitlist, setSelectedWaitlist)}
+        onDelete={deleteWaitlist}
+        deleting={deletingWaitlist}
+        headers={['Joined', 'Name', 'Email', 'Location', 'Cooking Interest']}
+        renderRow={entry => (
+          <>
+            <td className="px-4 py-3 text-gray-500">{fmtDate(entry.created_at)}</td>
+            <td className="px-4 py-3 font-medium text-gray-900">{entry.name}</td>
+            <td className="px-4 py-3 text-gray-600">{entry.email}</td>
+            <td className="px-4 py-3 text-gray-600">{[entry.city, entry.state].filter(Boolean).join(', ')}</td>
+            <td className="px-4 py-3 text-gray-600">{entry.cooking_interest}</td>
           </>
         )}
       />

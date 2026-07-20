@@ -27,7 +27,7 @@ export default async function AdminPage({
 
   const supabase = getSupabase()
 
-  const [{ data: jobs }, { data: cooks }] = await Promise.all([
+  const [{ data: jobs }, { data: cooks }, { data: waitlist }] = await Promise.all([
     supabase
       .from('job_posts')
       .select('id, job_category, request_type, specific_dishes, occasion, city, requested_date, status, created_at, client_name, client_email')
@@ -36,7 +36,11 @@ export default async function AdminPage({
       .from('cooks')
       .select('id, name, email, status, service_areas, created_at')
       .order('created_at', { ascending: false }),
+    supabase
+      .from('cook_waitlist')
+      .select('id, name, email, city, state, cooking_interest, created_at')
+      .order('created_at', { ascending: false }),
   ])
 
-  return <AdminPanel jobs={jobs ?? []} cooks={cooks ?? []} adminKey={key} />
+  return <AdminPanel jobs={jobs ?? []} cooks={cooks ?? []} waitlist={waitlist ?? []} adminKey={key} />
 }
