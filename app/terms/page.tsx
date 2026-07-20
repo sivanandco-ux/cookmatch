@@ -132,36 +132,42 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="9. Dispute Resolution, Mediation, and Arbitration">
+      <Section title="9. Disputes Between Cooks and Clients">
         <p>
-          You and Sivan Cooks agree to first try to resolve any dispute informally by contacting{' '}
-          <a href="/contact" className="text-copper-600 underline">Contact Us</a>. If a dispute is not resolved
-          within 30 days, both parties agree to attempt to resolve it through mediation with a mutually agreed
-          neutral mediator before pursuing arbitration or any other proceeding. Either party may propose a
-          mediator; if the parties cannot agree on one within 14 days, either party may request that a mediator be
-          appointed by a recognized mediation provider (such as the American Arbitration Association).
-        </p>
-        <p>
-          If mediation does not resolve the dispute within 60 days of being initiated (or a longer period both
-          parties agree to in writing), the dispute will be resolved by binding individual arbitration rather than
-          in court, except that either party may bring an individual claim in small claims court. This means you
-          and Sivan Cooks each waive the right to a jury trial and the right to participate in a class action,
-          class arbitration, or representative action. Where applicable law does not permit enforcement of an
-          arbitration or class-action-waiver provision, that provision (and only that provision) will not apply,
-          and the dispute will instead proceed in the courts described in Section 10.
+          Sivan Cooks is not a party to, and has no obligation to investigate, mediate, arbitrate, or otherwise get
+          involved in resolving, any dispute between a Cook and a Client. Any such dispute — including anything
+          related to food quality, safety, pricing, payment, cancellation, or conduct — is solely between the Cook
+          and the Client involved.
         </p>
       </Section>
 
-      <Section title="10. Governing Law and Venue">
+      <Section title="10. Disputes With Sivan Cooks">
+        <p>
+          If you have a claim against Sivan Cooks itself, you agree to first try to resolve it informally by
+          contacting <a href="/contact" className="text-copper-600 underline">Contact Us</a>. Sivan Cooks is a
+          small, founder-run platform without dedicated legal staff, and does not agree to participate in formal
+          mediation or arbitration proceedings. If a claim cannot be resolved informally, it may be brought in
+          small claims court in the jurisdiction where it qualifies, to the extent the claim falls within that
+          court's monetary and subject-matter limits.
+        </p>
+        <p>
+          You agree not to bring, and waive any right to bring or participate in, a class action, class
+          arbitration, or representative action against Sivan Cooks. Where applicable law does not permit
+          enforcement of this waiver, this provision (and only this provision) will not apply, and the claim will
+          instead proceed on an individual basis in the courts described in Section 11.
+        </p>
+      </Section>
+
+      <Section title="11. Governing Law and Venue">
         <p>
           These Terms are governed by the laws of the State of California, without regard to conflict-of-laws
           principles, except where a user's home-state consumer protection law mandates otherwise for that user.
-          Subject to Section 9, any dispute not subject to arbitration will be brought exclusively in the state or
-          federal courts located in California, and you consent to personal jurisdiction there.
+          Subject to Section 10, any dispute not brought in small claims court will proceed in the state or federal
+          courts located in California, and you consent to personal jurisdiction there.
         </p>
       </Section>
 
-      <Section title="11. Content and Conduct">
+      <Section title="12. Content and Conduct">
         <p>
           You are responsible for anything you post, upload, or send through Sivan Cooks, including profile
           information, photos, messages, and reviews. You agree not to post anything false, misleading, illegal,
@@ -170,7 +176,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="12. Changes to These Terms">
+      <Section title="13. Changes to These Terms">
         <p>
           We may update these Terms from time to time. If we make material changes, we will update the "Last
           updated" date above. Continued use of Sivan Cooks after changes take effect constitutes acceptance of the
@@ -178,7 +184,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="13. Severability and Entire Agreement">
+      <Section title="14. Severability and Entire Agreement">
         <p>
           If any provision of these Terms is found unenforceable, the remaining provisions will remain in full
           force and effect, and the unenforceable provision will be modified to the minimum extent necessary to
@@ -187,7 +193,7 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="14. Contact">
+      <Section title="15. Contact">
         <p>
           Questions about these Terms can be sent through our{' '}
           <a href="/contact" className="text-copper-600 underline">Contact Us</a> page.
