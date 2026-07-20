@@ -66,6 +66,8 @@ export default function ApplyPage() {
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
   const [waitlistName, setWaitlistName] = useState('')
+  const [waitlistCity, setWaitlistCity] = useState('')
+  const [waitlistCookingInterest, setWaitlistCookingInterest] = useState('')
   const [waitlistJoining, setWaitlistJoining] = useState(false)
   const [waitlistJoined, setWaitlistJoined] = useState(false)
   const [waitlistError, setWaitlistError] = useState('')
@@ -138,7 +140,7 @@ export default function ApplyPage() {
     const res = await fetch('/api/waitlist', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: waitlistName }),
+      body: JSON.stringify({ name: waitlistName, city: waitlistCity, cooking_interest: waitlistCookingInterest }),
     })
     setWaitlistJoining(false)
     if (!res.ok) {
@@ -372,6 +374,21 @@ export default function ApplyPage() {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
               />
               <input type="email" disabled value={verifiedEmail} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500" />
+              <CityInput
+                value={waitlistCity}
+                onChange={setWaitlistCity}
+                required
+                placeholder="City you'd cook/serve in"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <input
+                type="text"
+                required
+                value={waitlistCookingInterest}
+                onChange={e => setWaitlistCookingInterest(e.target.value)}
+                placeholder="What kind of cooking? e.g. South Indian, baking, pickles"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
               {waitlistError && <p className="text-sm text-red-600">{waitlistError}</p>}
               <button
                 type="submit"
