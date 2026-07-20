@@ -54,3 +54,25 @@ export function readSessionCookie(): ClientSessionUser | null {
     return null
   }
 }
+
+// Clears the session cookie(s) immediately instead of waiting on
+// supabase.auth.signOut(), which shares the same multi-second network
+// latency documented above — logging out shouldn't make someone wait 4-6+
+// seconds staring at an unresponsive button. Call supabase.auth.signOut()
+// too (fire-and-forget) so the refresh token is actually revoked
+// server-side, but don't block the UI on it.
+export function clearSessionCookie(): void {
+  if (typeof document === 'undefined') return
+  const projectRef = getProjectRef()
+  if (!projectRef) return
+  const baseName = `sb-${projectRef}-auth-token`
+
+  const names = document.cookie
+    .split('; ')
+    .map(pair => pair.slice(0, pair.indexOf('=')))
+    .filter(name => name === baseName || name.startsWith(`${baseName}.`))
+
+  for (const name of names) {
+    document.cookie = `${name}=; Max-Age=0; path=/`
+  }
+}

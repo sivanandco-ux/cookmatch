@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { readSessionCookie } from '@/lib/supabase/readSessionCookie'
+import { readSessionCookie, clearSessionCookie } from '@/lib/supabase/readSessionCookie'
 
 const LINKS = [
   { href: '/cooks', label: 'Hire a Cook' },
@@ -67,13 +67,15 @@ export default function SiteNav() {
     return () => listener.subscription.unsubscribe()
   }, [])
 
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+  function handleLogout() {
+    clearSessionCookie()
     setSession(null)
     setOpen(false)
     router.push('/')
     router.refresh()
+    // Fire-and-forget: revokes the refresh token server-side, but the UI
+    // has already logged out locally — no reason to make the user wait on it.
+    createClient().auth.signOut().catch(() => {})
   }
 
   function Avatar({ size }: { size: number }) {

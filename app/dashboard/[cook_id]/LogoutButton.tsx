@@ -2,15 +2,18 @@
 
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { clearSessionCookie } from '@/lib/supabase/readSessionCookie'
 
 export default function LogoutButton() {
   const router = useRouter()
 
-  async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
+  function handleLogout() {
+    clearSessionCookie()
     router.push('/login')
     router.refresh()
+    // Fire-and-forget: revokes the refresh token server-side, but the UI
+    // has already logged out locally — no reason to make the user wait on it.
+    createClient().auth.signOut().catch(() => {})
   }
 
   return (
