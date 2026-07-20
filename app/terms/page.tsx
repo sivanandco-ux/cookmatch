@@ -161,9 +161,14 @@ export default function TermsPage() {
       <Section title="11. Governing Law and Venue">
         <p>
           These Terms are governed by the laws of the State of California, without regard to conflict-of-laws
-          principles, except where a user's home-state consumer protection law mandates otherwise for that user.
+          principles, except where a user's home-state consumer protection law mandates that a different state's
+          law apply to that user, in which case that mandatory law applies solely to the extent required.
+        </p>
+        <p>
           Subject to Section 10, any dispute not brought in small claims court will proceed in the state or federal
-          courts located in California, and you consent to personal jurisdiction there.
+          courts located in California, and you consent to personal jurisdiction there — unless applicable law in
+          your state of residence requires that the dispute instead be litigated in your home state, in which case
+          venue will lie in the state or federal courts located in your state of residence.
         </p>
       </Section>
 
