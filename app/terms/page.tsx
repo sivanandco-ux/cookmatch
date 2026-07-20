@@ -132,15 +132,22 @@ export default function TermsPage() {
         </p>
       </Section>
 
-      <Section title="9. Dispute Resolution and Arbitration">
+      <Section title="9. Dispute Resolution, Mediation, and Arbitration">
         <p>
           You and Sivan Cooks agree to first try to resolve any dispute informally by contacting{' '}
           <a href="/contact" className="text-copper-600 underline">Contact Us</a>. If a dispute is not resolved
-          within 30 days, you and Sivan Cooks agree that it will be resolved by binding individual arbitration
-          rather than in court, except that either party may bring an individual claim in small claims court. This
-          means you and Sivan Cooks each waive the right to a jury trial and the right to participate in a class
-          action, class arbitration, or representative action. Where applicable law does not permit enforcement of
-          an arbitration or class-action-waiver provision, that provision (and only that provision) will not apply,
+          within 30 days, both parties agree to attempt to resolve it through mediation with a mutually agreed
+          neutral mediator before pursuing arbitration or any other proceeding. Either party may propose a
+          mediator; if the parties cannot agree on one within 14 days, either party may request that a mediator be
+          appointed by a recognized mediation provider (such as the American Arbitration Association).
+        </p>
+        <p>
+          If mediation does not resolve the dispute within 60 days of being initiated (or a longer period both
+          parties agree to in writing), the dispute will be resolved by binding individual arbitration rather than
+          in court, except that either party may bring an individual claim in small claims court. This means you
+          and Sivan Cooks each waive the right to a jury trial and the right to participate in a class action,
+          class arbitration, or representative action. Where applicable law does not permit enforcement of an
+          arbitration or class-action-waiver provision, that provision (and only that provision) will not apply,
           and the dispute will instead proceed in the courts described in Section 10.
         </p>
       </Section>
