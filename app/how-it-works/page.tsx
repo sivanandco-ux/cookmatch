@@ -2,8 +2,15 @@ export default function HowItWorksPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-2">How It Works</h1>
+      <p className="text-gray-600 mb-2">
+        Sivan Cooks is a directory that connects independent home cooks with people looking for real, home-cooked
+        food — full sessions or specialty items like pickles, sweets, and baked goods. We don&apos;t prepare, sell,
+        or deliver any food ourselves; cooks and clients connect directly and work out the rest between themselves.
+      </p>
       <p className="text-gray-600 mb-10">
-        Sivan Cooks connects you with cooks across the USA who deliver healthy home-cooked food or come cook it in your kitchen. We started in the Bay Area and are growing to new cities as cooks and clients join us.
+        We started in the Bay Area and are growing to new cities as cooks and clients join us. For the full legal
+        details — including cook and client responsibilities and how disputes are handled — see our{' '}
+        <a href="/terms" className="text-copper-600 underline hover:text-copper-700">Terms of Service</a>.
       </p>
 
       <div className="flex flex-col gap-10">
