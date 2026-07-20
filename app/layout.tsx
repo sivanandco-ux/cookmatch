@@ -46,7 +46,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <p>
             A service by Sivan Cooks — delivered, picked up, or cooked in your own kitchen. Meals, baking, pickles, preserves, sweets & snacks, and more, from cooks near you.
           </p>
-          <a href="/how-it-works" className="inline-block mt-2 text-copper-600 hover:underline">How It Works</a>
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <a href="/how-it-works" className="text-copper-600 hover:underline">How It Works</a>
+            <span className="text-gray-300">·</span>
+            <a href="/terms" className="text-copper-600 hover:underline">Terms of Service</a>
+          </div>
         </footer>
       </body>
     </html>

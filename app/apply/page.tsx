@@ -812,7 +812,12 @@ export default function ApplyPage() {
           </ul>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
-            <span className="text-sm text-gray-700">I understand and accept the Sivan Cooks Terms of Service</span>
+            <span className="text-sm text-gray-700">
+              I understand and accept the Sivan Cooks{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-copper-600 underline">
+                Terms of Service
+              </a>
+            </span>
           </label>
         </section>
 
