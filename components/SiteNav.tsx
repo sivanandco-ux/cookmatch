@@ -9,6 +9,7 @@ const LINKS = [
   { href: '/cooks', label: 'Hire a Cook' },
   { href: '/jobs', label: 'Community Cravings' },
   { href: '/my-bookings', label: 'My Bookings' },
+  { href: '/become-a-cook', label: 'Cook Guide' },
   { href: '/', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
@@ -129,8 +130,7 @@ export default function SiteNav() {
           </div>
         ) : (
           <div className="flex items-center border border-paper/25 rounded-lg overflow-hidden">
-            <a href="/become-a-cook" className="px-4 py-2 text-paper/80 hover:bg-leaf-600 hover:text-brass-light">Cook Guide</a>
-            <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700 border-l border-paper/25">Cook Sign In</a>
+            <a href="/apply" className="px-4 py-2 bg-copper-600 text-white hover:bg-copper-700">Cook Sign In</a>
           </div>
         )}
       </nav>
@@ -173,14 +173,9 @@ export default function SiteNav() {
               </button>
             </>
           ) : (
-            <>
-              <a href="/become-a-cook" onClick={() => setOpen(false)} className="px-4 py-2.5 text-gray-600 hover:bg-copper-50 hover:text-copper-600">
-                Cook Guide
-              </a>
-              <a href="/apply" onClick={() => setOpen(false)} className="mx-4 mt-1 mb-1 px-4 py-2 text-center rounded-lg bg-copper-600 text-white hover:bg-copper-700">
-                Cook Sign In
-              </a>
-            </>
+            <a href="/apply" onClick={() => setOpen(false)} className="mx-4 mt-1 mb-1 px-4 py-2 text-center rounded-lg bg-copper-600 text-white hover:bg-copper-700">
+              Cook Sign In
+            </a>
           )}
         </nav>
       )}
