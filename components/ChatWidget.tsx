@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isValidUsPhone } from '@/lib/phone'
+import { isValidPhone, normalizePhone } from '@/lib/phone'
 import { renderMarkdown } from '@/lib/renderMarkdown'
 import EducationChat from '@/components/EducationChat'
 import BecomeCookTimeline from '@/components/BecomeCookTimeline'
@@ -406,7 +406,7 @@ export default function ChatWidget() {
   function goReview(e: FormEvent) {
     e.preventDefault(); setError('')
     const phone = path === 'cook' ? cook.phone : client.client_phone
-    if (!isValidUsPhone(phone)) { setError('Please enter a valid 10-digit US phone number.'); return }
+    if (!isValidPhone(phone)) { setError('Please enter a valid US or India phone number.'); return }
     if (path === 'cook' && cook.cuisine_types.length === 0) {
       setError('Please add at least one thing you make.'); return
     }
@@ -986,7 +986,7 @@ export default function ChatWidget() {
                           <a href={`tel:${c.phone}`} className="flex-1 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-1 text-gray-700 hover:border-copper-400 hover:text-copper-600 transition-colors truncate">
                             📞 {c.phone}
                           </a>
-                          <a href={`https://wa.me/${(c.whatsapp || c.phone).replace(/\D/g, '').replace(/^([^1])/, '1$1')}`}
+                          <a href={`https://wa.me/${(normalizePhone(c.whatsapp || c.phone) || c.phone).replace(/\D/g, '')}`}
                             target="_blank" rel="noopener noreferrer"
                             className="shrink-0 text-center text-xs border border-gray-300 rounded-lg py-1.5 px-3 text-gray-700 hover:border-green-400 hover:text-green-600 transition-colors">
                             💬 WhatsApp

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import DashboardActions from './DashboardActions'
 import JobInterestActions from './JobInterestActions'
 import CookProfileUploads from './CookProfileUploads'
+import CookProfileDetails from './CookProfileDetails'
 import LogoutButton from './LogoutButton'
 import StartJobActions from './StartJobActions'
 import { getRequestLabel } from '@/lib/jobLabels'
@@ -66,7 +67,12 @@ export default async function CookDashboardPage({
 
   const { data: cook } = await supabase
     .from('cooks')
-    .select('id, name, status, bio, photo_url, instagram_url, youtube_url, whatsapp_group_link')
+    .select(`
+      id, name, status, bio, photo_url, instagram_url, youtube_url, whatsapp_group_link,
+      phone, whatsapp, video_url, cuisine_types, offering_types, dietary_specialties,
+      occasion_types, cooking_arrangement, languages, price_min, price_max, min_hours,
+      state, service_areas, job_categories, does_cleanup, grocery_pickup, grocery_pickup_charge
+    `)
     .eq('id', cook_id)
     .single()
 
@@ -187,6 +193,30 @@ export default async function CookDashboardPage({
         initialInstagramUrl={cook.instagram_url}
         initialYoutubeUrl={cook.youtube_url}
         initialWhatsappGroupLink={cook.whatsapp_group_link}
+      />
+
+      <CookProfileDetails
+        cookId={cook_id}
+        initial={{
+          phone: cook.phone || '',
+          whatsapp: cook.whatsapp,
+          video_url: cook.video_url,
+          cuisine_types: cook.cuisine_types || [],
+          offering_types: cook.offering_types || [],
+          dietary_specialties: cook.dietary_specialties || [],
+          occasion_types: cook.occasion_types || [],
+          cooking_arrangement: cook.cooking_arrangement || [],
+          languages: cook.languages || [],
+          price_min: cook.price_min || 0,
+          price_max: cook.price_max || 0,
+          min_hours: cook.min_hours,
+          state: cook.state,
+          service_areas: cook.service_areas || [],
+          job_categories: cook.job_categories || [],
+          does_cleanup: !!cook.does_cleanup,
+          grocery_pickup: !!cook.grocery_pickup,
+          grocery_pickup_charge: cook.grocery_pickup_charge,
+        }}
       />
 
       {/* Pending — needs action */}

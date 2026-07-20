@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import ConfirmActions from './ConfirmActions'
 import { getRequestLabel } from '@/lib/jobLabels'
+import { normalizePhone } from '@/lib/phone'
 
 function getSupabase() {
   return createClient(
@@ -131,7 +132,7 @@ export default async function ConfirmBookingPage({
           )}
           {cook?.whatsapp && (
             <a
-              href={`https://wa.me/${cook.whatsapp.replace(/\D/g, '')}`}
+              href={`https://wa.me/${(normalizePhone(cook.whatsapp) || cook.whatsapp).replace(/\D/g, '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-900 font-medium"

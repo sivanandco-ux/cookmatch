@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import BookingForm from '@/components/BookingForm'
 import type { CookWithDetails } from '@/lib/types'
+import { normalizePhone } from '@/lib/phone'
 
 function VerifiedBadge({ label, detail }: { label: string; detail?: string }) {
   return (
@@ -257,7 +258,7 @@ export default async function CookProfilePage({
                       </a>
                       {c.whatsapp && (
                         <a
-                          href={`https://wa.me/${c.whatsapp.replace(/\D/g, '').replace(/^([^1])/, '1$1')}`}
+                          href={`https://wa.me/${(normalizePhone(c.whatsapp) || c.whatsapp).replace(/\D/g, '')}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-center text-sm border border-gray-300 rounded-lg py-2 text-gray-700 hover:border-green-400 hover:text-green-600 transition-colors"
