@@ -8,8 +8,7 @@ export default function HowItWorksPage() {
         or deliver any food ourselves; cooks and clients connect directly and work out the rest between themselves.
       </p>
       <p className="text-gray-600 mb-10">
-        We started in the Bay Area and are growing to new cities as cooks and clients join us. For the full legal
-        details — including cook and client responsibilities and how disputes are handled — see our{' '}
+        We started in the Bay Area and are growing to new cities as cooks and clients join us. See our{' '}
         <a href="/terms" className="text-copper-600 underline hover:text-copper-700">Terms of Service</a>.
       </p>
 
