@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 // Cook signups are capped while the platform is still small — raise this
 // (or remove the cap entirely by deleting its call sites) once ready to
 // grow past it.
-export const MAX_COOKS = 20
+// TEMPORARY: set to 3 to test the waitlist flow against the current cook
+// count — revert to 20 once confirmed working.
+export const MAX_COOKS = 3
 
 function getServiceSupabase() {
   return createClient(
