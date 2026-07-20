@@ -25,6 +25,10 @@ export async function POST(request: Request) {
   if (!city) {
     return NextResponse.json({ error: 'Please enter the city you\'d serve.' }, { status: 400 })
   }
+  const state = String(body.state || '').trim()
+  if (!state) {
+    return NextResponse.json({ error: 'Please select your state.' }, { status: 400 })
+  }
   const cookingInterest = String(body.cooking_interest || '').trim()
   if (!cookingInterest) {
     return NextResponse.json({ error: 'Please tell us what kind of cooking you do.' }, { status: 400 })
@@ -35,7 +39,7 @@ export async function POST(request: Request) {
   // details instead of erroring on the unique constraint.
   const { error } = await service
     .from('cook_waitlist')
-    .upsert({ user_id: user.id, email: user.email, name, city, cooking_interest: cookingInterest }, { onConflict: 'email' })
+    .upsert({ user_id: user.id, email: user.email, name, city, state, cooking_interest: cookingInterest }, { onConflict: 'email' })
 
   if (error) {
     console.error('[Waitlist] DB error:', error.message)

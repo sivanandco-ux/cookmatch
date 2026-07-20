@@ -67,6 +67,7 @@ export default function ApplyPage() {
   const [authError, setAuthError] = useState('')
   const [waitlistName, setWaitlistName] = useState('')
   const [waitlistCity, setWaitlistCity] = useState('')
+  const [waitlistState, setWaitlistState] = useState('')
   const [waitlistCookingInterest, setWaitlistCookingInterest] = useState('')
   const [waitlistJoining, setWaitlistJoining] = useState(false)
   const [waitlistJoined, setWaitlistJoined] = useState(false)
@@ -140,7 +141,7 @@ export default function ApplyPage() {
     const res = await fetch('/api/waitlist', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: waitlistName, city: waitlistCity, cooking_interest: waitlistCookingInterest }),
+      body: JSON.stringify({ name: waitlistName, city: waitlistCity, state: waitlistState, cooking_interest: waitlistCookingInterest }),
     })
     setWaitlistJoining(false)
     if (!res.ok) {
@@ -374,6 +375,15 @@ export default function ApplyPage() {
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
               />
               <input type="email" disabled value={verifiedEmail} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500" />
+              <select
+                required
+                value={waitlistState}
+                onChange={e => setWaitlistState(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
+              >
+                <option value="" disabled>Select your state</option>
+                {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
               <CityInput
                 value={waitlistCity}
                 onChange={setWaitlistCity}
