@@ -8,6 +8,7 @@ import EducationChat from '@/components/EducationChat'
 import BecomeCookTimeline from '@/components/BecomeCookTimeline'
 import CityInput from '@/components/CityInput'
 import SpecialtyTagInput from '@/components/SpecialtyTagInput'
+import GoogleIcon from '@/components/GoogleIcon'
 import { US_STATES } from '@/lib/usStates'
 
 type View = 'home' | 'mode' | 'cook' | 'client' | 'cook-verify' | 'voice-chat' | 'review' | 'done' | 'learn'
@@ -121,12 +122,10 @@ export default function ChatWidget() {
   }, [])
 
   // Cook email verification gate — a cook profile can't be created until the
-  // email is confirmed via magic link, so identity is proven up front.
+  // Google account is confirmed, so identity is proven up front.
   const [cookAuthState, setCookAuthState] = useState<'unknown' | 'unverified' | 'verified'>('unknown')
   const [verifiedEmail, setVerifiedEmail] = useState('')
-  const [signupEmail, setSignupEmail] = useState('')
-  const [sendingLink, setSendingLink] = useState(false)
-  const [linkSent, setLinkSent] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
 
   const recRef = useRef<any>(null)
@@ -159,27 +158,25 @@ export default function ChatWidget() {
     }
   }, [])
 
-  async function handleSendVerifyLink(e: FormEvent) {
-    e.preventDefault()
-    setSendingLink(true); setAuthError('')
+  async function handleGoogleSignIn() {
+    setSigningIn(true); setAuthError('')
     try {
       const supabase = createClient()
       const callbackUrl = new URL('/auth/callback', window.location.origin)
       callbackUrl.searchParams.set('intent', 'signup')
       callbackUrl.searchParams.set('redirectTo', window.location.pathname + '?opencookwidget=1')
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email: signupEmail,
-        options: { emailRedirectTo: callbackUrl.toString() },
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: callbackUrl.toString() },
       })
-      if (otpError) {
-        setAuthError(`Something went wrong: ${otpError.message}`)
-      } else {
-        setLinkSent(true)
+      if (oauthError) {
+        setAuthError('Something went wrong starting Google sign-in. Please try again.')
+        setSigningIn(false)
       }
+      // On success the browser navigates away to Google — nothing else to do here.
     } catch {
-      setAuthError('Something went wrong. Please try again.')
-    } finally {
-      setSendingLink(false)
+      setAuthError('Something went wrong starting Google sign-in. Please try again.')
+      setSigningIn(false)
     }
   }
 
@@ -495,7 +492,7 @@ export default function ChatWidget() {
               <button onClick={() => {
                   setPath('cook')
                   if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); setView('mode') }
-                  else { setLinkSent(false); setAuthError(''); setView('cook-verify') }
+                  else { setAuthError(''); setView('cook-verify') }
                 }}
                 className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
                 <p className="font-semibold text-gray-800 text-sm">👨‍🍳 Sign Up as a Cook</p>
@@ -548,21 +545,17 @@ export default function ChatWidget() {
           {/* Cook email verification gate */}
           {view === 'cook-verify' && (
             <div className="flex-1 overflow-y-auto flex flex-col px-5 py-8 gap-4">
-              <p className="text-sm text-gray-500 text-center">First, verify your email — we'll send a link to confirm it's really you before you fill out your cook profile.</p>
-              {linkSent ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800 text-center">
-                  Check your email — we sent a verification link to <strong>{signupEmail}</strong>. Click it to continue, then come back here.
-                </div>
-              ) : (
-                <form onSubmit={handleSendVerifyLink} className="flex flex-col gap-3">
-                  <input type="email" required value={signupEmail} onChange={e => setSignupEmail(e.target.value)} placeholder="you@email.com" className={ic} />
-                  {authError && <p className="text-xs text-red-600 text-center">{authError}</p>}
-                  <button type="submit" disabled={sendingLink}
-                    className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50">
-                    {sendingLink ? 'Sending...' : 'Send verification link'}
-                  </button>
-                </form>
-              )}
+              <p className="text-sm text-gray-500 text-center">First, sign in with Google to confirm it's really you before you fill out your cook profile.</p>
+              {authError && <p className="text-xs text-red-600 text-center">{authError}</p>}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={signingIn}
+                className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              >
+                <GoogleIcon />
+                {signingIn ? 'Redirecting…' : 'Continue with Google'}
+              </button>
             </div>
           )}
 
