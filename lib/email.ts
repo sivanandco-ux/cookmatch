@@ -891,3 +891,27 @@ export async function sendWaitlistNotification({
   })
   if (error) console.error('[Email] Waitlist notification failed:', error.message)
 }
+
+export async function sendContactMessage({
+  fromEmail,
+  message,
+}: {
+  fromEmail: string
+  message: string
+}) {
+  const { error } = await getResend().emails.send({
+    from: FROM,
+    to: 'sivanandco1904@gmail.com',
+    replyTo: fromEmail,
+    subject: `Contact form message from ${fromEmail}`,
+    html: `
+      <p>New message from the Contact Us page.</p>
+      <table cellpadding="6" style="border-collapse:collapse;margin:16px 0;">
+        <tr><td><strong>From</strong></td><td>${fromEmail}</td></tr>
+      </table>
+      <p style="white-space:pre-wrap;border-left:3px solid #ea580c;padding-left:12px;">${message}</p>
+      <p>— Sivan Cooks System</p>
+    `,
+  })
+  if (error) console.error('[Email] Contact message failed:', error.message)
+}

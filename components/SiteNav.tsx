@@ -10,6 +10,7 @@ const LINKS = [
   { href: '/jobs', label: 'Community Cravings' },
   { href: '/my-bookings', label: 'My Bookings' },
   { href: '/', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ]
 
 interface Session {
