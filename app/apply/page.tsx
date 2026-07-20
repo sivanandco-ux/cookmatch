@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { readSessionCookie } from '@/lib/supabase/readSessionCookie'
 import { US_STATES } from '@/lib/usStates'
 import { US_CITIES_BY_STATE } from '@/lib/usCitiesByState'
 import { makeTagline } from '@/lib/tagline'
@@ -58,17 +59,11 @@ export default function ApplyPage() {
   const INTRO_LIMIT = 280
 
   // Email verification gate — a cook profile can't be created until the
-  // email is confirmed via magic link, so identity is proven up front.
+  // Google account is confirmed, so identity is proven up front.
   const [authState, setAuthState] = useState<'checking' | 'unverified' | 'verified'>('checking')
   const [verifiedEmail, setVerifiedEmail] = useState('')
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
-  // TEMPORARY DEBUG — /apply bounces back to the "Continue with Google" gate
-  // after completing Google sign-in instead of showing the form. Same class
-  // of bug as the nav avatar issue (see lib/supabase/client.ts comment), but
-  // this is a separate code path, so re-instrumenting here to see whether
-  // cookies/session are actually present on the post-redirect load.
-  const [debugText, setDebugText] = useState('APPLY-EFFECT-NOT-RUN-YET')
 
   useEffect(() => {
     fetch('/api/specialties')
@@ -82,51 +77,21 @@ export default function ApplyPage() {
   }, [])
 
   useEffect(() => {
-    let settled = false
-    const startedAt = Date.now()
-    setDebugText('APPLY-EFFECT-STARTED')
-    // getUser() makes a live round-trip to the auth server rather than
-    // reading a cached session — if that call hangs instead of resolving
-    // or rejecting (network issue, stuck refresh), this page would
-    // otherwise be stuck on "Loading..." forever with no way out.
-    const timeout = setTimeout(() => {
-      if (!settled) {
-        settled = true
-        setDebugText(`TIMEOUT after ${Date.now() - startedAt}ms`)
-        setAuthState('unverified')
-      }
-    }, 6000)
-
-    try {
-      const supabase = createClient()
-      // getSession() reads straight from cookies — no live round-trip to the
-      // auth server, so no dependency on that call succeeding from the
-      // browser. A session existing here already means the email was
-      // verified at sign-in (Google or magic-link), so this doesn't need
-      // getUser()'s server re-check.
-      supabase.auth.getSession().then(({ data: { session: authSession }, error: sessionError }) => {
-        if (settled) return
-        settled = true
-        clearTimeout(timeout)
-        const elapsed = Date.now() - startedAt
-        const cookieNames = document.cookie.split('; ').filter(c => c.startsWith('sb-')).map(c => c.split('=')[0]).join(',') || 'NONE'
-        setDebugText(`[${elapsed}ms] cookies=[${cookieNames}] hasSession=${!!authSession} email=${authSession?.user?.email || 'none'} err=${sessionError ? sessionError.message : 'none'}`)
-        if (authSession?.user?.email) { setVerifiedEmail(authSession.user.email); setAuthState('verified') }
-        else setAuthState('unverified')
-      }).catch(err => {
-        if (settled) return
-        settled = true
-        clearTimeout(timeout)
-        setDebugText(`CATCH: ${err instanceof Error ? err.message : String(err)}`)
-        setAuthState('unverified')
-      })
-    } catch {
-      settled = true
-      clearTimeout(timeout)
+    // Read the session cookie directly rather than calling
+    // supabase.auth.getSession() — that call has been observed taking
+    // 4-6+ seconds on this project (likely a network round-trip to the auth
+    // server), which is far too slow right after the Google sign-in
+    // redirect lands back here. This is only a cosmetic "should I show the
+    // form or the sign-in gate" check — the actual submit still goes through
+    // a server API route that re-verifies via getUser(), so nothing
+    // security-sensitive depends on this being tamper-proof.
+    const sessionUser = readSessionCookie()
+    if (sessionUser?.email) {
+      setVerifiedEmail(sessionUser.email)
+      setAuthState('verified')
+    } else {
       setAuthState('unverified')
     }
-
-    return () => clearTimeout(timeout)
   }, [])
 
   async function handleGoogleSignIn() {
@@ -301,43 +266,28 @@ export default function ApplyPage() {
     setLoading(false)
   }
 
-  // TEMPORARY DEBUG banner — remove once the /apply session bug is diagnosed
-  const debugBanner = (
-    <div className="fixed top-0 left-0 right-0 z-[999] bg-red-600 text-white text-xs font-mono px-2 py-1 break-all">
-      {debugText}
-    </div>
-  )
-
   if (authState === 'checking') {
-    return (
-      <>
-        {debugBanner}
-        <div className="max-w-sm mx-auto px-6 py-20 text-center text-sm text-gray-400">Loading...</div>
-      </>
-    )
+    return <div className="max-w-sm mx-auto px-6 py-20 text-center text-sm text-gray-400">Loading...</div>
   }
 
   if (authState === 'unverified') {
     return (
-      <>
-        {debugBanner}
-        <div className="max-w-sm mx-auto px-6 py-16">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
-          <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
+      <div className="max-w-sm mx-auto px-6 py-16">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign Up as a Cook</h1>
+        <p className="text-sm text-gray-500 mb-6">First, sign in with Google to confirm it's really you before you fill out your profile.</p>
 
-          {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
+        {authError && <p className="text-sm text-red-600 mb-4">{authError}</p>}
 
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={signingIn}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-          >
-            <GoogleIcon />
-            {signingIn ? 'Redirecting…' : 'Continue with Google'}
-          </button>
-        </div>
-      </>
+        <button
+          type="button"
+          onClick={handleGoogleSignIn}
+          disabled={signingIn}
+          className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-2.5 text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+        >
+          <GoogleIcon />
+          {signingIn ? 'Redirecting…' : 'Continue with Google'}
+        </button>
+      </div>
     )
   }
 

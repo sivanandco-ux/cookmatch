@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { readSessionCookie } from '@/lib/supabase/readSessionCookie'
 
 const LINKS = [
   { href: '/cooks', label: 'Hire a Cook' },
@@ -27,24 +28,32 @@ export default function SiteNav() {
 
     async function loadSession() {
       try {
-        // getSession() reads from cookies but can still take a few seconds
-        // on first call while Supabase silently refreshes a near-expired
-        // access token — that's expected, not a hang.
-        const { data: { session: authSession } } = await supabase.auth.getSession()
-        const user = authSession?.user
+        // Read the session straight from its cookie instead of calling
+        // supabase.auth.getSession() — that call has been observed taking
+        // 4-6+ seconds on this project (likely a network round-trip to the
+        // auth server), which made the avatar take far too long to appear.
+        // This is a cosmetic check only; every security-sensitive check
+        // still goes through server-side getUser().
+        const user = readSessionCookie()
         if (!user) {
           setSession(null)
           return
         }
-        // A logged-in user is either a cook (goes to their dashboard) or a
-        // client (goes to My Bookings) — this is the only place that
-        // distinction needs resolving just to pick the avatar's link target.
-        const { data: cook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
         setSession({
           avatarUrl: (user.user_metadata?.avatar_url || user.user_metadata?.picture || null) as string | null,
           name: (user.user_metadata?.full_name || user.user_metadata?.name || user.email || 'Account') as string,
-          dashboardHref: cook ? `/dashboard/${cook.id}` : '/my-bookings',
+          // Default to My Bookings — patched below once we know whether
+          // this user is actually a cook.
+          dashboardHref: '/my-bookings',
         })
+        // A logged-in user is either a cook (goes to their dashboard) or a
+        // client (goes to My Bookings) — resolved separately since it needs
+        // a DB round-trip through the Supabase client, which shouldn't block
+        // the avatar itself from appearing.
+        const { data: cook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
+        if (cook) {
+          setSession(prev => prev && { ...prev, dashboardHref: `/dashboard/${cook.id}` })
+        }
       } catch (err) {
         // Fall back to the logged-out nav rather than leaving state stuck
         // mid-check forever if the session check errors for any reason.
