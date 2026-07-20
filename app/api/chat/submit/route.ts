@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import { sendNewJobNotification } from '@/lib/email'
-import { normalizeUsPhone } from '@/lib/phone'
+import { normalizePhone, normalizeUsPhone } from '@/lib/phone'
 import { makeTagline } from '@/lib/tagline'
+import { isCookCapReached } from '@/lib/cookCap'
 
 function getSupabase() {
   return createClient(
@@ -29,9 +30,13 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
       }
 
-      const cookPhone = normalizeUsPhone(String(data.phone || ''))
+      if (await isCookCapReached()) {
+        return NextResponse.json({ error: "We're at capacity right now. Please apply at /apply to join the waitlist." }, { status: 400 })
+      }
+
+      const cookPhone = normalizePhone(String(data.phone || ''))
       if (!cookPhone) {
-        return NextResponse.json({ error: 'Please provide a valid 10-digit US phone number.' }, { status: 400 })
+        return NextResponse.json({ error: 'Please provide a valid US or India phone number.' }, { status: 400 })
       }
 
       const bio = String(data.intro || '')

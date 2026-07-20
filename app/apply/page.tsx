@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { readSessionCookie } from '@/lib/supabase/readSessionCookie'
 import { US_STATES } from '@/lib/usStates'
@@ -60,10 +61,15 @@ export default function ApplyPage() {
 
   // Email verification gate — a cook profile can't be created until the
   // Google account is confirmed, so identity is proven up front.
-  const [authState, setAuthState] = useState<'checking' | 'unverified' | 'verified'>('checking')
+  const [authState, setAuthState] = useState<'checking' | 'unverified' | 'verified' | 'waitlist'>('checking')
   const [verifiedEmail, setVerifiedEmail] = useState('')
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState('')
+  const [waitlistName, setWaitlistName] = useState('')
+  const [waitlistJoining, setWaitlistJoining] = useState(false)
+  const [waitlistJoined, setWaitlistJoined] = useState(false)
+  const [waitlistError, setWaitlistError] = useState('')
+  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/specialties')
@@ -86,13 +92,62 @@ export default function ApplyPage() {
     // a server API route that re-verifies via getUser(), so nothing
     // security-sensitive depends on this being tamper-proof.
     const sessionUser = readSessionCookie()
-    if (sessionUser?.email) {
-      setVerifiedEmail(sessionUser.email)
-      setAuthState('verified')
-    } else {
+    if (!sessionUser?.email) {
       setAuthState('unverified')
+      return
     }
-  }, [])
+    setVerifiedEmail(sessionUser.email)
+
+    async function resolve() {
+      // A signed-in visitor landing directly on /apply (not via the fresh
+      // OAuth redirect, which already handles this server-side) might
+      // already have a cook profile — send them to their dashboard instead
+      // of showing a blank application. Uses a plain fetch against
+      // PostgREST (cooks is publicly readable) rather than the Supabase
+      // client's .from(), which has shown unreliable multi-second-or-hung
+      // behavior on this project (see lib/supabase/readSessionCookie.ts).
+      const cookRes = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/cooks?user_id=eq.${sessionUser!.id}&select=id`,
+        {
+          headers: {
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+        }
+      )
+      const cookRows = cookRes.ok ? await cookRes.json() : []
+      if (cookRows[0]?.id) {
+        router.replace(`/dashboard/${cookRows[0].id}`)
+        return
+      }
+
+      // Only a genuinely new applicant is subject to the cap — check it
+      // last so an existing cook's redirect above never gets delayed by it.
+      const capRes = await fetch('/api/cook-cap')
+      const capData = capRes.ok ? await capRes.json() : { full: false }
+      setAuthState(capData.full ? 'waitlist' : 'verified')
+    }
+
+    resolve().catch(() => setAuthState('verified'))
+  }, [router])
+
+  async function handleJoinWaitlist(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setWaitlistError('')
+    setWaitlistJoining(true)
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: waitlistName }),
+    })
+    setWaitlistJoining(false)
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setWaitlistError(data.error || 'Something went wrong. Please try again.')
+      return
+    }
+    setWaitlistJoined(true)
+  }
 
   async function handleGoogleSignIn() {
     setSigningIn(true)
@@ -287,6 +342,47 @@ export default function ApplyPage() {
           <GoogleIcon />
           {signingIn ? 'Redirecting…' : 'Continue with Google'}
         </button>
+      </div>
+    )
+  }
+
+  if (authState === 'waitlist') {
+    return (
+      <div className="max-w-sm mx-auto px-6 py-16">
+        {waitlistJoined ? (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">You're on the list!</h1>
+            <p className="text-sm text-gray-600">
+              We're at our cook capacity right now, but we'll reach out at <strong>{verifiedEmail}</strong> as soon as a spot opens up.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">We're full right now</h1>
+            <p className="text-sm text-gray-500 mb-6">
+              Sivan Cooks is limited to a small number of cooks while we're just getting started. Join the waitlist and we'll reach out the moment a spot opens up.
+            </p>
+            <form onSubmit={handleJoinWaitlist} className="flex flex-col gap-3">
+              <input
+                type="text"
+                required
+                value={waitlistName}
+                onChange={e => setWaitlistName(e.target.value)}
+                placeholder="Your name"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <input type="email" disabled value={verifiedEmail} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-500" />
+              {waitlistError && <p className="text-sm text-red-600">{waitlistError}</p>}
+              <button
+                type="submit"
+                disabled={waitlistJoining}
+                className="w-full bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50"
+              >
+                {waitlistJoining ? 'Joining...' : 'Join the waitlist'}
+              </button>
+            </form>
+          </>
+        )}
       </div>
     )
   }

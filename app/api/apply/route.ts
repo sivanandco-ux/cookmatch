@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { verifyCook } from '@/lib/agents/cookVerificationAgent'
+import { isCookCapReached } from '@/lib/cookCap'
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -14,6 +15,13 @@ export async function POST(request: Request) {
   const { data: existingCook } = await supabase.from('cooks').select('id').eq('user_id', user.id).maybeSingle()
   if (existingCook) {
     return NextResponse.json({ error: 'You already have a cook profile.' }, { status: 400 })
+  }
+
+  // The client-side flow already routes to a waitlist form once full (see
+  // /apply) — this is the authoritative check in case of a race right at
+  // the cap, or a request that skipped that UI.
+  if (await isCookCapReached()) {
+    return NextResponse.json({ error: "We're at capacity right now. Please join the waitlist instead." }, { status: 400 })
   }
 
   // Each specialty tag is already validated client-side as it's added (see
