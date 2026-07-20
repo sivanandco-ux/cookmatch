@@ -683,9 +683,13 @@ export default function ApplyPage() {
         <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-copper-900 mb-2">Approval</h2>
           <p className="text-sm text-gray-700 mb-3">At this time, Sivan Cooks approves cooks by checking references. We may follow up with you after you apply.</p>
+          <ul className="text-sm text-gray-700 mb-3 list-disc pl-5 space-y-1">
+            <li>Sivan Cooks does not negotiate prices or handle payments — pricing and payment are worked out directly between you and the client.</li>
+            <li>Sivan Cooks does not provide insurance or liability coverage for cooking services — carrying any insurance you need is your own responsibility.</li>
+          </ul>
           <label className="flex items-center gap-2 cursor-pointer">
             <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
-            <span className="text-sm text-gray-700">I accept the Sivan Cooks Terms of Service</span>
+            <span className="text-sm text-gray-700">I understand and accept the Sivan Cooks Terms of Service</span>
           </label>
         </section>
 
