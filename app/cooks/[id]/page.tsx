@@ -6,14 +6,6 @@ import BookingForm from '@/components/BookingForm'
 import type { CookWithDetails } from '@/lib/types'
 import { normalizePhone } from '@/lib/phone'
 
-function VerifiedBadge({ label, detail }: { label: string; detail?: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 text-sm bg-green-50 text-green-700 border border-green-200 rounded-lg px-3 py-1.5">
-      <span>✓</span> {label}{detail ? ` — ${detail}` : ''}
-    </span>
-  )
-}
-
 export default async function CookProfilePage({
   params,
 }: {
@@ -45,7 +37,6 @@ export default async function CookProfilePage({
 
   const c = cook as CookWithDetails
   const score = c.cook_scores
-  const verification = c.cook_verifications
   const sessionCount = score?.session_count ?? 0
   const hasRating = sessionCount >= 3
 
@@ -178,20 +169,6 @@ export default async function CookProfilePage({
               </div>
             </div>
           )}
-
-          {/* Verification badges */}
-          <div>
-            <h2 className="text-lg font-semibold mb-3">Verified</h2>
-            <div className="flex flex-wrap gap-2">
-              {verification?.food_handler_certified && (
-                <VerifiedBadge
-                  label="Food Handler Certified"
-                  detail={verification.food_handler_expiry ? `expires ${verification.food_handler_expiry}` : undefined}
-                />
-              )}
-              {verification?.references_verified && <VerifiedBadge label="References Verified" />}
-            </div>
-          </div>
 
           {/* Ratings breakdown */}
           {hasRating && score && (

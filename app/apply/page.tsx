@@ -805,7 +805,7 @@ export default function ApplyPage() {
         {/* Approval */}
         <section className="bg-copper-50 border border-copper-200 rounded-xl p-6">
           <h2 className="text-lg font-semibold text-copper-900 mb-2">Approval</h2>
-          <p className="text-sm text-gray-700 mb-3">At this time, Sivan Cooks approves cooks by checking references. We may follow up with you after you apply.</p>
+          <p className="text-sm text-gray-700 mb-3">We may follow up with you after you apply.</p>
           <ul className="text-sm text-gray-700 mb-3 list-disc pl-5 space-y-1">
             <li>Sivan Cooks does not negotiate prices or handle payments — pricing and payment are worked out directly between you and the client.</li>
             <li>Sivan Cooks does not provide insurance or liability coverage for cooking services — carrying any insurance you need is your own responsibility.</li>

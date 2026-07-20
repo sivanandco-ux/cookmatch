@@ -61,7 +61,7 @@ export async function POST(
     html: `
       <p>Hi ${booking.client_name},</p>
       <p>Unfortunately, <strong>${cookName}</strong> is not available for your requested date.</p>
-      <p>You can browse other approved cooks on CookMatch and submit a new brief.</p>
+      <p>You can browse other cooks on CookMatch and submit a new brief.</p>
       <p style="margin-top:24px;">
         <a href="${SITE_URL}/cooks"
            style="background:#ea580c;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">

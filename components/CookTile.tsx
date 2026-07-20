@@ -13,14 +13,6 @@ function StarRating({ score, count }: { score: number; count: number }) {
   )
 }
 
-function VerifiedBadge({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 rounded-full px-2 py-0.5">
-      <span>✓</span> {label}
-    </span>
-  )
-}
-
 function formatName(fullName: string) {
   const parts = fullName.trim().split(' ')
   if (parts.length === 1) return fullName
@@ -29,7 +21,6 @@ function formatName(fullName: string) {
 }
 
 export default function CookTile({ cook }: { cook: CookWithDetails }) {
-  const verification = cook.cook_verifications
   const score = cook.cook_scores
   const sessionCount = score?.session_count ?? 0
   const hasRating = sessionCount >= 3
@@ -129,12 +120,6 @@ export default function CookTile({ cook }: { cook: CookWithDetails }) {
           ) : (
             <p className="text-sm text-gray-500">Rate negotiable</p>
           )}
-
-          {/* Verified badges */}
-          <div className="flex flex-wrap gap-1 mt-auto pt-2 border-t border-copper-100">
-            {verification?.food_handler_certified && <VerifiedBadge label="Food Handler" />}
-            {verification?.references_verified && <VerifiedBadge label="References" />}
-          </div>
 
           {cook.available_recurring && (
             <p className="text-xs text-green-600">Available for recurring bookings</p>

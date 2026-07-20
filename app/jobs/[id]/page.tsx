@@ -201,7 +201,7 @@ export default async function JobDetailPage({
 
       {!isCook && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
-          Full brief — including voice memo and description — is visible to approved cooks only.
+          Full brief — including voice memo and description — is visible to cooks only.
           Access this page from your cook dashboard to see all details.
         </div>
       )}

@@ -154,7 +154,7 @@ export default async function JobBoardPage({
 
       {!isCook && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 text-sm text-blue-800">
-          Are you an approved cook? Access the full craving details and express interest from your{' '}
+          Are you a cook on Sivan Cooks? Access the full craving details and express interest from your{' '}
           <span className="font-medium">cook dashboard</span>.
         </div>
       )}
