@@ -126,20 +126,7 @@ export default function Home() {
                 caps, food safety rules that vary by state and county — the clearer it became that most people
                 considering this don&apos;t have an easy way to find honest, specific answers before they spend money.
               </p>
-              <p>
-                My own journey started in between tech roles, when I launched{' '}
-                <a
-                  href="https://www.sivanspices.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-copper-700 underline decoration-copper-300 hover:decoration-copper-700"
-                >
-                  Sivan Spices
-                </a>{' '}
-                to share the authentic, pure, and healthy recipes I grew up on. Sivan Cooks is the next step — helping
-                other people answer the same questions I had to work through myself.
-              </p>
-              <p className="font-semibold text-leaf-800 mt-3">— Tara Jagannathan, Founder, Sivan Spices &amp; Sivan Cooks</p>
+              <p className="font-semibold text-leaf-800 mt-3">— Tara Jagannathan, Founder, Sivan Cooks</p>
             </div>
           </div>
           <div>
