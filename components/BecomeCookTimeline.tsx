@@ -1,3 +1,7 @@
+'use client'
+
+import { useState } from 'react'
+
 type Step = { title: string; description: string; time: string }
 
 type Track = {
@@ -80,39 +84,61 @@ const TRACKS: Track[] = [
 ]
 
 export default function BecomeCookTimeline({ compact = false }: { compact?: boolean }) {
+  // Compact mode (inside the narrow chat widget) starts with all three
+  // tracks collapsed to just their headers — three full 5-step timelines
+  // stacked in a ~360px-wide scroll box was unreadable. Only one track
+  // open at a time keeps it scannable. The full-page version (compact
+  // false) has room to show everything at once, so it's unaffected.
+  const [openTrack, setOpenTrack] = useState<string | null>(null)
+
   return (
-    <div className={compact ? 'flex flex-col gap-6' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}>
+    <div className={compact ? 'flex flex-col gap-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}>
       {TRACKS.map(track => {
         const c = COLORS[track.color]
+        const isOpen = !compact || openTrack === track.title
         return (
           <div key={track.title}>
-            <div className={`rounded-xl border px-4 py-3 mb-4 ${c.header}`}>
-              <p className={`font-semibold ${compact ? 'text-sm' : 'text-base'}`}>{track.icon} {track.title}</p>
-              <p className="text-xs mt-0.5 opacity-80">{track.subtitle}</p>
-              <p className="text-xs font-medium mt-1.5">⏱ Total: {track.totalTime}</p>
+            <div
+              className={`rounded-xl border px-4 py-3 ${isOpen ? 'mb-4' : ''} ${c.header} ${compact ? 'cursor-pointer' : ''}`}
+              onClick={compact ? () => setOpenTrack(isOpen ? null : track.title) : undefined}
+              role={compact ? 'button' : undefined}
+              aria-expanded={compact ? isOpen : undefined}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className={`font-semibold ${compact ? 'text-sm' : 'text-base'}`}>{track.icon} {track.title}</p>
+                  <p className="text-xs mt-0.5 opacity-80">{track.subtitle}</p>
+                  <p className="text-xs font-medium mt-1.5">⏱ Total: {track.totalTime}</p>
+                </div>
+                {compact && (
+                  <span className={`text-xs shrink-0 mt-0.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}>▾</span>
+                )}
+              </div>
             </div>
-            <div className="flex flex-col">
-              {track.steps.map((step, i) => {
-                const isLast = i === track.steps.length - 1
-                return (
-                  <div key={step.title} className="flex gap-3">
-                    <div className="flex flex-col items-center">
-                      <div className={`w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ${c.dot}`}>
-                        {i + 1}
+            {isOpen && (
+              <div className="flex flex-col">
+                {track.steps.map((step, i) => {
+                  const isLast = i === track.steps.length - 1
+                  return (
+                    <div key={step.title} className="flex gap-3">
+                      <div className="flex flex-col items-center">
+                        <div className={`w-6 h-6 rounded-full text-white text-xs font-bold flex items-center justify-center shrink-0 ${c.dot}`}>
+                          {i + 1}
+                        </div>
+                        {!isLast && <div className={`w-px flex-1 my-1 ${c.line}`} />}
                       </div>
-                      {!isLast && <div className={`w-px flex-1 my-1 ${c.line}`} />}
+                      <div className={isLast ? 'pb-1' : 'pb-5'}>
+                        <p className="font-semibold text-gray-900 text-sm">{step.title}</p>
+                        <p className="text-sm text-gray-600 mt-0.5 leading-snug">{step.description}</p>
+                        <span className={`inline-block mt-1.5 text-xs font-medium rounded-full px-2 py-0.5 border ${c.chip}`}>
+                          {step.time}
+                        </span>
+                      </div>
                     </div>
-                    <div className={isLast ? 'pb-1' : 'pb-5'}>
-                      <p className="font-semibold text-gray-900 text-sm">{step.title}</p>
-                      <p className="text-sm text-gray-600 mt-0.5 leading-snug">{step.description}</p>
-                      <span className={`inline-block mt-1.5 text-xs font-medium rounded-full px-2 py-0.5 border ${c.chip}`}>
-                        {step.time}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )
       })}
