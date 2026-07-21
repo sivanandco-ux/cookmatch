@@ -8,6 +8,7 @@ import {
   CA_MEHKO,
   CA_COTTAGE_FOOD,
   CA_FOOD_HANDLER_CARD,
+  CA_FOOD_SAFETY_CLASS_FEE,
   type FoodType,
   type Arrangement,
 } from '@/lib/foodLawReference'
@@ -58,7 +59,13 @@ function NavButtons({ onBack, onNext, nextDisabled, nextLabel }: { onBack?: () =
 
 interface SetupItem { label: string; note: string }
 
-function getSetupPlan(foodType: FoodType, arrangement: Arrangement, state: string): { items: SetupItem[]; knownTotal: number | null; unknownCosts: boolean; blocked: boolean } {
+const OPERATING_COST_REMINDERS: SetupItem[] = [
+  { label: 'Packaging supplies', note: 'Jars, boxes, bags, and labels — your per-unit cost (from Step 3) covers what goes into each sale, but budget for an initial bulk stock too, since suppliers usually sell in quantities bigger than your first batch.' },
+  { label: 'Transportation', note: 'Gas, vehicle wear, or delivery time/mileage if you\'re dropping off orders or driving to a farmers market — easy to forget since it doesn\'t show up on a receipt the way ingredients do.' },
+  { label: 'Your own labor', note: 'Time is a real cost even on a side gig. Check the effective hourly rate on the Profit & Volume step — if it\'s well below what your time is worth elsewhere, that\'s worth weighing before you invest in a permit.' },
+]
+
+function getSetupPlan(foodType: FoodType, arrangement: Arrangement, state: string, annualRevenue: number | null): { items: SetupItem[]; knownTotal: number | null; unknownCosts: boolean; blocked: boolean } {
   const isCA = state === 'California'
   const shelfStable = FOOD_TYPE_OPTIONS.find(f => f.value === foodType)?.shelfStable ?? true
 
@@ -98,12 +105,12 @@ function getSetupPlan(foodType: FoodType, arrangement: Arrangement, state: strin
     if (isCA) {
       return {
         items: [
-          { label: 'Food safety manager course', note: 'More rigorous than a basic handler card — required for the permit holder (cost varies by provider).' },
+          { label: 'Food safety class', note: `Alameda County's own required course for CFO/MEHKO registration: ${money(CA_FOOD_SAFETY_CLASS_FEE)} (per the county's official fee schedule).` },
           { label: 'MEHKO permit fee', note: `${money(CA_MEHKO.permitFee)} county fee in Alameda County, plus a health inspection before approval.` },
           { label: 'Home kitchen inspection', note: 'Roughly 2–4 weeks from application to approval.' },
         ],
-        knownTotal: CA_MEHKO.permitFee,
-        unknownCosts: true,
+        knownTotal: CA_FOOD_SAFETY_CLASS_FEE + CA_MEHKO.permitFee,
+        unknownCosts: false,
         blocked: false,
       }
     }
@@ -120,14 +127,31 @@ function getSetupPlan(foodType: FoodType, arrangement: Arrangement, state: strin
   }
 
   // shelf-stable cottage food
+  if (isCA) {
+    const needsClassB = annualRevenue != null && annualRevenue > CA_COTTAGE_FOOD.classA.annualRevenueCap
+    const tierFee = needsClassB ? CA_COTTAGE_FOOD.classB.fee : CA_COTTAGE_FOOD.classA.fee
+    return {
+      items: [
+        { label: 'Food safety class', note: `Alameda County's own required course for CFO registration: ${money(CA_FOOD_SAFETY_CLASS_FEE)} (per the county's official fee schedule).` },
+        {
+          label: needsClassB ? 'Class B CFO permit (indirect sales)' : 'Class A CFO registration (direct sales)',
+          note: needsClassB
+            ? `${money(CA_COTTAGE_FOOD.classB.fee)} permit fee, plus a kitchen inspection — needed since your target from Step 3 is above Class A's ~${money(CA_COTTAGE_FOOD.classA.annualRevenueCap)}/yr cap. Covers sales up to ~${money(CA_COTTAGE_FOOD.classB.annualRevenueCap)}/yr.`
+            : `${money(CA_COTTAGE_FOOD.classA.fee)} registration fee, no inspection required — covers direct sales up to ~${money(CA_COTTAGE_FOOD.classA.annualRevenueCap)}/yr.`,
+        },
+        { label: 'Labeling', note: 'A "made in a home kitchen, not state-inspected" disclosure, plus ingredients and allergens on every label.' },
+      ],
+      knownTotal: CA_FOOD_SAFETY_CLASS_FEE + tierFee,
+      unknownCosts: false,
+      blocked: false,
+    }
+  }
   return {
     items: [
       { label: 'Food safety course', note: 'Most states require a short training before you can register (cost varies by provider).' },
       {
         label: 'Registration or permit',
-        note: isCA
-          ? `Class A: registration only, no inspection, gross sales up to ~${money(CA_COTTAGE_FOOD.classA.annualRevenueCap)}/yr. Class B adds a permit + kitchen inspection for sales up to ~${money(CA_COTTAGE_FOOD.classB.annualRevenueCap)}/yr.`
-          : `Most states only require registration at first, sometimes adding a permit + inspection at higher sales tiers — check your state's cottage food agency for the exact fee and cap.`,
+        note: `Most states only require registration at first, sometimes adding a permit + inspection at higher sales tiers — check your state's cottage food agency for the exact fee and cap.`,
       },
       { label: 'Labeling', note: 'A "made in a home kitchen, not state-inspected" disclosure, plus ingredients and allergens on every label.' },
     ],
@@ -146,17 +170,21 @@ export default function CookPlanner() {
   const [arrangement, setArrangement] = useState<Arrangement | null>(null)
   const [state, setState] = useState('')
   const [price, setPrice] = useState('')
-  const [cost, setCost] = useState('')
+  const [ingredientCost, setIngredientCost] = useState('')
+  const [packagingCost, setPackagingCost] = useState('')
+  const [minutesPerUnit, setMinutesPerUnit] = useState('')
 
   const monthlyGoal = goalAmount
     ? (goalPeriod === 'week' ? (Number(goalAmount) * 52) / 12 : goalPeriod === 'year' ? Number(goalAmount) / 12 : Number(goalAmount))
     : 0
-  const profitPerUnit = (Number(price) || 0) - (Number(cost) || 0)
+  const totalCostPerUnit = (Number(ingredientCost) || 0) + (Number(packagingCost) || 0)
+  const profitPerUnit = (Number(price) || 0) - totalCostPerUnit
   const unitsNeededPerMonth = profitPerUnit > 0 && monthlyGoal > 0 ? Math.ceil(monthlyGoal / profitPerUnit) : null
   const monthlyRevenue = unitsNeededPerMonth ? unitsNeededPerMonth * Number(price) : null
   const annualRevenue = monthlyRevenue ? monthlyRevenue * 12 : null
+  const effectiveHourlyWage = profitPerUnit > 0 && Number(minutesPerUnit) > 0 ? profitPerUnit / (Number(minutesPerUnit) / 60) : null
 
-  const setupPlan = foodType && arrangement ? getSetupPlan(foodType, arrangement, state) : null
+  const setupPlan = foodType && arrangement ? getSetupPlan(foodType, arrangement, state, annualRevenue) : null
   const monthsToBreakEven = setupPlan?.knownTotal && monthlyGoal > 0 ? setupPlan.knownTotal / monthlyGoal : null
 
   const foodTypeOption = FOOD_TYPE_OPTIONS.find(f => f.value === foodType)
@@ -291,22 +319,38 @@ export default function CookPlanner() {
                     <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 12" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">Ingredient + packaging cost per unit ($)</label>
-                    <input type="number" value={cost} onChange={e => setCost(e.target.value)} placeholder="e.g. 4" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Ingredient cost per unit ($)</label>
+                    <input type="number" value={ingredientCost} onChange={e => setIngredientCost(e.target.value)} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Packaging cost per unit ($)</label>
+                    <input type="number" value={packagingCost} onChange={e => setPackagingCost(e.target.value)} placeholder="e.g. 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Time to make one unit (minutes)</label>
+                    <input type="number" value={minutesPerUnit} onChange={e => setMinutesPerUnit(e.target.value)} placeholder="e.g. 20" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
                 </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Transportation (gas, delivery time) and any equipment aren't per-unit costs the same way — those show up on the next step instead.
+                </p>
 
                 {profitPerUnit > 0 && monthlyGoal > 0 && (
                   <div className="mt-5 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3 text-sm text-gray-800">
-                    <p>Profit per unit: <strong>{money(profitPerUnit)}</strong></p>
+                    <p>Profit per unit: <strong>{money(profitPerUnit)}</strong> (price minus ingredients and packaging)</p>
                     <p className="mt-1">To reach {money(monthlyGoal)}/month, you'd need to sell about <strong>{unitsNeededPerMonth} {foodTypeOption?.shelfStable ? 'items' : 'meals/sessions'}/month</strong> (roughly {money(monthlyRevenue ?? 0)}/month in revenue).</p>
+                    {effectiveHourlyWage != null && (
+                      <p className="mt-1">
+                        At {minutesPerUnit} minutes per unit, that profit works out to about <strong>{money(effectiveHourlyWage)}/hour</strong> for your own time — worth comparing against what your time is worth elsewhere before deciding this is worth the investment.
+                      </p>
+                    )}
                   </div>
                 )}
-                {price && cost && profitPerUnit <= 0 && (
-                  <p className="mt-4 text-sm text-red-600">Your cost per unit is at or above your price — there's no profit margin to work with yet. Try adjusting one of the numbers.</p>
+                {price && ingredientCost && packagingCost && profitPerUnit <= 0 && (
+                  <p className="mt-4 text-sm text-red-600">Your ingredient + packaging cost is at or above your price — there's no profit margin to work with yet. Try adjusting one of the numbers.</p>
                 )}
 
-                <NavButtons onBack={() => setStep(2)} onNext={() => setStep(4)} nextDisabled={!price || !cost || profitPerUnit <= 0} />
+                <NavButtons onBack={() => setStep(2)} onNext={() => setStep(4)} nextDisabled={!price || !ingredientCost || profitPerUnit <= 0} />
               </div>
             )}
 
@@ -337,6 +381,22 @@ export default function CookPlanner() {
                     We don't have a verified fee to total up for {state || 'your state'} — once you know your registration/permit fee, months to break even = that fee ÷ your monthly profit target.
                   </p>
                 )}
+
+                {!setupPlan.blocked && (
+                  <div className="mt-6">
+                    <p className="text-gray-800 font-medium mb-1">Other costs to plan for</p>
+                    <p className="text-xs text-gray-500 mb-3">These don't have a fixed nationwide number the way registration fees do — they depend on your setup — but they're real costs, not legal/regulatory ones like the items above.</p>
+                    <div className="flex flex-col gap-3">
+                      {OPERATING_COST_REMINDERS.map(item => (
+                        <div key={item.label} className="border border-gray-200 rounded-lg px-4 py-3">
+                          <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
+                          <p className="text-xs text-gray-600 mt-0.5 leading-snug">{item.note}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <NavButtons onBack={() => setStep(3)} onNext={() => setStep(5)} />
               </div>
             )}
@@ -428,6 +488,9 @@ export default function CookPlanner() {
             <button onClick={() => jumpTo(3)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
               <span className="text-gray-400">Profit/unit:</span> <span className="font-medium text-gray-800">{money(profitPerUnit)}</span><br />
               <span className="text-gray-400">Volume needed:</span> <span className="font-medium text-gray-800">{unitsNeededPerMonth}/month</span>
+              {effectiveHourlyWage != null && (
+                <><br /><span className="text-gray-400">Effective wage:</span> <span className="font-medium text-gray-800">{money(effectiveHourlyWage)}/hr</span></>
+              )}
             </button>
           )}
           {step > 3 && setupPlan && setupPlan.items.length > 0 && (

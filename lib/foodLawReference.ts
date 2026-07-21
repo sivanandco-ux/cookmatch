@@ -1,10 +1,19 @@
 // Shared factual reference for the cook-planning wizard (components/CookPlanner.tsx).
-// Numbers here are the same verified-as-of-2026-07-09 figures used in
+// Most figures here are the same verified-as-of-2026-07-09 figures used in
 // app/api/chat/education/route.ts (California/Alameda County specific — see
 // that file's source comment). Keep the two in sync if either changes.
 // Never add a specific dollar figure for a state other than California —
 // the same rule the education chatbot follows, for the same reason: we
 // haven't verified fees/caps for the other 49 states, only agency names.
+//
+// classA.fee, classB.fee, and FOOD_SAFETY_CLASS_FEE were added later,
+// sourced directly from Alameda County DEH's official fee schedule
+// (deh.acgov.org/deh-assets/docs/General-Fees.pdf, fetched 2026-07-20):
+// item 2091 "CLASS A CFO REGISTRATION (DIRECT SALES)" = $190, item 2092
+// "CLASS B CFO PERMIT (INDIRECT SALES)" = $450, item 2089/1009 "FOOD SAFETY
+// CLASS" = $141. That same schedule's item 2093 "MEHKOs" = $696, matching
+// the MEHKO permit fee already in use — a good cross-check that this
+// source is current.
 
 export type FoodType = 'baked' | 'jams' | 'candies' | 'perishable' | 'meals'
 export type Arrangement = 'travel' | 'home'
@@ -40,11 +49,18 @@ export const CA_MEHKO = {
 }
 
 export const CA_COTTAGE_FOOD = {
-  classA: { annualRevenueCap: 88000 },
-  classB: { annualRevenueCap: 176000 },
+  classA: { annualRevenueCap: 88000, fee: 190 },
+  classB: { annualRevenueCap: 176000, fee: 450 },
 }
 
 export const CA_FOOD_HANDLER_CARD = {
   minCost: 7,
   maxCost: 15,
 }
+
+// Alameda County DEH's own required food safety training class, a
+// prerequisite for CFO (Class A/B) and MEHKO registration — separate from
+// the ANAB-accredited "food handler card" used for the travel-to-client
+// path, which is a different, lower-tier certification bought from a
+// private vendor rather than the county.
+export const CA_FOOD_SAFETY_CLASS_FEE = 141
