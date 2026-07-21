@@ -265,15 +265,6 @@ export default function CookPlanner() {
         confirm the current requirements directly with your local health department or state agency.
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-900">
-        <p className="font-semibold mb-1">Revenue isn't profit</p>
-        <p className="leading-relaxed">
-          <strong>Revenue</strong> is what you collect from sales. <strong>Profit</strong> is what's left after ingredients, packaging, and fees —
-          that's the part that's actually yours. Most new food businesses spend their first few months of revenue just paying back what it
-          cost to get started, before any of it counts as real profit. Both numbers matter, so we'll keep them separate throughout.
-        </p>
-      </div>
-
       <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Main step content */}
         <div className="flex-1 w-full min-w-0">
@@ -541,6 +532,15 @@ export default function CookPlanner() {
             </button>
           )}
         </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mt-8 text-sm text-blue-900">
+        <p className="font-semibold mb-1">Revenue isn't profit</p>
+        <p className="leading-relaxed">
+          <strong>Revenue</strong> is what you collect from sales. <strong>Profit</strong> is what's left after ingredients, packaging, and fees —
+          that's the part that's actually yours. Most new food businesses spend their first few months of revenue just paying back what it
+          cost to get started, before any of it counts as real profit. Both numbers matter, so we'll keep them separate throughout.
+        </p>
       </div>
     </div>
   )
