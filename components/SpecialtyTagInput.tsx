@@ -22,6 +22,11 @@ export default function SpecialtyTagInput({
   const [text, setText] = useState('')
   const [checking, setChecking] = useState(false)
   const [error, setError] = useState('')
+  // Keyed by tag text — a short heads-up for perishable food items (needs
+  // refrigeration), a separate legal category from shelf-stable cottage
+  // food items even though neither is served hot. Populated from the
+  // validation response, not re-derived here.
+  const [perishableNotes, setPerishableNotes] = useState<Record<string, string>>({})
 
   function hasTag(tag: string) {
     return value.some(v => v.toLowerCase() === tag.toLowerCase())
@@ -72,6 +77,9 @@ export default function SpecialtyTagInput({
           if (!next.some(v => v.toLowerCase() === finalTag.toLowerCase())) {
             next = addTag(finalTag, next)
           }
+          if (data.perishableNote) {
+            setPerishableNotes(prev => ({ ...prev, [finalTag]: data.perishableNote }))
+          }
         } else {
           invalid.push(part)
         }
@@ -119,6 +127,16 @@ export default function SpecialtyTagInput({
           ))}
         </div>
       )}
+
+      {(() => {
+        const flagged = value.filter(v => perishableNotes[v])
+        if (flagged.length === 0) return null
+        return (
+          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 mb-2">
+            ⚠️ {flagged.join(', ')} typically {flagged.length > 1 ? 'need' : 'needs'} refrigeration — most cottage food laws only cover shelf-stable items, so check your state&apos;s rules before selling {flagged.length > 1 ? 'these' : 'it'} without a proper permit.
+          </p>
+        )
+      })()}
 
       <div className="flex gap-2">
         <input
