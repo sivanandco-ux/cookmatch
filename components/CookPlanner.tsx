@@ -485,7 +485,6 @@ export default function CookPlanner() {
                   <ul className="text-sm text-gray-600 leading-relaxed list-disc pl-5 flex flex-col gap-1">
                     <li>Ask your likely customers directly — friends, family, neighbors, community or religious groups, coworkers — whether they'd pay your planned price. A show of hands isn't a sale, but it's a start.</li>
                     <li>Offer a small batch at a community gathering, potluck, or event you're already attending, and see how people actually respond.</li>
-                    <li>Post in local community groups (neighborhood apps, WhatsApp groups, local social media) describing what you'd offer and gauge real interest, not just compliments.</li>
                     <li>Pre-sell a small batch at your real planned price, not a discount — a true test needs people willing to actually pay, not just say something sounds nice.</li>
                     <li>Track how many said yes vs. how many actually followed through — that ratio is the honest signal, more useful than enthusiastic feedback alone.</li>
                   </ul>
