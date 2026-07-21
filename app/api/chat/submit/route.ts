@@ -48,6 +48,12 @@ export async function POST(request: Request) {
       const cooksAtClientLocation = (data.cooking_arrangement || []).includes("Cook at client's location")
       const rate = cooksAtClientLocation ? Math.max(Number(data.hourly_rate) || 0, 30) : 0
 
+      // Only the form/voice-memo review screen collects explicit terms
+      // acceptance today — the voice-assistant path (Mode 3) submits here too
+      // but hasn't been given an equivalent spoken-consent step yet, so this
+      // stays optional rather than rejecting those submissions outright.
+      const termsAcceptedAt = data.terms_accepted === true ? new Date().toISOString() : null
+
       const { data: cook, error } = await supabase
         .from('cooks')
         .insert({
@@ -83,6 +89,7 @@ export async function POST(request: Request) {
           grocery_pickup: false,
           grocery_pickup_charge: null,
           status: 'pending',
+          terms_accepted_at: termsAcceptedAt,
         })
         .select()
         .single()
@@ -131,6 +138,8 @@ export async function POST(request: Request) {
       const jobCategory =
         isItem ? 'family_cooking' : numPeople <= 5 ? 'family_cooking' : numPeople <= 10 ? 'small_event' : 'medium_event'
 
+      const termsAcceptedAt = data.terms_accepted === true ? new Date().toISOString() : null
+
       const { data: job, error } = await supabase
         .from('job_posts')
         .insert({
@@ -159,6 +168,7 @@ export async function POST(request: Request) {
           voice_memo_url: null,
           additional_notes: null,
           status: 'open',
+          terms_accepted_at: termsAcceptedAt,
         })
         .select('id')
         .single()

@@ -24,6 +24,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "We're at capacity right now. Please join the waitlist instead." }, { status: 400 })
   }
 
+  if (body.terms_accepted !== true) {
+    return NextResponse.json({ error: 'You must accept the Terms of Service to apply.' }, { status: 400 })
+  }
+
   // Each specialty tag is already validated client-side as it's added (see
   // /api/validate-specialty), so there's nothing left to reject here.
   const cuisineTypes: string[] = body.cuisine_types || []
@@ -71,6 +75,7 @@ export async function POST(request: Request) {
       grocery_pickup: body.grocery_pickup || false,
       grocery_pickup_charge: body.grocery_pickup_charge ?? null,
       status: 'pending',
+      terms_accepted_at: new Date().toISOString(),
     })
     .select()
     .single()

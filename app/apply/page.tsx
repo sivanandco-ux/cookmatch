@@ -290,6 +290,7 @@ export default function ApplyPage() {
       does_cleanup: formData.get('does_cleanup') === 'on',
       grocery_pickup: formData.get('grocery_pickup') === 'on',
       grocery_pickup_charge: groceryPickup ? Number(formData.get('grocery_pickup_charge')) || null : null,
+      terms_accepted: formData.get('terms_accepted') === 'on',
     }
 
     let photo_url: string | null = null
@@ -811,7 +812,7 @@ export default function ApplyPage() {
             <li>Sivan Cooks does not provide insurance or liability coverage for cooking services — carrying any insurance you need is your own responsibility.</li>
           </ul>
           <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" required className="rounded border-gray-300 text-copper-600" />
+            <input type="checkbox" name="terms_accepted" required className="rounded border-gray-300 text-copper-600" />
             <span className="text-sm text-gray-700">
               I understand and accept the Sivan Cooks{' '}
               <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-copper-600 underline">

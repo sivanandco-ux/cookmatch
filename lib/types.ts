@@ -52,6 +52,7 @@ export interface Cook {
   does_cleanup: boolean
   grocery_pickup: boolean
   grocery_pickup_charge: number | null
+  terms_accepted_at: string | null
   created_at: string
 }
 
@@ -152,6 +153,7 @@ export interface JobPost {
   recurring: boolean
   voice_memo_url: string
   additional_notes: string | null
+  terms_accepted_at: string | null
   status: JobPostStatus
   assigned_cook_id: string | null
   confirmed_at: string | null

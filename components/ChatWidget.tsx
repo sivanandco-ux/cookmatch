@@ -86,6 +86,7 @@ export default function ChatWidget() {
   const [client, setClient] = useState(initClient)
   const [polishingCook, setPolishingCook] = useState(false)
   const [polishingClient, setPolishingClient] = useState(false)
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [matchingCooks, setMatchingCooks] = useState<Array<{ id: string; name: string; phone: string; whatsapp?: string; cuisine_types: string[]; dietary_specialties: string[] }>>([])
 
   // Voice memo
@@ -465,10 +466,12 @@ export default function ChatWidget() {
     if (path === 'client' && client.request_type === 'session' && client.cleanup_needed === null) {
       setError('Please select Yes or No for cleanup.'); return
     }
+    setTermsAccepted(false)
     setView('review')
   }
 
   async function submit() {
+    if (!termsAccepted) { setError('Please accept the Terms of Service to continue.'); return }
     setLoading(true); setError('')
     try {
       const cookData = {
@@ -477,8 +480,10 @@ export default function ChatWidget() {
           ...cook.cooking_arrangement,
           ...(cook.cooking_arrangement_other.trim() ? [cook.cooking_arrangement_other.trim()] : []),
         ])],
+        terms_accepted: true,
       }
-      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cookData : client, language: languageLabel }) })
+      const clientData = { ...client, terms_accepted: true }
+      const res = await fetch('/api/chat/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: path, data: path === 'cook' ? cookData : clientData, language: languageLabel }) })
       const data = await res.json()
       if (!res.ok || data.error) { setError(data.error || 'Something went wrong.'); return }
       if (data.matchingCooks) setMatchingCooks(data.matchingCooks)
@@ -1020,10 +1025,25 @@ export default function ChatWidget() {
                   </>
                 )}
               </div>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  required
+                  checked={termsAccepted}
+                  onChange={e => setTermsAccepted(e.target.checked)}
+                  className="rounded border-gray-300 text-copper-600 mt-0.5"
+                />
+                <span className="text-xs text-gray-600">
+                  I understand and accept the Sivan Cooks{' '}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-copper-600 underline">
+                    Terms of Service
+                  </a>
+                </span>
+              </label>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <div className="flex gap-2 mt-auto">
                 <button onClick={() => setView(path as View)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">Edit</button>
-                <button onClick={submit} disabled={loading} className="flex-1 bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50 transition-opacity">
+                <button onClick={submit} disabled={loading || !termsAccepted} className="flex-1 bg-copper-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-copper-700 disabled:opacity-50 transition-opacity">
                   {loading ? 'Submitting...' : 'Confirm & Submit'}
                 </button>
               </div>
