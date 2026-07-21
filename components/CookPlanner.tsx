@@ -502,6 +502,27 @@ export default function CookPlanner() {
                   </div>
                 )}
 
+                {isTravel && (
+                  <div className="border border-gray-200 rounded-lg px-4 py-3 mb-5">
+                    <p className="font-semibold text-gray-900 text-sm mb-1">Tips for cooking in a client's home</p>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                      You're a guest in someone else's kitchen — a few things that go a long way:
+                    </p>
+                    <ul className="text-sm text-gray-600 leading-relaxed list-disc pl-5 flex flex-col gap-1">
+                      <li>Show up on time, or a few minutes early — confirm the address and parking situation the day before.</li>
+                      <li>Ask about house rules up front: shoes on or off, pets, kids around, anything off-limits in their kitchen.</li>
+                      <li>Bring your own apron and any specific tools or knives you rely on — don't assume the client's kitchen has what you're used to.</li>
+                      <li>Dress comfortably but presentably: closed-toe shoes, hair tied back, minimal fragrance around food.</li>
+                      <li>Send a list of ingredients needed before the session, and confirm ahead of time whether you or the client is buying them — a last-minute gap is the easiest way to derail a booking.</li>
+                      <li>Ask about allergies and dietary restrictions before you shop or arrive, not after you start cooking.</li>
+                      <li>Confirm what equipment they actually have (oven type, stovetop, cookware) so you're not improvising on the spot.</li>
+                      <li>Clean as you go, and leave the kitchen as clean as or cleaner than you found it — this is one of the biggest things clients remember and mention in reviews.</li>
+                      <li>Communicate timing clearly: when you'll arrive, how long you'll be there, and when food will be ready.</li>
+                      <li>Agree on payment logistics (how and when you'll be paid) before the session, not after.</li>
+                    </ul>
+                  </div>
+                )}
+
                 <div className="border border-gray-200 rounded-lg px-4 py-3">
                   <p className="font-semibold text-gray-900 text-sm mb-1">Before you get licensed: test the interest first</p>
                   <p className="text-sm text-gray-600 leading-relaxed mb-2">
