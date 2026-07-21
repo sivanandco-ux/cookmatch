@@ -250,6 +250,12 @@ export default function CookPlanner() {
         <p className="text-sm text-gray-500 mt-1">Walk through your numbers before you invest in a permit — no signup required.</p>
       </div>
 
+      <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-xs text-amber-900 leading-relaxed">
+        This tool is for a cursory, planning-level check — not a final determination of what's legal, required, or accurate for your situation.
+        Fees, caps, and requirements vary by county and change over time. Before you invest in any certification, registration, or permit,
+        confirm the current requirements directly with your local health department or state agency.
+      </div>
+
       <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Main step content */}
         <div className="flex-1 w-full min-w-0">
