@@ -498,7 +498,7 @@ export default function ChatWidget() {
   const dateLabel = client.requested_date ? new Date(client.requested_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : ''
 
   const headerTitle = voiceActive ? 'Voice Description'
-    : view === 'home' ? 'Sivan Cooks'
+    : view === 'home' ? 'Cook & Sell Food'
     : view === 'mode' ? (path === 'cook' ? 'Sign Up as a Cook' : 'Hire a Cook')
     : view === 'cook-verify' ? 'Verify Your Email'
     : view === 'cook-waitlist' ? 'Cook Waitlist'
@@ -524,38 +524,13 @@ export default function ChatWidget() {
             )}
             <div className="flex-1 min-w-0">
               <p className="text-white font-semibold text-sm leading-tight truncate">{headerTitle}</p>
-              {view === 'home' && <p className="text-copper-200 text-xs mt-0.5">Sign up as a cook or post a job</p>}
+              {view === 'home' && <p className="text-copper-200 text-xs mt-0.5">Certification, legal paths, and planning your gig</p>}
             </div>
             <button onClick={() => { stopAll(); setOpen(false) }} className="text-copper-200 hover:text-white text-base leading-none shrink-0 ml-1">✕</button>
           </div>
 
-          {/* Home */}
-          {view === 'home' && (
-            <div className="flex-1 flex flex-col justify-center px-6 gap-4">
-              <p className="text-sm text-gray-500 text-center">What brings you here today?</p>
-              <button onClick={() => { setPath('client'); setView('mode') }}
-                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
-                <p className="font-semibold text-gray-800 text-sm">🏠 Hire a Cook</p>
-                <p className="text-xs text-gray-500 mt-1">Post a job and connect with home cooks in your area</p>
-              </button>
-              <button onClick={() => {
-                  setPath('cook')
-                  if (cookAuthState === 'verified') { setCook(p => ({ ...p, email: verifiedEmail })); openCookFlow() }
-                  else { setAuthError(''); setView('cook-verify') }
-                }}
-                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
-                <p className="font-semibold text-gray-800 text-sm">👨‍🍳 Sign Up as a Cook</p>
-                <p className="text-xs text-gray-500 mt-1">Create your cook profile and start getting hired</p>
-              </button>
-              <button onClick={() => setView('learn')}
-                className="border-2 border-copper-200 rounded-xl px-4 py-4 text-left hover:border-copper-400 hover:bg-copper-50 transition-colors">
-                <p className="font-semibold text-gray-800 text-sm">📚 Learn How to Cook & Sell Food</p>
-                <p className="text-xs text-gray-500 mt-1">Certification, selling food from home, and getting paid</p>
-              </button>
-            </div>
-          )}
-
-          {view === 'learn' && (
+          {/* Home — informational only: certification, legal paths, and the planning tool */}
+          {(view === 'home' || view === 'learn') && (
             <div className="flex-1 overflow-y-auto flex flex-col">
               <div className="px-4 pt-4 pb-2 border-b border-gray-100">
                 <BecomeCookTimeline compact />
