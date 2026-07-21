@@ -126,7 +126,6 @@ export default function Home() {
                 caps, food safety rules that vary by state and county — the clearer it became that most people
                 considering this don&apos;t have an easy way to find honest, specific answers before they spend money.
               </p>
-              <p className="font-semibold text-leaf-800 mt-3">— Tara Jagannathan, Founder, Sivan Cooks</p>
             </div>
           </div>
           <div>
