@@ -16,7 +16,7 @@ import { estimateCosts } from '@/lib/costEstimates'
 
 type Period = 'week' | 'month' | 'year'
 
-const STEP_LABELS = ['Interest', 'Income Goal', 'What & How', 'Profit & Volume', 'Setup Costs', 'Where to Sell', 'Decision']
+const STEP_LABELS = ['Interest', 'Income Goal', 'What & How', 'Profit & Volume', 'Setup Costs', 'Decision']
 
 const money = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 
@@ -446,29 +446,6 @@ export default function CookPlanner() {
             )}
 
             {step === 5 && (
-              <div>
-                <p className="text-gray-800 font-medium mb-4">Where you could sell this</p>
-                <div className="flex flex-col gap-2 text-sm text-gray-700">
-                  {arrangement === 'travel' ? (
-                    <>
-                      <p>• SivanCooks bookings — clients post a job, you get matched directly</p>
-                      <p>• Word of mouth within your community</p>
-                      <p>• Facebook Marketplace or local community/buy-sell groups</p>
-                    </>
-                  ) : (
-                    <>
-                      <p>• SivanCooks item/session listings</p>
-                      <p>• Local farmers markets (check their vendor rules)</p>
-                      <p>• Word of mouth and local community groups</p>
-                      <p>• Facebook Marketplace or local community/buy-sell groups</p>
-                    </>
-                  )}
-                </div>
-                <NavButtons onBack={() => setStep(4)} onNext={() => setStep(6)} />
-              </div>
-            )}
-
-            {step === 6 && (
               <div>
                 {verdict && (
                   <div className={`rounded-lg px-4 py-3 border text-sm mb-5 ${verdict.tone === 'good' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
