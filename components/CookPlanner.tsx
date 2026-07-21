@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, ReactNode } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import { US_STATES } from '@/lib/usStates'
 import {
   FOOD_TYPE_OPTIONS,
@@ -12,6 +12,7 @@ import {
   type FoodType,
   type Arrangement,
 } from '@/lib/foodLawReference'
+import { estimateCosts } from '@/lib/costEstimates'
 
 type Period = 'week' | 'month' | 'year'
 
@@ -172,7 +173,27 @@ export default function CookPlanner() {
   const [price, setPrice] = useState('')
   const [ingredientCost, setIngredientCost] = useState('')
   const [packagingCost, setPackagingCost] = useState('')
+  const [costsEdited, setCostsEdited] = useState(false)
   const [minutesPerUnit, setMinutesPerUnit] = useState('')
+
+  // Auto-fill ingredient/packaging cost from a rough category estimate
+  // (see lib/costEstimates.ts) whenever price or food type changes — but
+  // only until the cook edits either field by hand, so we never clobber
+  // their own numbers once they've told us something more accurate.
+  useEffect(() => {
+    if (costsEdited || !foodType || !price || Number(price) <= 0) return
+    const est = estimateCosts(foodType, Number(price))
+    setIngredientCost(String(est.ingredientCost))
+    setPackagingCost(String(est.packagingCost))
+  }, [price, foodType, costsEdited])
+
+  function resetCostsToEstimate() {
+    if (!foodType || !price) return
+    const est = estimateCosts(foodType, Number(price))
+    setIngredientCost(String(est.ingredientCost))
+    setPackagingCost(String(est.packagingCost))
+    setCostsEdited(false)
+  }
 
   const monthlyGoal = goalAmount
     ? (goalPeriod === 'week' ? (Number(goalAmount) * 52) / 12 : goalPeriod === 'year' ? Number(goalAmount) / 12 : Number(goalAmount))
@@ -318,18 +339,28 @@ export default function CookPlanner() {
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Price per {foodTypeOption?.shelfStable ? 'item' : 'meal/session'} ($)</label>
                     <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 12" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
+                  <div />
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Ingredient cost per unit ($)</label>
-                    <input type="number" value={ingredientCost} onChange={e => setIngredientCost(e.target.value)} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    <input type="number" value={ingredientCost} onChange={e => { setIngredientCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Packaging cost per unit ($)</label>
-                    <input type="number" value={packagingCost} onChange={e => setPackagingCost(e.target.value)} placeholder="e.g. 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    <input type="number" value={packagingCost} onChange={e => { setPackagingCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">Time to make one unit (minutes)</label>
-                    <input type="number" value={minutesPerUnit} onChange={e => setMinutesPerUnit(e.target.value)} placeholder="e.g. 20" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                  </div>
+                </div>
+                {price && Number(price) > 0 && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    {costsEdited ? (
+                      <>Using your own numbers. <button type="button" onClick={resetCostsToEstimate} className="text-copper-600 underline">Reset to estimate</button></>
+                    ) : (
+                      <>Ingredient and packaging costs are a rough estimate based on typical costs for {foodTypeOption?.label.toLowerCase()} — not a verified figure, just a starting point. Edit either field with your own numbers any time.</>
+                    )}
+                  </p>
+                )}
+                <div className="mt-4">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Time to make one unit (minutes) — optional</label>
+                  <input type="number" value={minutesPerUnit} onChange={e => setMinutesPerUnit(e.target.value)} placeholder="e.g. 20" className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
                 </div>
                 <p className="text-xs text-gray-400 mt-2">
                   Transportation (gas, delivery time) and any equipment aren't per-unit costs the same way — those show up on the next step instead.
