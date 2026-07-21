@@ -13,6 +13,7 @@ import {
   type Arrangement,
 } from '@/lib/foodLawReference'
 import { estimateCosts } from '@/lib/costEstimates'
+import { getEquipmentList } from '@/lib/equipmentEstimates'
 
 type Period = 'week' | 'month' | 'year'
 
@@ -230,6 +231,9 @@ export default function CookPlanner() {
     : (profitPerUnit > 0 && Number(minutesPerUnit) > 0 ? profitPerUnit / (Number(minutesPerUnit) / 60) : null)
 
   const setupPlan = foodType && arrangement ? getSetupPlan(foodType, arrangement, state, annualRevenue) : null
+  const equipmentList = foodType && arrangement ? getEquipmentList(foodType, arrangement) : null
+  const equipmentMin = equipmentList ? equipmentList.reduce((sum, e) => sum + e.minCost, 0) : 0
+  const equipmentMax = equipmentList ? equipmentList.reduce((sum, e) => sum + e.maxCost, 0) : 0
   const monthsToBreakEven = setupPlan?.knownTotal && monthlyGoal > 0 ? setupPlan.knownTotal / monthlyGoal : null
 
   const foodTypeOption = FOOD_TYPE_OPTIONS.find(f => f.value === foodType)
@@ -472,6 +476,25 @@ export default function CookPlanner() {
                   <p className="mt-4 text-xs text-gray-500">
                     We don't have a verified fee to total up for {state || 'your state'} — once you know your registration/permit fee, months to break even = that fee ÷ your monthly profit target.
                   </p>
+                )}
+
+                {!setupPlan.blocked && equipmentList && equipmentList.length > 0 && (
+                  <div className="mt-6">
+                    <p className="text-gray-800 font-medium mb-1">Equipment you'll likely need</p>
+                    <p className="text-xs text-gray-500 mb-3">
+                      {isTravel
+                        ? "The client's kitchen provides the big appliances — this is what you'd typically bring with you."
+                        : "A starting kit for equipping your own kitchen. Typical retail ranges, not a specific quote — you may already own some of this."}
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-lg px-4 py-1">
+                      {equipmentList.map(e => (
+                        <NumberRow key={e.item} label={e.item} value={e.minCost === e.maxCost ? money(e.minCost) : `${money(e.minCost)}–${money(e.maxCost)}`} />
+                      ))}
+                    </div>
+                    <div className="bg-copper-50 border border-copper-200 rounded-lg px-4 py-3 mt-3">
+                      <NumberRow label="Estimated total" value={`${money(equipmentMin)}–${money(equipmentMax)}`} emphasis />
+                    </div>
+                  </div>
                 )}
 
                 {!setupPlan.blocked && (
