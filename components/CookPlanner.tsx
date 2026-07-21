@@ -184,17 +184,24 @@ export default function CookPlanner() {
   const [packagingCost, setPackagingCost] = useState('')
   const [costsEdited, setCostsEdited] = useState(false)
   const [minutesPerUnit, setMinutesPerUnit] = useState('')
+  const [hourlyRate, setHourlyRate] = useState('')
+  const [hoursPerSession, setHoursPerSession] = useState('')
+  const [travelCost, setTravelCost] = useState('')
+
+  const isTravel = arrangement === 'travel'
 
   // Auto-fill ingredient/packaging cost from a rough category estimate
   // (see lib/costEstimates.ts) whenever price or food type changes — but
   // only until the cook edits either field by hand, so we never clobber
-  // their own numbers once they've told us something more accurate.
+  // their own numbers once they've told us something more accurate. Only
+  // applies to the home-kitchen path — a traveling cook is paid hourly,
+  // not per unit of ingredients, so this estimate doesn't apply there.
   useEffect(() => {
-    if (costsEdited || !foodType || !price || Number(price) <= 0) return
+    if (isTravel || costsEdited || !foodType || !price || Number(price) <= 0) return
     const est = estimateCosts(foodType, Number(price))
     setIngredientCost(String(est.ingredientCost))
     setPackagingCost(String(est.packagingCost))
-  }, [price, foodType, costsEdited])
+  }, [price, foodType, costsEdited, isTravel])
 
   function resetCostsToEstimate() {
     if (!foodType || !price) return
@@ -208,11 +215,20 @@ export default function CookPlanner() {
     ? (goalPeriod === 'week' ? (Number(goalAmount) * 52) / 12 : goalPeriod === 'year' ? Number(goalAmount) / 12 : Number(goalAmount))
     : 0
   const totalCostPerUnit = (Number(ingredientCost) || 0) + (Number(packagingCost) || 0)
-  const profitPerUnit = (Number(price) || 0) - totalCostPerUnit
+
+  // A traveling cook is paid hourly rate × hours, minus travel cost — not
+  // a flat per-item price the way a home-kitchen cook selling items is.
+  const sessionRevenue = (Number(hourlyRate) || 0) * (Number(hoursPerSession) || 0)
+  const effectivePrice = isTravel ? sessionRevenue : (Number(price) || 0)
+  const effectiveCostPerUnit = isTravel ? (Number(travelCost) || 0) : totalCostPerUnit
+
+  const profitPerUnit = effectivePrice - effectiveCostPerUnit
   const unitsNeededPerMonth = profitPerUnit > 0 && monthlyGoal > 0 ? Math.ceil(monthlyGoal / profitPerUnit) : null
-  const monthlyRevenue = unitsNeededPerMonth ? unitsNeededPerMonth * Number(price) : null
+  const monthlyRevenue = unitsNeededPerMonth ? unitsNeededPerMonth * effectivePrice : null
   const annualRevenue = monthlyRevenue ? monthlyRevenue * 12 : null
-  const effectiveHourlyWage = profitPerUnit > 0 && Number(minutesPerUnit) > 0 ? profitPerUnit / (Number(minutesPerUnit) / 60) : null
+  const effectiveHourlyWage = isTravel
+    ? (profitPerUnit > 0 && Number(hoursPerSession) > 0 ? profitPerUnit / Number(hoursPerSession) : null)
+    : (profitPerUnit > 0 && Number(minutesPerUnit) > 0 ? profitPerUnit / (Number(minutesPerUnit) / 60) : null)
 
   const setupPlan = foodType && arrangement ? getSetupPlan(foodType, arrangement, state, annualRevenue) : null
   const monthsToBreakEven = setupPlan?.knownTotal && monthlyGoal > 0 ? setupPlan.knownTotal / monthlyGoal : null
@@ -341,44 +357,79 @@ export default function CookPlanner() {
 
             {step === 3 && (
               <div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">Price per {foodTypeOption?.shelfStable ? 'item' : 'meal/session'} ($)</label>
-                    <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 12" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                  </div>
-                  <div />
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">Ingredient cost per unit ($)</label>
-                    <input type="number" value={ingredientCost} onChange={e => { setIngredientCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">Packaging cost per unit ($)</label>
-                    <input type="number" value={packagingCost} onChange={e => { setPackagingCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                  </div>
-                </div>
-                {price && Number(price) > 0 && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    {costsEdited ? (
-                      <>Using your own numbers. <button type="button" onClick={resetCostsToEstimate} className="text-copper-600 underline">Reset to estimate</button></>
-                    ) : (
-                      <>Ingredient and packaging costs are a rough estimate based on typical costs for {foodTypeOption?.label.toLowerCase()} — not a verified figure, just a starting point. Edit either field with your own numbers any time.</>
+                {isTravel ? (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Hourly rate ($/hr)</label>
+                        <input type="number" value={hourlyRate} onChange={e => setHourlyRate(e.target.value)} placeholder="e.g. 30" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Hours per session</label>
+                        <input type="number" value={hoursPerSession} onChange={e => setHoursPerSession(e.target.value)} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Travel cost per session ($)</label>
+                        <input type="number" value={travelCost} onChange={e => setTravelCost(e.target.value)} placeholder="e.g. 8" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      Travel cost covers gas, mileage, or vehicle wear getting to and from each client's home — ingredients are typically the client's, not yours, in this arrangement.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Price per {foodTypeOption?.shelfStable ? 'item' : 'meal/session'} ($)</label>
+                        <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="e.g. 12" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div />
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Ingredient cost per unit ($)</label>
+                        <input type="number" value={ingredientCost} onChange={e => { setIngredientCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 3" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Packaging cost per unit ($)</label>
+                        <input type="number" value={packagingCost} onChange={e => { setPackagingCost(e.target.value); setCostsEdited(true) }} placeholder="e.g. 1" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                      </div>
+                    </div>
+                    {price && Number(price) > 0 && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        {costsEdited ? (
+                          <>Using your own numbers. <button type="button" onClick={resetCostsToEstimate} className="text-copper-600 underline">Reset to estimate</button></>
+                        ) : (
+                          <>Ingredient and packaging costs are a rough estimate based on typical costs for {foodTypeOption?.label.toLowerCase()} — not a verified figure, just a starting point. Edit either field with your own numbers any time.</>
+                        )}
+                      </p>
                     )}
-                  </p>
+                    <div className="mt-4">
+                      <label className="text-sm font-medium text-gray-700 mb-1 block">Time to make one unit (minutes) — optional</label>
+                      <input type="number" value={minutesPerUnit} onChange={e => setMinutesPerUnit(e.target.value)} placeholder="e.g. 20" className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">
+                      Transportation (gas, delivery time) and any equipment aren't per-unit costs the same way — those show up on the next step instead.
+                    </p>
+                  </>
                 )}
-                <div className="mt-4">
-                  <label className="text-sm font-medium text-gray-700 mb-1 block">Time to make one unit (minutes) — optional</label>
-                  <input type="number" value={minutesPerUnit} onChange={e => setMinutesPerUnit(e.target.value)} placeholder="e.g. 20" className="w-full sm:w-1/2 border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-                </div>
-                <p className="text-xs text-gray-400 mt-2">
-                  Transportation (gas, delivery time) and any equipment aren't per-unit costs the same way — those show up on the next step instead.
-                </p>
 
                 {profitPerUnit > 0 && monthlyGoal > 0 && (
                   <div className="mt-5 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3">
-                    <NumberRow label="Price per unit" value={money(Number(price))} />
-                    <NumberRow label="Cost per unit (ingredients + packaging)" value={money(totalCostPerUnit)} />
-                    <NumberRow label="Profit per unit" value={money(profitPerUnit)} emphasis />
-                    <NumberRow label="Units to sell per month" value={String(unitsNeededPerMonth)} />
+                    {isTravel ? (
+                      <>
+                        <NumberRow label="Revenue per session" value={money(sessionRevenue)} />
+                        <NumberRow label="Travel cost per session" value={money(Number(travelCost) || 0)} />
+                        <NumberRow label="Profit per session" value={money(profitPerUnit)} emphasis />
+                        <NumberRow label="Sessions to book per month" value={String(unitsNeededPerMonth)} />
+                      </>
+                    ) : (
+                      <>
+                        <NumberRow label="Price per unit" value={money(Number(price))} />
+                        <NumberRow label="Cost per unit (ingredients + packaging)" value={money(totalCostPerUnit)} />
+                        <NumberRow label="Profit per unit" value={money(profitPerUnit)} emphasis />
+                        <NumberRow label="Units to sell per month" value={String(unitsNeededPerMonth)} />
+                      </>
+                    )}
                     <NumberRow label="Revenue needed per month" value={money(monthlyRevenue ?? 0)} />
                     <NumberRow label="Profit needed per month (your goal)" value={money(monthlyGoal)} emphasis />
                     {effectiveHourlyWage != null && (
@@ -392,11 +443,18 @@ export default function CookPlanner() {
                     net earnings pass $400/year — a tax professional (or the IRS Self-Employed Tax Center) can help you plan what you'd actually keep.
                   </p>
                 )}
-                {price && ingredientCost && packagingCost && profitPerUnit <= 0 && (
+                {isTravel && hourlyRate && hoursPerSession && profitPerUnit <= 0 && (
+                  <p className="mt-4 text-sm text-red-600">Your travel cost is at or above your session revenue — there's no profit margin to work with yet. Try adjusting one of the numbers.</p>
+                )}
+                {!isTravel && price && ingredientCost && packagingCost && profitPerUnit <= 0 && (
                   <p className="mt-4 text-sm text-red-600">Your ingredient + packaging cost is at or above your price — there's no profit margin to work with yet. Try adjusting one of the numbers.</p>
                 )}
 
-                <NavButtons onBack={() => setStep(2)} onNext={() => setStep(4)} nextDisabled={!price || !ingredientCost || profitPerUnit <= 0} />
+                <NavButtons
+                  onBack={() => setStep(2)}
+                  onNext={() => setStep(4)}
+                  nextDisabled={isTravel ? (!hourlyRate || !hoursPerSession || profitPerUnit <= 0) : (!price || !ingredientCost || profitPerUnit <= 0)}
+                />
               </div>
             )}
 
@@ -438,7 +496,7 @@ export default function CookPlanner() {
                     <p className="text-gray-800 font-medium mb-1">Other costs to plan for</p>
                     <p className="text-xs text-gray-500 mb-3">These don't have a fixed nationwide number the way registration fees do — they depend on your setup — but they're real costs, not legal/regulatory ones like the items above.</p>
                     <div className="flex flex-col gap-3">
-                      {OPERATING_COST_REMINDERS.map(item => (
+                      {OPERATING_COST_REMINDERS.filter(item => !(isTravel && (item.label === 'Transportation' || item.label === 'Packaging supplies'))).map(item => (
                         <div key={item.label} className="border border-gray-200 rounded-lg px-4 py-3">
                           <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
                           <p className="text-xs text-gray-600 mt-0.5 leading-snug">{item.note}</p>
@@ -513,8 +571,8 @@ export default function CookPlanner() {
           )}
           {step > 2 && profitPerUnit > 0 && unitsNeededPerMonth && (
             <button onClick={() => jumpTo(3)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
-              <span className="text-gray-400">Profit/unit:</span> <span className="font-medium text-gray-800">{money(profitPerUnit)}</span><br />
-              <span className="text-gray-400">Volume needed:</span> <span className="font-medium text-gray-800">{unitsNeededPerMonth}/month</span>
+              <span className="text-gray-400">{isTravel ? 'Profit/session:' : 'Profit/unit:'}</span> <span className="font-medium text-gray-800">{money(profitPerUnit)}</span><br />
+              <span className="text-gray-400">{isTravel ? 'Sessions needed:' : 'Volume needed:'}</span> <span className="font-medium text-gray-800">{unitsNeededPerMonth}/month</span>
               {effectiveHourlyWage != null && (
                 <><br /><span className="text-gray-400">Effective wage:</span> <span className="font-medium text-gray-800">{money(effectiveHourlyWage)}/hr</span></>
               )}
