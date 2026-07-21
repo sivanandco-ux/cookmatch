@@ -546,6 +546,21 @@ export default function CookPlanner() {
                   </div>
                 )}
 
+                <div className="border border-gray-200 rounded-lg px-4 py-3 mb-5">
+                  <p className="font-semibold text-gray-900 text-sm mb-1">Assess your local market</p>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                    There's no reliable data service that tells you "will people in my area actually buy this" — but you can do this research yourself in an afternoon:
+                  </p>
+                  <ul className="text-sm text-gray-600 leading-relaxed list-disc pl-5 flex flex-col gap-1">
+                    <li>Search "{foodTypeOption?.label.toLowerCase() || 'your food type'} near {state || 'your city'}" on Google Maps and Yelp — count existing bakeries, caterers, or similar sellers. Many? You're in a proven market, but competition is real. Almost none? Could mean low demand, or an underserved niche — worth figuring out which before assuming either.</li>
+                    <li>If what you make has a cultural or regional identity, look for community-specific channels a generic search won't surface — temple or church bulletin boards, cultural association Facebook or WhatsApp groups, ethnic grocery store bulletin boards. The highest-intent buyers for specialty items are often invisible to Yelp entirely.</li>
+                    <li>Check neighborhood apps (Nextdoor, local Buy Nothing or buy-sell-trade Facebook groups) for existing chatter about wanting what you make, or complaints about not being able to find it locally.</li>
+                    <li>Look for local farmers markets, festivals, or recurring community events where homemade food already sells — these show you where actual buying behavior for this kind of product already happens nearby.</li>
+                    <li>Compare your planned price (from the Profit & Volume step) against what similar items already cost locally — a grocery store, an existing bakery, a farmers market stall. Wildly out of step in either direction is worth revisiting.</li>
+                    <li>Write down 10–15 specific real people or groups you could realistically sell to first. Struggling to name even a handful is itself useful information, before you spend money on a permit.</li>
+                  </ul>
+                </div>
+
                 <div className="border border-gray-200 rounded-lg px-4 py-3">
                   <p className="font-semibold text-gray-900 text-sm mb-1">Before you get licensed: test the interest first</p>
                   <p className="text-sm text-gray-600 leading-relaxed mb-2">
@@ -566,8 +581,8 @@ export default function CookPlanner() {
                   <button onClick={() => setStep(3)} className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">
                     ← Back
                   </button>
-                  <a href="/apply" className="flex-1 text-center bg-copper-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-copper-700 transition-colors">
-                    Ready — Apply as a Cook →
+                  <a href="/become-a-cook" className="flex-1 text-center bg-copper-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-copper-700 transition-colors">
+                    See the Legal Path Guide →
                   </a>
                 </div>
               </div>
