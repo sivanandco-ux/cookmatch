@@ -559,6 +559,9 @@ export default function ChatWidget() {
             <div className="flex-1 overflow-y-auto flex flex-col">
               <div className="px-4 pt-4 pb-2 border-b border-gray-100">
                 <BecomeCookTimeline compact />
+                <a href="/plan" target="_blank" rel="noopener noreferrer" className="block text-center mt-3 text-sm font-medium text-copper-600 border border-copper-300 rounded-lg py-2 hover:bg-copper-50 transition-colors">
+                  Not sure it's worth it? Run the numbers →
+                </a>
               </div>
               <div className="flex-1 flex flex-col min-h-[360px]">
                 <EducationChat compact />

@@ -13,6 +13,12 @@ export default function BecomeACookPage() {
         <BecomeCookTimeline />
       </div>
 
+      <div className="text-center mb-8">
+        <a href="/plan" className="inline-block bg-copper-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-copper-700 transition-colors">
+          Not sure which path is worth it? Run your numbers →
+        </a>
+      </div>
+
       <div className="max-w-2xl mx-auto bg-panel rounded-sm border-l-4 border-copper-600 p-6">
         <EducationChat />
       </div>
