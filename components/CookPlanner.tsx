@@ -37,6 +37,15 @@ function ChoiceButton({ active, onClick, title, subtitle }: { active: boolean; o
   )
 }
 
+function NumberRow({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+  return (
+    <div className="flex justify-between items-baseline gap-4 py-1.5 border-b border-gray-100 last:border-0">
+      <span className={emphasis ? 'text-sm font-semibold text-gray-900' : 'text-sm text-gray-600'}>{label}</span>
+      <span className={`shrink-0 tabular-nums ${emphasis ? 'text-sm font-bold text-copper-700' : 'text-sm font-semibold text-gray-900'}`}>{value}</span>
+    </div>
+  )
+}
+
 function NavButtons({ onBack, onNext, nextDisabled, nextLabel }: { onBack?: () => void; onNext?: () => void; nextDisabled?: boolean; nextLabel?: string }) {
   return (
     <div className="flex gap-3 mt-6">
@@ -374,28 +383,23 @@ export default function CookPlanner() {
                 </p>
 
                 {profitPerUnit > 0 && monthlyGoal > 0 && (
-                  <div className="mt-5 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3 text-sm text-gray-800">
-                    <p>Profit per unit: <strong>{money(profitPerUnit)}</strong> (price minus ingredients and packaging)</p>
-                    <p className="mt-1">
-                      To reach <strong>{money(monthlyGoal)}/month in profit</strong>, you'd need to sell about <strong>{unitsNeededPerMonth} {foodTypeOption?.shelfStable ? 'items' : 'meals/sessions'}/month</strong> —
-                      that's roughly <strong>{money(monthlyRevenue ?? 0)}/month in revenue</strong> collected, of which {money(monthlyGoal)}/month is the profit you'd actually keep before tax.
-                    </p>
+                  <div className="mt-5 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3">
+                    <NumberRow label="Price per unit" value={money(Number(price))} />
+                    <NumberRow label="Cost per unit (ingredients + packaging)" value={money(totalCostPerUnit)} />
+                    <NumberRow label="Profit per unit" value={money(profitPerUnit)} emphasis />
+                    <NumberRow label={`${foodTypeOption?.shelfStable ? 'Items' : 'Meals/sessions'} needed per month`} value={String(unitsNeededPerMonth)} />
+                    <NumberRow label="Revenue needed per month" value={money(monthlyRevenue ?? 0)} />
+                    <NumberRow label="Profit needed per month (your goal)" value={money(monthlyGoal)} emphasis />
                     {effectiveHourlyWage != null && (
-                      <p className="mt-1">
-                        At {minutesPerUnit} minutes per unit, that profit works out to about <strong>{money(effectiveHourlyWage)}/hour</strong> for your own time — worth comparing against what your time is worth elsewhere before deciding this is worth the investment.
-                      </p>
+                      <NumberRow label="Effective hourly wage for your time" value={`${money(effectiveHourlyWage)}/hr`} emphasis />
                     )}
                   </div>
                 )}
                 {profitPerUnit > 0 && monthlyGoal > 0 && (
-                  <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-600 leading-relaxed">
-                    <p>
-                      <strong>This profit figure is before taxes.</strong> As an independent cook, this is self-employment income — there's no minimum
-                      amount exempt from being reported, and once net earnings from it reach $400 or more in a year, self-employment tax applies on top of
-                      regular income tax. A tax professional (or the IRS Self-Employed Tax Center) can help you plan for what you'd actually keep and what
-                      to set aside — worth doing before you count on a specific take-home number.
-                    </p>
-                  </div>
+                  <p className="mt-3 text-xs text-gray-500 leading-relaxed">
+                    These profit figures are before tax. Self-employment income has no minimum exempt from reporting, and self-employment tax applies once
+                    net earnings pass $400/year — a tax professional (or the IRS Self-Employed Tax Center) can help you plan what you'd actually keep.
+                  </p>
                 )}
                 {price && ingredientCost && packagingCost && profitPerUnit <= 0 && (
                   <p className="mt-4 text-sm text-red-600">Your ingredient + packaging cost is at or above your price — there's no profit margin to work with yet. Try adjusting one of the numbers.</p>
@@ -417,14 +421,19 @@ export default function CookPlanner() {
                   ))}
                 </div>
                 {setupPlan.knownTotal != null && (
-                  <div className="mt-4 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3 text-sm text-gray-800">
-                    <p>Known upfront cost: <strong>{money(setupPlan.knownTotal)}</strong>{setupPlan.unknownCosts ? ' (other costs like your safety course vary by provider and aren\'t included)' : ''}</p>
+                  <div className="mt-4 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3">
+                    <NumberRow label="Known upfront cost" value={money(setupPlan.knownTotal)} emphasis />
                     {monthsToBreakEven != null && (
-                      <p className="mt-1">
-                        At your target profit rate, that pays for itself in about{' '}
-                        <strong>{monthsToBreakEven < 1 ? 'less than a month' : `${Math.ceil(monthsToBreakEven)} month${Math.ceil(monthsToBreakEven) > 1 ? 's' : ''}`}</strong> — assuming you're already hitting your target volume, which usually takes some ramp-up time in practice.
-                      </p>
+                      <NumberRow
+                        label="Time to break even"
+                        value={monthsToBreakEven < 1 ? '< 1 month' : `${Math.ceil(monthsToBreakEven)} month${Math.ceil(monthsToBreakEven) > 1 ? 's' : ''}`}
+                        emphasis
+                      />
                     )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      {setupPlan.unknownCosts && 'Some costs (like your safety course) vary by provider and aren\'t included. '}
+                      Break-even assumes you're already at your target volume — ramp-up usually takes longer in practice.
+                    </p>
                   </div>
                 )}
                 {setupPlan.knownTotal == null && !setupPlan.blocked && (
