@@ -250,10 +250,19 @@ export default function CookPlanner() {
         <p className="text-sm text-gray-500 mt-1">Walk through your numbers before you invest in a permit — no signup required.</p>
       </div>
 
-      <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-xs text-amber-900 leading-relaxed">
+      <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-4 text-xs text-amber-900 leading-relaxed">
         This tool is for a cursory, planning-level check — not a final determination of what's legal, required, or accurate for your situation.
         Fees, caps, and requirements vary by county and change over time. Before you invest in any certification, registration, or permit,
         confirm the current requirements directly with your local health department or state agency.
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-900">
+        <p className="font-semibold mb-1">Revenue isn't profit</p>
+        <p className="leading-relaxed">
+          <strong>Revenue</strong> is what you collect from sales. <strong>Profit</strong> is what's left after ingredients, packaging, and fees —
+          that's the part that's actually yours. Most new food businesses spend their first few months of revenue just paying back what it
+          cost to get started, before any of it counts as real profit. Both numbers matter, so we'll keep them separate throughout.
+        </p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -332,14 +341,6 @@ export default function CookPlanner() {
 
             {step === 3 && (
               <div>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm text-blue-900">
-                  <p className="font-semibold mb-1">Revenue isn't profit</p>
-                  <p className="leading-relaxed">
-                    <strong>Revenue</strong> is what you collect from sales. <strong>Profit</strong> is what's left after ingredients, packaging, and fees —
-                    that's the part that's actually yours. Most new food businesses spend their first few months of revenue just paying back what it
-                    cost to get started, before any of it counts as real profit. Both numbers matter, so we'll keep them separate below.
-                  </p>
-                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Price per {foodTypeOption?.shelfStable ? 'item' : 'meal/session'} ($)</label>
