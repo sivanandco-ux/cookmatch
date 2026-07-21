@@ -6,11 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { readSessionCookie, clearSessionCookie } from '@/lib/supabase/readSessionCookie'
 
 const LINKS = [
-  { href: '/cooks', label: 'Hire a Cook' },
-  { href: '/jobs', label: 'Community Cravings' },
-  { href: '/my-bookings', label: 'My Bookings' },
-  { href: '/become-a-cook', label: 'Cook Guide' },
   { href: '/plan', label: 'Plan My Gig' },
+  { href: '/become-a-cook', label: 'Cook Guide' },
   { href: '/', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]

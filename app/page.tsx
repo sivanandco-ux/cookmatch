@@ -1,61 +1,31 @@
-const CLIENT_OFFERS = [
+const WHAT_WE_DO = [
   {
-    title: 'A Home-Cooked Meal',
-    body: "Book a cook for a family dinner, a festival spread, or a small gathering — cooked in their kitchen or delivered to yours. The kind of food that usually only travels as far as a phone number passed between neighbors.",
-    icon: '☺',
+    title: 'Set an income goal',
+    body: "Tell us what you'd like to earn — per week, month, or year — and we work backward from there instead of guessing at numbers that don't fit your life.",
+    icon: '🎯',
     accent: 'border-copper-600',
     iconBg: 'bg-copper-600',
   },
   {
-    title: 'A Specialty Dish',
-    body: "Pickles, laddus, baked goods, sauces — order the specialty a home cook near you is already known for among friends and family, made fresh to order.",
-    icon: '✿',
+    title: 'See the real legal paths',
+    body: "Traveling to cook in a client's kitchen, cooking hot meals at home, or selling shelf-stable items each have different rules, permits, and costs — sourced from official state and county fee schedules, not guesswork.",
+    icon: '📋',
     accent: 'border-leaf-500',
     iconBg: 'bg-leaf-700',
   },
-]
-
-const OFFERS = [
   {
-    title: 'Home-Cooked Sessions',
-    body: "Cook a full meal in a client's kitchen, or prepare it in your own and deliver — family dinners, festival spreads, small gatherings. You set your rate, your availability, and the terms.",
-    icon: '☺',
-    accent: 'border-copper-600',
-    iconBg: 'bg-copper-600',
-  },
-  {
-    title: 'Made-to-Order Items',
-    body: "Pickles, laddus, baked goods, sauces — the specialty you're already known for among friends and family. List it once, take orders whenever you're ready to make a batch.",
-    icon: '✿',
-    accent: 'border-leaf-500',
-    iconBg: 'bg-leaf-700',
+    title: 'Do the math before you invest',
+    body: "Price, ingredients, packaging, permit fees, and how long it takes to break even — all worked out before you spend a dollar on a certification.",
+    icon: '🧮',
+    accent: 'border-brass',
+    iconBg: 'bg-brass',
   },
 ]
 
-const HOW_IT_WORKS = [
-  ['Sign up by talking', 'A guided conversation — type, voice-memo, or just talk — builds your profile in minutes.'],
-  ['Get discovered', "Clients browse cooks by specialty, or post what they're craving and get matched to you."],
-  ['Chat directly', 'Message the client to work out details before anything is confirmed — no surprises either way.'],
-  ['Cook, deliver, grow', "Build a track record, earn trust, and get surfaced as one of the platform's star cooks."],
-]
-
-const STEP_COLORS = [
-  { box: 'bg-copper-50 border-copper-200', badge: 'border-copper-300 text-copper-600' },
-  { box: 'bg-leaf-50 border-leaf-200', badge: 'border-leaf-300 text-leaf-600' },
-  { box: 'bg-brass-light/15 border-brass-light', badge: 'border-brass-light text-brass' },
-  { box: 'bg-copper-100 border-copper-300', badge: 'border-copper-400 text-copper-800' },
-]
-
-const STATS = [
-  { value: '2', label: 'Ways to offer your cooking', border: 'border-leaf-600', text: 'text-leaf-700' },
-  { value: '$0', label: 'Commission on what you earn', border: 'border-copper-600', text: 'text-copper-600' },
-  { value: 'Concierge', label: "Guided signup — talk, don't type", border: 'border-brass', text: 'text-brass' },
-]
-
-const TRAITS = [
-  ['You make something real', "A full meal, a festival sweet, a pickle recipe passed down for generations — anything you'd be proud to put your name on."],
-  ['You want it on your terms', "Set your own rate, your own hours, and only take on what you actually want to make. This is flexible income, not a shift you're assigned."],
-  ["You're just getting started", "Never sold your cooking before? That's exactly who this is for — the guided signup and growth tools do the hard part with you, not for a fee."],
+const WHAT_WE_DONT_DO = [
+  "We don't connect you with clients or list cooks for hire — this isn't a marketplace or a directory.",
+  "We don't process payments or take a cut of anything you earn.",
+  "We don't provide legal or tax advice — we point you to the right agency and professional for your specific situation.",
 ]
 
 export default function Home() {
@@ -63,158 +33,73 @@ export default function Home() {
     <>
       {/* Hero */}
       <header className="relative overflow-hidden bg-gradient-to-b from-leaf-700 to-leaf-800 text-paper py-10 sm:py-14">
-        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-center relative">
-          <div>
-            <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-light mb-3">
-              Home Cooking Marketplace
-            </div>
-            <h1 className="text-2xl sm:text-3xl leading-tight mb-4 text-paper">
-              Every neighborhood has
-              <br />
-              <span className="text-brass-light">a few incredible cooks.</span>
-              <br />
-              We help you find them.
-            </h1>
-            <p className="text-sm sm:text-base text-paper/80 max-w-md mb-6">
-              Sivan Cooks connects local families with home cooks making authentic meals, pickles, sweets, snacks, and
-              baked goods — the kind of food that usually only travels as far as a phone number passed between
-              neighbors.
-            </p>
-            <div className="flex flex-wrap gap-2.5">
-              <a href="/cooks" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-                Find a Cook Near You →
-              </a>
-              <a
-                href="#onboard"
-                className="text-sm border border-paper/35 hover:border-brass-light hover:text-brass-light text-paper font-semibold px-5 py-2.5 rounded-lg"
-              >
-                Apply as a Cook
-              </a>
-            </div>
+        <div className="max-w-4xl mx-auto px-6 text-center relative">
+          <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-brass-light mb-3">
+            A Planning Tool for Home Cooks
           </div>
-
-          <div className="relative w-full max-w-xs mx-auto md:max-w-[400px] rounded-2xl overflow-hidden aspect-[4/5] bg-leaf-800">
-            <div className="hero-slideshow">
-              <img className="hero-slide" src="/landing-dishes/pistachio-baklava.jpg" alt="Pistachio baklava made by a cook on Sivan Cooks" />
-              <img className="hero-slide" src="/landing-dishes/rasam.jpg" alt="Homemade rasam made by a cook on Sivan Cooks" />
-              <img className="hero-slide" src="/landing-dishes/curry-leaf-rice.jpg" alt="Curry leaf rice made by a cook on Sivan Cooks" />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-leaf-900/75 to-transparent pointer-events-none" />
-            <div className="absolute left-4 bottom-4 z-10 text-paper text-xs font-semibold">
-              Real dishes from cooks in the directory
-            </div>
+          <h1 className="text-2xl sm:text-3xl leading-tight mb-4 text-paper">
+            Thinking about turning your cooking
+            <br />
+            <span className="text-brass-light">into a side income?</span>
+          </h1>
+          <p className="text-sm sm:text-base text-paper/80 max-w-lg mx-auto mb-6">
+            Sivan Cooks helps you decide whether it's actually worth it — walk through your income goal, the legal
+            path that fits how you'd cook and sell, and the real costs, before you spend anything on a permit or
+            certification.
+          </p>
+          <div className="flex flex-wrap gap-2.5 justify-center">
+            <a href="/plan" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+              Plan My Gig →
+            </a>
+            <a
+              href="/become-a-cook"
+              className="text-sm border border-paper/35 hover:border-brass-light hover:text-brass-light text-paper font-semibold px-5 py-2.5 rounded-lg"
+            >
+              See the Legal Paths
+            </a>
           </div>
         </div>
       </header>
 
-      {/* For Clients */}
+      {/* What We Do */}
       <section className="bg-panel py-14">
         <div className="max-w-6xl mx-auto px-6">
           <div className="max-w-xl mb-8">
-            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">For Clients</div>
-            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Real home cooking, no commission markup</h2>
+            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">What Sivan Cooks Does</div>
+            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">A cursory, honest planning check</h2>
             <p className="text-sm text-gray-600">
-              100% of what you pay goes straight to the cook — Sivan Cooks doesn&apos;t take a cut. You work out price
-              and details directly with them; we just help you find each other.
+              No signup required. Answer a few questions, see real numbers, and decide for yourself before you commit to anything.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {CLIENT_OFFERS.map((offer) => (
-              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
-                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
-                  {offer.icon}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {WHAT_WE_DO.map((item) => (
+              <div key={item.title} className={`bg-white rounded-xl p-6 border-l-4 ${item.accent}`}>
+                <div className={`w-9 h-9 rounded-lg ${item.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
+                  {item.icon}
                 </div>
-                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
-                <p className="text-gray-600 text-sm">{offer.body}</p>
+                <h3 className="text-base font-semibold text-leaf-800 mb-2">{item.title}</h3>
+                <p className="text-gray-600 text-sm">{item.body}</p>
               </div>
             ))}
           </div>
           <div className="mt-7 flex items-center gap-4 flex-wrap">
-            <a href="/cooks" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-              Find a Cook Near You →
-            </a>
-            <a href="/jobs/post" className="text-sm border border-copper-300 hover:border-copper-500 text-copper-700 font-semibold px-5 py-2.5 rounded-lg">
-              Post What You&apos;re Craving
+            <a href="/plan" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+              Plan My Gig →
             </a>
           </div>
         </div>
       </section>
 
-      {/* Built for Cooks, Not Platforms */}
-      <section className="max-w-6xl mx-auto px-6 py-12">
-        <h2 className="text-lg sm:text-xl text-leaf-800 text-center mb-7">Built for Cooks, Not Platforms</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {STATS.map((stat) => (
-            <div key={stat.label} className={`bg-white rounded-xl p-6 border-l-4 text-center sm:text-left ${stat.border}`}>
-              <div className={`font-display text-3xl mb-1 ${stat.text}`}>{stat.value}</div>
-              <div className="text-sm text-gray-600">{stat.label}</div>
+      {/* What We Don't Do */}
+      <section className="max-w-4xl mx-auto px-6 py-14">
+        <h2 className="text-lg sm:text-xl text-leaf-800 text-center mb-7">What Sivan Cooks Doesn&apos;t Do</h2>
+        <div className="flex flex-col gap-3 max-w-2xl mx-auto">
+          {WHAT_WE_DONT_DO.map((item) => (
+            <div key={item} className="flex gap-3 bg-white rounded-lg p-4 border border-gray-200 text-sm text-gray-700">
+              <span className="text-gray-400 shrink-0">✕</span>
+              <span>{item}</span>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* What We're Doing */}
-      <section id="what-we-do" className="bg-panel py-14">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="max-w-xl mb-8">
-            <div className="text-xs font-semibold uppercase tracking-widest text-copper-600 mb-2">What We&apos;re Doing</div>
-            <h2 className="text-xl sm:text-2xl text-leaf-800 mb-2.5">Two ways to share what you cook</h2>
-            <p className="text-sm text-gray-600">
-              Every cook on Sivan Cooks offers one or both of these — whichever fits how they actually like to cook.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {OFFERS.map((offer) => (
-              <div key={offer.title} className={`bg-white rounded-xl p-6 border-l-4 ${offer.accent}`}>
-                <div className={`w-9 h-9 rounded-lg ${offer.iconBg} text-white flex items-center justify-center font-display text-base mb-3`}>
-                  {offer.icon}
-                </div>
-                <h3 className="text-base font-semibold text-leaf-800 mb-2">{offer.title}</h3>
-                <p className="text-gray-600 text-sm">{offer.body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-8">
-            {HOW_IT_WORKS.map(([title, body], i) => (
-              <div key={title} className={`rounded-xl border p-4 ${STEP_COLORS[i].box}`}>
-                <div className={`w-7 h-7 rounded-full border bg-white font-display text-xs flex items-center justify-center mb-2.5 ${STEP_COLORS[i].badge}`}>
-                  {i + 1}
-                </div>
-                <h4 className="font-semibold text-sm text-leaf-800 mb-1">{title}</h4>
-                <p className="text-xs text-gray-600">{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Who We Want to Onboard */}
-      <section className="max-w-6xl mx-auto px-6 py-14">
-        <div id="onboard" className="relative overflow-hidden bg-leaf-700 text-paper rounded-2xl p-6 sm:p-10">
-          <div className="max-w-xl mb-7 relative">
-            <div className="text-xs font-semibold uppercase tracking-widest text-brass-light mb-2">Who We Want to Onboard</div>
-            <h2 className="text-xl sm:text-2xl text-paper mb-2.5">
-              If people already ask you to cook for them, you belong here.
-            </h2>
-            <p className="text-sm text-paper/80">
-              We&apos;re not looking for restaurant experience or a commercial kitchen. We&apos;re looking for the
-              cook everyone already knows about.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            {TRAITS.map(([title, body]) => (
-              <div key={title} className="border-t border-brass-light/30 pt-3">
-                <h4 className="font-display text-base text-brass-light mb-1.5">{title}</h4>
-                <p className="text-xs text-paper/75">{body}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex items-center gap-4 flex-wrap relative">
-            <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-              Apply to Become a Cook →
-            </a>
-            <p className="text-xs text-paper/65">Takes about 10 minutes. No cooking résumé required.</p>
-          </div>
         </div>
       </section>
 
@@ -224,7 +109,7 @@ export default function Home() {
           <div>
             <div className="font-display text-5xl leading-none text-brass mb-1">&ldquo;</div>
             <p className="font-display text-lg text-leaf-800 leading-snug mb-4">
-              Food made by someone who actually cares what you think of it — that&apos;s the whole idea.
+              Before anyone spends money on a permit, they deserve an honest answer to "is this actually worth it?"
             </p>
             <div className="bg-panel border-l-[3px] border-copper-600 rounded p-5 text-sm leading-relaxed text-gray-600">
               <p className="mb-3">
@@ -236,9 +121,10 @@ export default function Home() {
               </p>
               <p className="mb-3">
                 Food wasn&apos;t part of that world — but the principles are the same, and the struggles are just as
-                familiar: cash flow, finding customers, earning trust before anyone takes a chance on you. That&apos;s
-                exactly what makes food interesting to me now. I believe it&apos;s a space overdue for real
-                innovation, and I want to be part of bringing it.
+                familiar: cash flow, finding customers, earning trust before anyone takes a chance on you. The more I
+                looked into what it actually takes to sell home-cooked food legally in the U.S. — permits, revenue
+                caps, food safety rules that vary by state and county — the clearer it became that most people
+                considering this don&apos;t have an easy way to find honest, specific answers before they spend money.
               </p>
               <p>
                 My own journey started in between tech roles, when I launched{' '}
@@ -250,9 +136,8 @@ export default function Home() {
                 >
                   Sivan Spices
                 </a>{' '}
-                to share the authentic, pure, and healthy
-                recipes I grew up on. Sivan Cooks is the next step — the same entrepreneurial instinct, now applied to
-                an entirely new space.
+                to share the authentic, pure, and healthy recipes I grew up on. Sivan Cooks is the next step — helping
+                other people answer the same questions I had to work through myself.
               </p>
               <p className="font-semibold text-leaf-800 mt-3">— Tara Jagannathan, Founder, Sivan Spices &amp; Sivan Cooks</p>
             </div>
@@ -261,18 +146,17 @@ export default function Home() {
             <div className="text-sm font-semibold text-copper-600 mb-3">Who We Are</div>
             <p className="text-sm text-gray-600 mb-3">
               <strong className="text-leaf-800 font-semibold">Sivan Cooks</strong>{' '}
-              is a directory and matchmaking platform for local culinary artisans — home cooks who make real food,
-              the way it&apos;s made at home, not in a commercial kitchen chasing volume.
+              is a planning tool for people weighing whether to turn their cooking into a side income — not a
+              marketplace, and not a directory of cooks for hire.
             </p>
             <p className="text-sm text-gray-600 mb-3">
-              We built it because the best cooking in any neighborhood usually never leaves that neighborhood. A
-              friend&apos;s mother who makes the only mango pickle you&apos;ll ever want. A neighbor who bakes laddus
-              for every festival and would happily make a batch for you too, if only you knew to ask.
+              A lot of home cooks already know they're good enough that people would pay them — the harder question
+              is whether the legal path, the real costs, and the numbers actually work out for their situation.
             </p>
             <p className="text-sm text-gray-600">
-              Sivan Cooks is how you ask. Clients browse or post what they&apos;re craving; cooks get matched, chat
-              directly, and agree on the rest themselves — no middleman marking up the price, no corporate kitchen
-              between you and the person who actually cooked your food.
+              Sivan Cooks walks you through that decision: your income goal, what you'd make and how you'd sell it,
+              the certification or permit that applies to your state, and what it would cost to get started — all
+              before you spend anything.
             </p>
           </div>
         </div>
@@ -281,22 +165,14 @@ export default function Home() {
       {/* Final CTA */}
       <section className="text-center py-16 px-6">
         <h2 className="text-xl sm:text-2xl text-leaf-800 mb-3 max-w-2xl mx-auto">
-          Your neighborhood already has a star cook.
-          <br />
-          Let&apos;s help people find them.
+          Figure out if it's worth it before you spend a dollar on a permit.
         </h2>
         <p className="text-sm sm:text-base text-gray-600 max-w-md mx-auto mb-6">
-          Whether that&apos;s you, or someone you know — Sivan Cooks exists to make the introduction.
+          Takes a few minutes. No signup, no account, nothing to lose by checking.
         </p>
         <div className="flex gap-2.5 justify-center flex-wrap">
-          <a href="/apply" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
-            Apply as a Cook
-          </a>
-          <a
-            href="/cooks"
-            className="text-sm border border-copper-300 text-leaf-800 hover:border-copper-600 font-semibold px-5 py-2.5 rounded-lg"
-          >
-            Browse Cooks
+          <a href="/plan" className="text-sm bg-copper-600 hover:bg-copper-700 text-white font-semibold px-5 py-2.5 rounded-lg">
+            Plan My Gig →
           </a>
         </div>
       </section>
