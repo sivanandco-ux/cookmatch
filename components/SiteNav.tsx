@@ -10,7 +10,7 @@ const LINKS = [
   { href: '/jobs', label: 'Community Cravings' },
   { href: '/my-bookings', label: 'My Bookings' },
   { href: '/become-a-cook', label: 'Cook Guide' },
-  { href: '/plan', label: 'Is It Worth It?' },
+  { href: '/plan', label: 'Plan My Gig' },
   { href: '/', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ]
