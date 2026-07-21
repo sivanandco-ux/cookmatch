@@ -369,12 +369,25 @@ export default function CookPlanner() {
                 {profitPerUnit > 0 && monthlyGoal > 0 && (
                   <div className="mt-5 bg-copper-50 border border-copper-200 rounded-lg px-4 py-3 text-sm text-gray-800">
                     <p>Profit per unit: <strong>{money(profitPerUnit)}</strong> (price minus ingredients and packaging)</p>
-                    <p className="mt-1">To reach {money(monthlyGoal)}/month, you'd need to sell about <strong>{unitsNeededPerMonth} {foodTypeOption?.shelfStable ? 'items' : 'meals/sessions'}/month</strong> (roughly {money(monthlyRevenue ?? 0)}/month in revenue).</p>
+                    <p className="mt-1">
+                      To reach <strong>{money(monthlyGoal)}/month in profit</strong>, you'd need to sell about <strong>{unitsNeededPerMonth} {foodTypeOption?.shelfStable ? 'items' : 'meals/sessions'}/month</strong> —
+                      that's roughly <strong>{money(monthlyRevenue ?? 0)}/month in revenue</strong> collected, of which {money(monthlyGoal)}/month is the profit you'd actually keep before tax.
+                    </p>
                     {effectiveHourlyWage != null && (
                       <p className="mt-1">
                         At {minutesPerUnit} minutes per unit, that profit works out to about <strong>{money(effectiveHourlyWage)}/hour</strong> for your own time — worth comparing against what your time is worth elsewhere before deciding this is worth the investment.
                       </p>
                     )}
+                  </div>
+                )}
+                {profitPerUnit > 0 && monthlyGoal > 0 && (
+                  <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-600 leading-relaxed">
+                    <p>
+                      <strong>This profit figure is before taxes.</strong> As an independent cook, this is self-employment income — there's no minimum
+                      amount exempt from being reported, and once net earnings from it reach $400 or more in a year, self-employment tax applies on top of
+                      regular income tax. A tax professional (or the IRS Self-Employed Tax Center) can help you plan for what you'd actually keep and what
+                      to set aside — worth doing before you count on a specific take-home number.
+                    </p>
                   </div>
                 )}
                 {price && ingredientCost && packagingCost && profitPerUnit <= 0 && (
