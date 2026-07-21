@@ -349,12 +349,14 @@ export default function CookPlanner() {
                     <>
                       <p>• SivanCooks bookings — clients post a job, you get matched directly</p>
                       <p>• Word of mouth within your community</p>
+                      <p>• Facebook Marketplace or local community/buy-sell groups</p>
                     </>
                   ) : (
                     <>
                       <p>• SivanCooks item/session listings</p>
                       <p>• Local farmers markets (check their vendor rules)</p>
                       <p>• Word of mouth and local community groups</p>
+                      <p>• Facebook Marketplace or local community/buy-sell groups</p>
                     </>
                   )}
                 </div>
