@@ -387,7 +387,7 @@ export default function CookPlanner() {
                     <NumberRow label="Price per unit" value={money(Number(price))} />
                     <NumberRow label="Cost per unit (ingredients + packaging)" value={money(totalCostPerUnit)} />
                     <NumberRow label="Profit per unit" value={money(profitPerUnit)} emphasis />
-                    <NumberRow label={`${foodTypeOption?.shelfStable ? 'Items' : 'Meals/sessions'} needed per month`} value={String(unitsNeededPerMonth)} />
+                    <NumberRow label="Units to sell per month" value={String(unitsNeededPerMonth)} />
                     <NumberRow label="Revenue needed per month" value={money(monthlyRevenue ?? 0)} />
                     <NumberRow label="Profit needed per month (your goal)" value={money(monthlyGoal)} emphasis />
                     {effectiveHourlyWage != null && (
