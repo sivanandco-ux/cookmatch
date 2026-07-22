@@ -9,14 +9,19 @@ type Track = {
   title: string
   subtitle: string
   totalTime: string
-  color: 'blue' | 'orange' | 'green'
+  color: 'blue' | 'orange' | 'green' | 'violet'
   steps: Step[]
 }
 
 // Colors picked from and validated with the dataviz skill's categorical
 // palette (blue/aqua/orange ordering) — CVD separation ΔE 35.6, well clear
 // of the safety floor. "Green" here maps to the aqua/emerald family, not a
-// generic green, to preserve that separation from orange.
+// generic green, to preserve that separation from orange. "Violet" was
+// added later for the supper club track and re-validated with
+// scripts/validate_palette.js against all three existing colors — passes,
+// same pre-existing WARN-tier (not fail) adjacency between orange/green
+// as before, acceptable since every track already carries an icon + text
+// label as secondary encoding, not color alone.
 const COLORS = {
   blue: {
     dot: 'bg-blue-600',
@@ -35,6 +40,12 @@ const COLORS = {
     line: 'bg-emerald-200',
     chip: 'text-emerald-700 bg-emerald-50 border-emerald-200',
     header: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+  },
+  violet: {
+    dot: 'bg-violet-600',
+    line: 'bg-violet-200',
+    chip: 'text-violet-700 bg-violet-50 border-violet-200',
+    header: 'bg-violet-50 border-violet-200 text-violet-700',
   },
 } as const
 
@@ -81,6 +92,20 @@ const TRACKS: Track[] = [
       { title: 'Start selling', description: 'Direct to consumers — home pickup, farmers markets, or online orders, depending on your state.', time: '🎉' },
     ],
   },
+  {
+    icon: '🍽️',
+    title: 'Host a Supper Club',
+    subtitle: 'Ticketed dinners in your own home — the legal picture here is far less settled than cottage food or MEHKO',
+    totalTime: 'No standard timeline — treat this as ongoing research, not a checklist',
+    color: 'violet',
+    steps: [
+      { title: 'Understand there\'s no dedicated permit for this', description: 'Most states have no license category for a ticketed private dinner party. A few explicitly restrict it; most just haven\'t addressed it — that silence isn\'t the same as permission.', time: 'Day 0' },
+      { title: 'Call your local health department directly', description: 'Ask specifically about "supper clubs," "pop-up dinners," or a temporary food facility permit for your situation, and get the answer in writing or note who you spoke to and when.', time: '~1 week' },
+      { title: 'Decide private vs. public', description: 'A small, invite-only dinner for people you already know carries different risk than publicly selling tickets to strangers — the more it resembles a restaurant open to the public, the more scrutiny it invites.', time: 'Ongoing' },
+      { title: 'Get liability coverage before you serve anyone', description: 'Homeowner\'s insurance typically doesn\'t cover a paying guest getting sick or hurt in your kitchen — look into a short-term event policy or general liability coverage, and consider a simple guest waiver.', time: 'Before first dinner' },
+      { title: 'Start small and private, expand carefully', description: 'Host a few dinners for friends, family, and referrals before treating this as a repeatable public business — check back in with your health department before scaling beyond that.', time: '🎉' },
+    ],
+  },
 ]
 
 export default function BecomeCookTimeline({ compact = false }: { compact?: boolean }) {
@@ -92,7 +117,7 @@ export default function BecomeCookTimeline({ compact = false }: { compact?: bool
   const [openTrack, setOpenTrack] = useState<string | null>(null)
 
   return (
-    <div className={compact ? 'flex flex-col gap-3' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'}>
+    <div className={compact ? 'flex flex-col gap-3' : 'grid grid-cols-1 md:grid-cols-2 gap-8'}>
       {TRACKS.map(track => {
         const c = COLORS[track.color]
         const isOpen = !compact || openTrack === track.title

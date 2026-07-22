@@ -17,7 +17,7 @@ import { getEquipmentList } from '@/lib/equipmentEstimates'
 
 type Period = 'week' | 'month' | 'year'
 
-const STEP_LABELS = ['Income Goal', 'What & How', 'Profit & Volume', 'Setup Costs', 'Decision']
+const STEP_LABELS = ['Your Goal & Setup', 'Profit & Volume', 'Legal Path & Decision']
 
 const money = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
 
@@ -43,6 +43,39 @@ function NumberRow({ label, value, emphasis }: { label: string; value: string; e
     <div className="flex justify-between items-baseline gap-4 py-1.5 border-b border-gray-100 last:border-0">
       <span className={emphasis ? 'text-sm font-semibold text-gray-900' : 'text-sm text-gray-600'}>{label}</span>
       <span className={`shrink-0 tabular-nums ${emphasis ? 'text-sm font-bold text-copper-700' : 'text-sm font-semibold text-gray-900'}`}>{value}</span>
+    </div>
+  )
+}
+
+function Stepper({ step, labels, onJump }: { step: number; labels: string[]; onJump: (i: number) => void }) {
+  return (
+    <div className="flex items-center mb-6">
+      {labels.map((label, i) => {
+        const done = i < step
+        const active = i === step
+        return (
+          <div key={label} className="flex items-center flex-1 last:flex-none">
+            <button
+              type="button"
+              onClick={() => onJump(i)}
+              disabled={!done}
+              className={`flex items-center gap-2 ${done ? 'cursor-pointer' : 'cursor-default'}`}
+            >
+              <span
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
+                  active ? 'bg-copper-600 text-white' : done ? 'bg-copper-100 text-copper-700 border border-copper-300' : 'bg-gray-100 text-gray-400 border border-gray-200'
+                }`}
+              >
+                {done ? '✓' : i + 1}
+              </span>
+              <span className={`text-xs font-semibold hidden sm:inline whitespace-nowrap ${active ? 'text-gray-900' : done ? 'text-copper-700' : 'text-gray-400'}`}>
+                {label}
+              </span>
+            </button>
+            {i < labels.length - 1 && <div className={`h-px flex-1 mx-2 transition-colors ${i < step ? 'bg-copper-300' : 'bg-gray-200'}`} />}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -287,35 +320,28 @@ export default function CookPlanner() {
       <div className="flex flex-col md:flex-row gap-6 items-start">
         {/* Main step content */}
         <div className="flex-1 w-full min-w-0">
+          <Stepper step={step} labels={STEP_LABELS} onJump={jumpTo} />
           <Card>
-            <p className="text-xs font-semibold text-copper-600 uppercase tracking-wide mb-3">
-              Step {step + 1} of {STEP_LABELS.length} — {STEP_LABELS[step]}
-            </p>
-
             {step === 0 && (
-              <div>
-                <p className="text-gray-800 font-medium mb-4">How much would you like to earn from this cooking gig?</p>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    value={goalAmount}
-                    onChange={e => setGoalAmount(e.target.value)}
-                    placeholder="e.g. 500"
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  />
-                  <select value={goalPeriod} onChange={e => setGoalPeriod(e.target.value as Period)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
-                    <option value="week">per week</option>
-                    <option value="month">per month</option>
-                    <option value="year">per year</option>
-                  </select>
-                </div>
-                <p className="text-xs text-gray-400 mt-2">Think of this as a target to grow into over a few months, not a week-one expectation.</p>
-                <NavButtons onNext={() => setStep(1)} nextDisabled={!goalAmount || Number(goalAmount) <= 0} />
-              </div>
-            )}
-
-            {step === 1 && (
               <div className="flex flex-col gap-5">
+                <div>
+                  <p className="text-gray-800 font-medium mb-4">How much would you like to earn from this cooking gig?</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      value={goalAmount}
+                      onChange={e => setGoalAmount(e.target.value)}
+                      placeholder="e.g. 500"
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    />
+                    <select value={goalPeriod} onChange={e => setGoalPeriod(e.target.value as Period)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                      <option value="week">per week</option>
+                      <option value="month">per month</option>
+                      <option value="year">per year</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Think of this as a target to grow into over a few months, not a week-one expectation.</p>
+                </div>
                 <div>
                   <p className="text-gray-800 font-medium mb-3">What would you make?</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -338,11 +364,11 @@ export default function CookPlanner() {
                     {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
-                <NavButtons onBack={() => setStep(0)} onNext={() => setStep(2)} nextDisabled={!foodType || !arrangement || !state} />
+                <NavButtons onNext={() => setStep(1)} nextDisabled={!goalAmount || Number(goalAmount) <= 0 || !foodType || !arrangement || !state} />
               </div>
             )}
 
-            {step === 2 && (
+            {step === 1 && (
               <div>
                 {isTravel ? (
                   <>
@@ -438,14 +464,14 @@ export default function CookPlanner() {
                 )}
 
                 <NavButtons
-                  onBack={() => setStep(1)}
-                  onNext={() => setStep(3)}
+                  onBack={() => setStep(0)}
+                  onNext={() => setStep(2)}
                   nextDisabled={isTravel ? (!hourlyRate || !hoursPerSession || profitPerUnit <= 0) : (!price || !ingredientCost || profitPerUnit <= 0)}
                 />
               </div>
             )}
 
-            {step === 3 && setupPlan && (
+            {step === 2 && setupPlan && (
               <div>
                 <p className="text-gray-800 font-medium mb-4">What it costs to legally get started</p>
                 <div className="flex flex-col gap-3">
@@ -512,12 +538,6 @@ export default function CookPlanner() {
                   </div>
                 )}
 
-                <NavButtons onBack={() => setStep(2)} onNext={() => setStep(4)} />
-              </div>
-            )}
-
-            {step === 4 && (
-              <div>
                 {verdict && (
                   <div className={`rounded-lg px-4 py-3 border text-sm mb-5 ${verdict.tone === 'good' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}`}>
                     <p className="font-semibold mb-1">{verdict.tone === 'good' ? 'This looks workable' : 'Worth reconsidering the setup'}</p>
@@ -578,7 +598,7 @@ export default function CookPlanner() {
                 </div>
 
                 <div className="flex gap-3 mt-6">
-                  <button onClick={() => setStep(3)} className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">
+                  <button onClick={() => setStep(1)} className="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg text-sm hover:border-copper-400 hover:text-copper-600 transition-colors">
                     ← Back
                   </button>
                   <a href="/become-a-cook" className="flex-1 text-center bg-copper-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-copper-700 transition-colors">
@@ -594,20 +614,16 @@ export default function CookPlanner() {
         <div className="w-full md:w-72 shrink-0 md:sticky md:top-6 flex flex-col gap-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Your plan so far</p>
 
-          {goalAmount && (
+          {step > 0 && goalAmount && foodType && arrangement && (
             <button onClick={() => jumpTo(0)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
-              <span className="text-gray-400">Goal:</span> <span className="font-medium text-gray-800">${goalAmount}/{goalPeriod}</span>
-            </button>
-          )}
-          {step > 0 && foodType && arrangement && (
-            <button onClick={() => jumpTo(1)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
+              <span className="text-gray-400">Goal:</span> <span className="font-medium text-gray-800">${goalAmount}/{goalPeriod}</span><br />
               <span className="text-gray-400">Making:</span> <span className="font-medium text-gray-800">{foodTypeOption?.label}</span><br />
               <span className="text-gray-400">Arrangement:</span> <span className="font-medium text-gray-800">{arrangement === 'travel' ? 'Travel to client' : 'Cook at home'}</span><br />
               <span className="text-gray-400">State:</span> <span className="font-medium text-gray-800">{state || '—'}</span>
             </button>
           )}
           {step > 1 && profitPerUnit > 0 && unitsNeededPerMonth && (
-            <button onClick={() => jumpTo(2)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
+            <button onClick={() => jumpTo(1)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
               <span className="text-gray-400">{isTravel ? 'Profit/session:' : 'Profit/unit:'}</span> <span className="font-medium text-gray-800">{money(profitPerUnit)}</span><br />
               <span className="text-gray-400">{isTravel ? 'Sessions needed:' : 'Volume needed:'}</span> <span className="font-medium text-gray-800">{unitsNeededPerMonth}/month</span>
               {effectiveHourlyWage != null && (
@@ -615,8 +631,8 @@ export default function CookPlanner() {
               )}
             </button>
           )}
-          {step > 2 && setupPlan && setupPlan.items.length > 0 && (
-            <button onClick={() => jumpTo(3)} className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs hover:border-copper-300">
+          {step >= 2 && setupPlan && setupPlan.items.length > 0 && (
+            <div className="text-left bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs">
               <p className="text-gray-400 mb-1">Setup expenses:</p>
               {setupPlan.items.map(item => (
                 <p key={item.label} className="text-gray-700">• {item.label}</p>
@@ -624,7 +640,7 @@ export default function CookPlanner() {
               {setupPlan.knownTotal != null && (
                 <p className="font-semibold text-copper-700 mt-1 pt-1 border-t border-gray-100">Known total: {money(setupPlan.knownTotal)}</p>
               )}
-            </button>
+            </div>
           )}
         </div>
       </div>
