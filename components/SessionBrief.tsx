@@ -10,11 +10,21 @@ import type { SessionBriefFormData, JobCategory, GrocerySituation, RequestType, 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
 
-const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: number }[] = [
-  { value: 'family_cooking', label: 'Family Cooking', range: '2–5 people', max: 5 },
-  { value: 'small_event',    label: 'Small Event',    range: '6–10 people', max: 10 },
-  { value: 'medium_event',   label: 'Medium Event',   range: '11–14 people', max: 14 },
+// job_category is no longer a client-facing choice — it's derived from the
+// headcount they enter, since asking for it separately just re-asked the
+// same "how many people" question the exact-headcount field already covers.
+// The category itself still matters downstream: cooks declare which sizes
+// of job they take on, and this is what job requests get matched against.
+const JOB_CATEGORIES: { value: JobCategory; label: string; max: number }[] = [
+  { value: 'family_cooking', label: 'Family Cooking', max: 5 },
+  { value: 'small_event',    label: 'Small Event',    max: 10 },
+  { value: 'medium_event',   label: 'Medium Event',   max: 14 },
 ]
+
+function deriveJobCategory(numPeople: number): JobCategory {
+  const tier = JOB_CATEGORIES.find(c => numPeople <= c.max)
+  return tier ? tier.value : JOB_CATEGORIES[JOB_CATEGORIES.length - 1].value
+}
 
 const FULFILLMENT_METHODS: { value: FulfillmentMethod; label: string }[] = [
   { value: 'pickup', label: 'Pick up' },
@@ -46,7 +56,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
   // job-board mode (no specific cook yet) the client always gets the choice.
   const lockedType = cookOfferingTypes && cookOfferingTypes.length === 1 ? (cookOfferingTypes[0] as RequestType) : null
   const [requestType, setRequestType] = useState<RequestType>(lockedType ?? 'session')
-  const [jobCategory, setJobCategory] = useState<JobCategory | ''>('')
   const [fulfillmentMethod, setFulfillmentMethod] = useState<FulfillmentMethod | ''>('')
   const [state, setState] = useState('')
   const [specificDishesTags, setSpecificDishesTags] = useState<string[]>([])
@@ -67,7 +76,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const categoryConfig = JOB_CATEGORIES.find(c => c.value === jobCategory)
   const availableDietary = cookDietarySpecialties && cookDietarySpecialties.length > 0
     ? DIETARY.filter(d => cookDietarySpecialties.includes(d))
     : DIETARY
@@ -86,7 +94,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     const form = e.currentTarget
     const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
-    if (!isItem && !jobCategory) { setError('Please select a job type.'); return }
     if (!isItem && !fulfillmentMethod) { setError("Please select how you'd like to receive it."); return }
     if (isItem && specificDishesTags.length === 0) {
       setError('Please tell us what item you need.')
@@ -103,8 +110,8 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     // to buying a jar of pickles, so a placeholder value is stored instead
     // of asking the client something irrelevant.
     const numPeople = isItem ? 2 : Number(get('num_people'))
-    if (!isItem && categoryConfig && (numPeople < 2 || numPeople > categoryConfig.max)) {
-      setError(`For ${categoryConfig.label}, party size must be between 2 and ${categoryConfig.max}.`)
+    if (!isItem && (numPeople < 2 || numPeople > 14)) {
+      setError('Party size must be between 2 and 14 people.')
       return
     }
 
@@ -112,7 +119,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       client_name: get('client_name'),
       client_email: get('client_email'),
       client_phone: get('client_phone'),
-      job_category: (isItem ? 'family_cooking' : jobCategory) as JobCategory,
+      job_category: isItem ? 'family_cooking' : deriveJobCategory(numPeople),
       request_type: requestType,
       occasion: get('occasion'),
       specific_dishes: isItem ? (specificDishesTags[0] || '') : '',
@@ -212,37 +219,6 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
 
       {/* Section 1: Job type */}
       <div className="flex flex-col gap-3">
-        {requestType === 'session' && (
-          <>
-            <p className="text-sm font-semibold text-gray-900">What kind of help do you need? <span className="text-red-500">*</span></p>
-            <div className="grid grid-cols-1 gap-2">
-              {JOB_CATEGORIES.map(cat => (
-                <label
-                  key={cat.value}
-                  className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
-                    jobCategory === cat.value
-                      ? 'border-copper-600 bg-copper-50'
-                      : 'border-gray-200 bg-white hover:border-copper-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      name="job_category_radio"
-                      value={cat.value}
-                      checked={jobCategory === cat.value}
-                      onChange={() => setJobCategory(cat.value)}
-                      className="text-copper-600"
-                    />
-                    <span className="text-sm font-medium text-gray-900">{cat.label}</span>
-                  </div>
-                  <span className="text-xs text-gray-400">{cat.range}</span>
-                </label>
-              ))}
-            </div>
-          </>
-        )}
-
         {requestType === 'item' && (
           <SpecialtyTagInput
             value={specificDishesTags}
@@ -324,14 +300,14 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
           <div>
             <label className="text-xs text-gray-500 mb-1 block">
               Number of people <span className="text-red-500">*</span>
-              {categoryConfig && <span className="text-gray-400"> (max {categoryConfig.max} for {categoryConfig.label})</span>}
+              <span className="text-gray-400"> (2–14 people)</span>
             </label>
             <input
               name="num_people"
               type="number"
               required
               min={2}
-              max={categoryConfig?.max ?? 14}
+              max={14}
               placeholder="e.g. 6"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
             />
