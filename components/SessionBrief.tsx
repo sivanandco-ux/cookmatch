@@ -5,7 +5,7 @@ import VoiceMemoRecorder from './VoiceMemoRecorder'
 import CityInput from './CityInput'
 import SpecialtyTagInput from './SpecialtyTagInput'
 import { US_STATES } from '@/lib/usStates'
-import type { SessionBriefFormData, JobCategory, GrocerySituation, RequestType } from '@/lib/types'
+import type { SessionBriefFormData, JobCategory, GrocerySituation, RequestType, FulfillmentMethod } from '@/lib/types'
 
 const OCCASIONS = ['Regular Meal', 'Festival / Occasion']
 const DIETARY = ['Vegetarian', 'Non-Vegetarian', 'Eggetarian']
@@ -14,6 +14,12 @@ const JOB_CATEGORIES: { value: JobCategory; label: string; range: string; max: n
   { value: 'family_cooking', label: 'Family Cooking', range: '2–5 people', max: 5 },
   { value: 'small_event',    label: 'Small Event',    range: '6–10 people', max: 10 },
   { value: 'medium_event',   label: 'Medium Event',   range: '11–14 people', max: 14 },
+]
+
+const FULFILLMENT_METHODS: { value: FulfillmentMethod; label: string }[] = [
+  { value: 'pickup', label: 'Pick up' },
+  { value: 'cook_visits_home', label: 'Cook visits your home' },
+  { value: 'delivery', label: 'Delivery' },
 ]
 
 
@@ -41,6 +47,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
   const lockedType = cookOfferingTypes && cookOfferingTypes.length === 1 ? (cookOfferingTypes[0] as RequestType) : null
   const [requestType, setRequestType] = useState<RequestType>(lockedType ?? 'session')
   const [jobCategory, setJobCategory] = useState<JobCategory | ''>('')
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<FulfillmentMethod | ''>('')
   const [state, setState] = useState('')
   const [specificDishesTags, setSpecificDishesTags] = useState<string[]>([])
   const [itemSuggestions, setItemSuggestions] = useState<string[]>([])
@@ -80,6 +87,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
     const get = (name: string) => (form.elements.namedItem(name) as HTMLInputElement | null)?.value ?? ''
 
     if (!isItem && !jobCategory) { setError('Please select a job type.'); return }
+    if (!isItem && !fulfillmentMethod) { setError("Please select how you'd like to receive it."); return }
     if (isItem && specificDishesTags.length === 0) {
       setError('Please tell us what item you need.')
       return
@@ -120,6 +128,7 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
       num_people: numPeople,
       dietary_restrictions: dietaryRestrictions,
       grocery_situation: (isItem ? 'client_has_everything' : (form.elements.namedItem('grocery_pickup') as HTMLInputElement)?.checked ? 'need_grocery_pickup' : 'client_has_everything') as GrocerySituation,
+      fulfillment_method: isItem ? null : (fulfillmentMethod as FulfillmentMethod),
       cleanup_needed: isItem ? false : ((form.elements.namedItem('cleanup_needed') as HTMLInputElement)?.checked ?? false),
       kitchen_access_time: '',
       city: get('city'),
@@ -170,6 +179,33 @@ export default function SessionBrief({ mode, availableDates = [], cookName, cook
               </span>
               <span className="text-xs text-gray-500 pl-6">Like pickles or baked goods</span>
             </label>
+          </div>
+        </div>
+      )}
+
+      {/* Section 0b: How would you like to receive it? — only for a home-cooked meal session */}
+      {requestType === 'session' && (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-semibold text-gray-900">How would you like to receive it? <span className="text-red-500">*</span></p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {FULFILLMENT_METHODS.map(f => (
+              <label
+                key={f.value}
+                className={`flex items-center gap-3 border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                  fulfillmentMethod === f.value ? 'border-copper-600 bg-copper-50' : 'border-gray-200 bg-white hover:border-copper-300'
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="fulfillment_method_radio"
+                  value={f.value}
+                  checked={fulfillmentMethod === f.value}
+                  onChange={() => setFulfillmentMethod(f.value)}
+                  className="text-copper-600"
+                />
+                <span className="text-sm font-medium text-gray-900">{f.label}</span>
+              </label>
+            ))}
           </div>
         </div>
       )}

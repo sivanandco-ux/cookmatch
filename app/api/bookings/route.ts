@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       expected_duration_hours: body.expected_duration_hours,
       num_people: body.num_people,
       grocery_situation: body.grocery_situation,
+      fulfillment_method: body.fulfillment_method || null,
       cleanup_needed: body.cleanup_needed ?? false,
       kitchen_access_time: body.kitchen_access_time || null,
       city: body.city,

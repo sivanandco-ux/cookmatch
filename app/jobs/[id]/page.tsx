@@ -20,6 +20,12 @@ const GROCERY_LABELS: Record<string, string> = {
   cook_brings_ingredients: 'Cook brings ingredients',
 }
 
+const FULFILLMENT_LABELS: Record<string, string> = {
+  pickup: 'Pick up',
+  cook_visits_home: 'Cook visits client\'s home',
+  delivery: 'Delivery',
+}
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
@@ -150,6 +156,12 @@ export default async function JobDetailPage({
             <p className="text-gray-500">Session</p>
             <p className="font-medium">{job.recurring ? 'Recurring' : 'One-time'}</p>
           </div>
+          {job.request_type !== 'item' && job.fulfillment_method && (
+            <div>
+              <p className="text-gray-500">How to receive</p>
+              <p className="font-medium">{FULFILLMENT_LABELS[job.fulfillment_method] ?? job.fulfillment_method}</p>
+            </div>
+          )}
         </div>
 
         {job.dietary_restrictions?.length > 0 && (

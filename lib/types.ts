@@ -12,6 +12,10 @@ export type JobCategory = 'family_cooking' | 'small_event' | 'medium_event'
 // (a jar of pickles, a batch of cookies) — no session-sizing fields apply.
 export type RequestType = 'session' | 'item'
 export type GrocerySituation = 'client_has_everything' | 'need_grocery_pickup' | 'cook_brings_ingredients'
+// How the client receives a home-cooked meal session — distinct from a
+// cook's own cooking_arrangement (their general capability), this is the
+// client's per-request choice. Doesn't apply to 'item' requests.
+export type FulfillmentMethod = 'pickup' | 'cook_visits_home' | 'delivery'
 export type JobPostStatus = 'open' | 'taken' | 'done' | 'expired'
 export type BookingStatus = 'legacy' | 'pending' | 'cook_interested' | 'confirmed' | 'in_progress' | 'cancelled' | 'completed'
 export type JobInterestStatus = 'pending' | 'accepted' | 'rejected'
@@ -113,6 +117,7 @@ export interface Booking {
   num_people: number | null
   dietary_restrictions: string[] | null
   grocery_situation: GrocerySituation | null
+  fulfillment_method: FulfillmentMethod | null
   cleanup_needed: boolean
   kitchen_access_time: string | null
   city: string | null
@@ -145,6 +150,7 @@ export interface JobPost {
   num_people: number
   dietary_restrictions: string[]
   grocery_situation: GrocerySituation
+  fulfillment_method: FulfillmentMethod | null
   cleanup_needed: boolean
   kitchen_access_time: string
   city: string
@@ -175,6 +181,7 @@ export interface JobPostPublic {
   num_people: number
   dietary_restrictions: string[]
   grocery_situation: GrocerySituation
+  fulfillment_method: FulfillmentMethod | null
   cleanup_needed: boolean
   city: string
   recurring: boolean
@@ -259,6 +266,7 @@ export interface SessionBriefFormData {
   num_people: number
   dietary_restrictions: string[]
   grocery_situation: GrocerySituation
+  fulfillment_method: FulfillmentMethod | null
   cleanup_needed: boolean
   kitchen_access_time: string
   city: string

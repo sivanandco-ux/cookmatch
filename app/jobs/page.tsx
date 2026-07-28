@@ -18,6 +18,12 @@ const GROCERY_LABELS: Record<string, string> = {
   cook_brings_ingredients: 'Cook brings ingredients',
 }
 
+const FULFILLMENT_LABELS: Record<string, string> = {
+  pickup: 'Pick up',
+  cook_visits_home: 'Cook visits your home',
+  delivery: 'Delivery',
+}
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -39,6 +45,7 @@ interface JobTile {
   num_people: number
   dietary_restrictions: string[]
   grocery_situation: string
+  fulfillment_method: string | null
   cleanup_needed: boolean
   city: string
   state: string | null
@@ -90,7 +97,7 @@ export default async function JobBoardPage({
 
   const selectFields = isCook
     ? '*'
-    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, specific_dishes, dietary_restrictions, grocery_situation, cleanup_needed, city, state, recurring, status, created_at, voice_memo_url, client_name'
+    : 'id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, num_dishes, specific_dishes, dietary_restrictions, grocery_situation, fulfillment_method, cleanup_needed, city, state, recurring, status, created_at, voice_memo_url, client_name'
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -252,6 +259,11 @@ function JobCard({ job, isCook, cookId }: { job: JobTile; isCook: boolean; cookI
         <span className="text-[10.5px] font-semibold bg-brass/20 text-copper-800 rounded-sm px-2 py-0.5">📍 {[job.city, job.state].filter(Boolean).join(', ')}</span>
         {job.voice_memo_url && (
           <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2.5 py-1 rounded-full">🎙 Voice memo</span>
+        )}
+        {!isItem && job.fulfillment_method && (
+          <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2.5 py-1 rounded-full">
+            {job.fulfillment_method === 'cook_visits_home' ? '🏠' : job.fulfillment_method === 'delivery' ? '🚗' : '📦'} {FULFILLMENT_LABELS[job.fulfillment_method] ?? job.fulfillment_method}
+          </span>
         )}
         {needsGrocery && (
           <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2.5 py-1 rounded-full">🛒 Grocery pickup needed</span>

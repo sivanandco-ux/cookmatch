@@ -13,7 +13,7 @@ export async function GET() {
   const supabase = getSupabase()
   const { data, error } = await supabase
     .from('job_posts')
-    .select('id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, cleanup_needed, city, recurring, status, created_at')
+    .select('id, job_category, request_type, occasion, requested_date, requested_time, expected_duration_hours, num_people, dietary_restrictions, grocery_situation, fulfillment_method, cleanup_needed, city, recurring, status, created_at')
     .eq('status', 'open')
     .order('requested_date', { ascending: true })
 
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
       num_people: body.num_people,
       dietary_restrictions: body.dietary_restrictions || [],
       grocery_situation: body.grocery_situation,
+      fulfillment_method: body.fulfillment_method || null,
       cleanup_needed: body.cleanup_needed ?? false,
       kitchen_access_time: body.kitchen_access_time || null,
       city: body.city,

@@ -28,6 +28,7 @@ interface DashboardBooking {
   cleanup_needed: boolean | null
   parking_available: boolean | null
   grocery_situation: string | null
+  fulfillment_method: string | null
   text_description: string | null
   voice_memo_url: string | null
   specific_dishes: string | null
@@ -46,6 +47,12 @@ const GROCERY_LABELS: Record<string, string> = {
   client_has_everything: 'Client has all ingredients',
   need_grocery_pickup: 'Client needs grocery pickup',
   cook_brings_ingredients: 'Cook brings ingredients',
+}
+
+const FULFILLMENT_LABELS: Record<string, string> = {
+  pickup: 'Pick up',
+  cook_visits_home: 'Cook visits client\'s home',
+  delivery: 'Delivery',
 }
 
 function formatDate(dateStr: string) {
@@ -89,7 +96,7 @@ export default async function CookDashboardPage({
       .order('preferred_date', { ascending: true }),
     supabase
       .from('job_posts')
-      .select('id, job_category, request_type, occasion, requested_date, num_people, num_dishes, specific_dishes, city, client_name, grocery_situation, cleanup_needed, created_at, status')
+      .select('id, job_category, request_type, occasion, requested_date, num_people, num_dishes, specific_dishes, city, client_name, grocery_situation, fulfillment_method, cleanup_needed, created_at, status')
       .in('status', ['open', 'taken'])
       .gte('requested_date', today)
       .order('created_at', { ascending: false })
@@ -365,7 +372,7 @@ export default async function CookDashboardPage({
             <a href={`/jobs?cook_id=${cook_id}`} className="text-sm text-copper-600 hover:underline">See all →</a>
           </div>
           <div className="flex flex-col gap-3">
-            {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; specific_dishes: string | null; city: string; client_name: string | null; grocery_situation: string; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
+            {(openJobs as { id: string; job_category: string; request_type: string; occasion: string; requested_date: string; num_people: number; num_dishes: number | null; specific_dishes: string | null; city: string; client_name: string | null; grocery_situation: string; fulfillment_method: string | null; cleanup_needed: boolean; created_at: string; status: string }[]).map(job => {
               const requestedDate = new Date(job.requested_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               const categoryLabel = getRequestLabel(job.job_category, job.request_type, job.specific_dishes)
               const isItem = job.request_type === 'item'
@@ -396,6 +403,11 @@ export default async function CookDashboardPage({
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">📍 {job.city}</span>
+                    {!isItem && job.fulfillment_method && (
+                      <span className="text-xs bg-copper-50 text-copper-700 border border-copper-200 px-2 py-0.5 rounded-full">
+                        {FULFILLMENT_LABELS[job.fulfillment_method] ?? job.fulfillment_method}
+                      </span>
+                    )}
                     {job.grocery_situation === 'need_grocery_pickup' && (
                       <span className="text-xs bg-amber-100 text-amber-800 font-medium px-2 py-0.5 rounded-full">🛒 Grocery pickup</span>
                     )}
@@ -465,6 +477,14 @@ function BriefCard({ booking, cookId, mode, cancellationCount, cookToken }: { bo
       {booking.request_type !== 'item' && (
         <p className="text-sm text-gray-600">
           {GROCERY_LABELS[booking.grocery_situation ?? ''] ?? booking.grocery_situation}
+        </p>
+      )}
+
+      {/* How the client wants to receive the meal — pickup, cook visits
+          their home, or delivery. Doesn't apply to item orders. */}
+      {booking.request_type !== 'item' && booking.fulfillment_method && (
+        <p className="text-sm text-gray-600">
+          {FULFILLMENT_LABELS[booking.fulfillment_method] ?? booking.fulfillment_method}
         </p>
       )}
 
