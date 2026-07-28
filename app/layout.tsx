@@ -8,11 +8,11 @@ const domine = Domine({ subsets: ['latin'], weight: ['400', '700'], variable: '-
 const workSans = Work_Sans({ subsets: ['latin'], weight: ['400', '500', '600'], variable: '--font-body' })
 
 export const metadata: Metadata = {
-  title: 'Sivan Cooks — A Planning Tool for Home Cooks',
-  description: 'Sivan Cooks helps you decide whether turning your cooking into a side income is worth it — legal paths, real costs, and a break-even estimate before you spend on a permit.',
+  title: 'Sivan Cooks — Your Directory for Local Culinary Artisans',
+  description: 'Sivan Cooks connects clients across the USA with home cooks near you.',
   openGraph: {
-    title: 'Sivan Cooks — A Planning Tool for Home Cooks',
-    description: 'Sivan Cooks helps you decide whether turning your cooking into a side income is worth it — legal paths, real costs, and a break-even estimate before you spend on a permit.',
+    title: 'Sivan Cooks — Your Directory for Local Culinary Artisans',
+    description: 'Sivan Cooks connects clients across the USA with home cooks near you.',
     url: 'https://cookmatch-flame.vercel.app/plan',
     siteName: 'Sivan Cooks',
     images: [
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         url: 'https://cookmatch-flame.vercel.app/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Sivan Cooks — A Planning Tool for Home Cooks',
+        alt: 'Sivan Cooks — Your Directory for Local Culinary Artisans',
       },
     ],
     type: 'website',
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" className="shrink-0">
               <img src="/sivancooks-logo.png" alt="Sivan Cooks" className="h-12 sm:h-[58px] md:h-[84px] w-auto" />
             </a>
-            <span className="hidden sm:block text-base sm:text-lg font-semibold text-paper leading-tight min-w-0">A Planning Tool for Home Cooks</span>
+            <span className="hidden sm:block text-base sm:text-lg font-semibold text-paper leading-tight min-w-0">Your Directory for Local Culinary Artisans</span>
           </div>
           <SiteNav />
         </header>
