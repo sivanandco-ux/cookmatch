@@ -109,22 +109,22 @@
     background-size: cover;
     background-position: center;
     filter: saturate(1.1) contrast(0.92) brightness(1.15);
-    opacity: 0.13;
+    opacity: 0.05;
     z-index: 0;
     pointer-events: none;
   }
 
   @media (prefers-color-scheme: dark) {
-    body::before { opacity: 0.11; filter: saturate(1) contrast(0.85) brightness(0.75); }
+    body::before { opacity: 0.04; filter: saturate(1) contrast(0.85) brightness(0.75); }
   }
 
   :root[data-theme="dark"] body::before {
-    opacity: 0.11;
+    opacity: 0.04;
     filter: saturate(1) contrast(0.85) brightness(0.75);
   }
 
   :root[data-theme="light"] body::before {
-    opacity: 0.13;
+    opacity: 0.05;
     filter: saturate(1.1) contrast(0.92) brightness(1.15);
   }
 
