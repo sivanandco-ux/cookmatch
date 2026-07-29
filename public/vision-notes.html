@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Sivan Spices — Build Notes</title>
+<style>
+  :root {
+    --paper: #eee8dd;
+    --paper-raised: #f5f0e6;
+    --ink: #262019;
+    --muted: #6b6153;
+    --line: #d9d0bf;
+    --accent: #a85f1d;
+    --accent-soft: #a85f1d1a;
+    --accent-bright: #e0670d;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #1c1712;
+      --paper-raised: #241e17;
+      --ink: #ede6d8;
+      --muted: #b0a48f;
+      --line: #3a322a;
+      --accent: #e0954c;
+      --accent-soft: #e0954c22;
+      --accent-bright: #ffb15c;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #1c1712;
+    --paper-raised: #241e17;
+    --ink: #ede6d8;
+    --muted: #b0a48f;
+    --line: #3a322a;
+    --accent: #e0954c;
+    --accent-soft: #e0954c22;
+    --accent-bright: #ffb15c;
+  }
+
+  :root[data-theme="light"] {
+    --paper: #eee8dd;
+    --paper-raised: #f5f0e6;
+    --ink: #262019;
+    --muted: #6b6153;
+    --line: #d9d0bf;
+    --accent: #a85f1d;
+    --accent-soft: #a85f1d1a;
+    --accent-bright: #e0670d;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", monospace;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin-bottom: 0.9rem;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--accent-bright);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  .back-link:hover { border-bottom-color: var(--accent-bright); }
+
+  h1 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(1.9rem, 4vw, 2.5rem);
+    line-height: 1.15;
+    text-wrap: balance;
+    margin: 0 0 0.6rem;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 52ch;
+    margin: 0 0 3rem;
+  }
+
+  h2 {
+    font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-wrap: balance;
+    margin: 0 0 0.9rem;
+    color: var(--ink);
+  }
+
+  .note-scope {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", monospace;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  section {
+    padding: 2.6rem 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 2rem;
+  }
+
+  section:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    max-width: 62ch;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <a class="back-link" href="/vision">← Back to Goal &amp; Vision</a>
+  <span class="eyebrow">Sivan Spices — Build Notes</span>
+  <h1>Why things were built this way</h1>
+  <p class="subtitle">Longer notes on the real decisions behind each initiative — added here as they're written up, so the main Vision page stays a quick read.</p>
+
+  <section id="internal-ops">
+    <span class="note-scope">Internal Operations Tool</span>
+    <h2>Why we built it custom</h2>
+    <p>The ops tool was built around one goal: staying flexible while Sivan Spices' actual pricing, invoicing, commission, and inventory needs are still evolving. Off-the-shelf options didn't fit — even a single $10/month Shopify invoicing app wasn't flexible enough, and covering everything the business actually needs (invoicing, inventory, commissions, leads, returns) would mean stitching together a different specialized tool for each one, none of which talk to each other.</p>
+    <p>Building custom instead — using AI-assisted development — meant the tool could change as fast as the business does: the pricing logic alone has already been rebuilt multiple times as real store agreements turned out more flexible than first assumed.</p>
+  </section>
+
+</div>
+
+</body>
+</html>

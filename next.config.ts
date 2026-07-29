@@ -12,7 +12,10 @@ const nextConfig: NextConfig = {
   // a different brand context (Sivan Spices, not Sivan Cooks) sharing this
   // deployment purely for hosting/OG-preview convenience.
   async rewrites() {
-    return [{ source: '/vision', destination: '/vision.html' }];
+    return [
+      { source: '/vision', destination: '/vision.html' },
+      { source: '/vision-notes', destination: '/vision-notes.html' },
+    ];
   },
 };
 

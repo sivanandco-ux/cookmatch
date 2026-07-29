@@ -265,6 +265,17 @@
     color: var(--accent-bright);
   }
 
+  .note-link {
+    display: inline-block;
+    margin-bottom: 0.7rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-bright);
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  .note-link:hover { border-bottom-color: var(--accent-bright); }
+
   .chip {
     display: inline-flex;
     align-items: center;
@@ -511,6 +522,7 @@
           <span class="pillar-title">Internal operations tool</span>
           <span class="pillar-scope">Wholesale &amp; Operations</span>
         </div>
+        <a class="note-link" href="/vision-notes#internal-ops" target="_blank" rel="noopener">Why we built it →</a>
         <p>A custom-built internal dashboard tracking invoicing, payments, sales across channels, store partnerships, and lead follow-up for retail expansion — replacing expensive, one-size-fits-all SaaS tools that don't fit an early-stage food business.</p>
         <span class="chip video"><span class="dot"></span>Highlights only — full demo not shared</span>
         <div class="links">
