@@ -148,6 +148,60 @@
   p:last-child { margin-bottom: 0; }
 
   strong { color: var(--ink); font-weight: 600; }
+
+  .diagram-box {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    margin: 0.5rem 0 0.6rem;
+    cursor: zoom-in;
+  }
+  .diagram-box svg { min-width: 900px; }
+
+  .diagram-hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin: 0 0 1.5rem;
+  }
+
+  .diagram-box.zoomed {
+    position: fixed;
+    inset: 3vh 3vw;
+    z-index: 10;
+    margin: 0;
+    padding: 2.5rem;
+    overflow: auto;
+    cursor: zoom-out;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .diagram-box.zoomed svg { min-width: 1500px; }
+
+  .scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 9;
+  }
+  .scrim.open { display: block; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.4rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+  .diagram-note {
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -174,7 +228,109 @@
     <p><strong>Looking ahead — future consideration for productization:</strong> most food startup founders are running a one-person show, with no time to build or manage their own tools — and most don't have a software background, so AI-assisted development isn't something they can lean on the way this was built. That's a real gap: the same approach that solved this problem for Sivan Spices could help other early-stage food founders get simple, actionable tools of their own, without each of them needing an engineering background to get there. Not something in motion yet — just a direction worth noting.</p>
   </section>
 
+  <section id="expansion">
+    <span class="note-scope">Sivan Cooks</span>
+    <h2>A goal/loop-driven architecture, built solo rather than hired out</h2>
+    <p>Sivan Cooks was a chance to build a real, goal/loop-driven architecture from scratch — a genuinely interesting technical problem on its own, not just a business one. Hiring designers and developers to build this out felt like overkill this early: the shape of the problem itself was still being figured out, which called for something one person could iterate on quickly with Claude Code, not a team executing against a fixed spec.</p>
+
+    <div class="diagram-box" id="diagramBox">
+      <pre class="mermaid">
+%%{init: {'themeVariables': {'fontSize': '18px'}}}%%
+flowchart LR
+    ENTRY["Entry points<br/><span style='font-size:11px'>voice agent (7 languages) · form · voice note</span>"]
+    BRAIN["Claude — conversation &amp; parsing"]
+    DB[("Supabase<br/>cooks · jobs · scores · bookings")]
+
+    subgraph VERIFY["Verification — rule-based, not AI"]
+        direction TB
+        RULE["First N cooks:<br/>auto-approved"]
+        PEND["Everyone else:<br/>pending"]
+        REVIEW["Manual review<br/>+ license check"]
+        ACTIVE["status: active"]
+        PEND --> REVIEW --> ACTIVE
+    end
+
+    subgraph AGENTS["Claude-powered agents"]
+        direction TB
+        SCOREAGENT["Scoring agent<br/>trust score, 0–100"]
+        COACHAGENT["Coaching agent<br/>fires below 3.5 rating"]
+    end
+
+    subgraph JOBS["Scheduled jobs — plain cron, not AI"]
+        direction TB
+        CHECKIN["Availability<br/>check-in"]
+        SESSREM["24hr session<br/>reminder"]
+        FEEDBACKREQ["Feedback/rating<br/>request"]
+        DORMANT["Mark dormant<br/>(60d inactive)"]
+    end
+
+    DIRECTORY["Cook directory<br/>ranked by trust score"]
+
+    ENTRY --> BRAIN --> DB
+    DB --> VERIFY
+    ACTIVE --> DB
+    DB --> AGENTS
+    SCOREAGENT --> DB
+    COACHAGENT --> DB
+    SCOREAGENT --> DIRECTORY
+    DB --> JOBS
+
+    classDef entry fill:#e0670d22,stroke:#a85f1d,color:#262019
+    classDef brain fill:#a85f1d22,stroke:#a85f1d,color:#262019
+    classDef data fill:#f5f0e6,stroke:#262019,color:#262019,stroke-width:2px
+    classDef rule fill:#f5f0e6,stroke:#6b6153,color:#262019
+    classDef agent fill:#a85f1d22,stroke:#a85f1d,color:#262019
+    classDef job fill:#f5f0e6,stroke:#d9d0bf,color:#6b6153
+    classDef out fill:#e0670d11,stroke:#d9d0bf,color:#262019
+
+    class ENTRY entry
+    class BRAIN brain
+    class DB data
+    class RULE,PEND,REVIEW,ACTIVE rule
+    class SCOREAGENT,COACHAGENT agent
+    class CHECKIN,SESSREM,FEEDBACKREQ,DORMANT job
+    class DIRECTORY out
+      </pre>
+    </div>
+    <p class="diagram-hint">Click the diagram to enlarge.</p>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:#e0670d22;border:1px solid #a85f1d"></span>Where a cook/client enters</span>
+      <span><span class="swatch" style="background:#a85f1d22;border:1px solid #a85f1d"></span>Claude-powered</span>
+      <span><span class="swatch" style="background:#f5f0e6;border:2px solid #262019"></span>Supabase (source of truth)</span>
+      <span><span class="swatch" style="background:#f5f0e6;border:1px solid #6b6153"></span>Rule-based, not AI</span>
+      <span><span class="swatch" style="background:#f5f0e6;border:1px solid #d9d0bf"></span>Scheduled cron job, not AI</span>
+    </div>
+
+    <p class="diagram-note"><strong>Reading it:</strong> not everything here is AI, on purpose. Entry parsing, scoring, and coaching are genuinely Claude-powered. Verification is a deliberately simple rule (auto-approve the first N, everyone else to manual review) — no automated ID/background-check service. Reminders and dormancy are plain scheduled jobs. All of it reads from and writes back to one Supabase source of truth rather than separate systems bolted together, which is the "loop" part: scoring and coaching re-run as new signal — a rating, a status change — comes in, not as one-time gates.</p>
+  </section>
+
 </div>
+
+<div class="scrim" id="scrim"></div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
+</script>
+<script>
+  var box = document.getElementById('diagramBox');
+  var scrim = document.getElementById('scrim');
+
+  function toggleZoom(e) {
+    e.stopPropagation();
+    var zoomed = box.classList.toggle('zoomed');
+    scrim.classList.toggle('open', zoomed);
+    box.style.cursor = zoomed ? 'zoom-out' : 'zoom-in';
+  }
+
+  box.addEventListener('click', toggleZoom);
+  scrim.addEventListener('click', function () {
+    box.classList.remove('zoomed');
+    scrim.classList.remove('open');
+    box.style.cursor = 'zoom-in';
+  });
+</script>
 
 </body>
 </html>
